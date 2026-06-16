@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/Database/">
+    <Project Path="Database/BRICOMA.ECOMMERCE.Database/BRICOMA.ECOMMERCE.Database.sqlproj" Id="8b21c660-8f15-4a52-bbfa-acb8d17fb029">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/Shared/" />
+  <Folder Name="/Shared/Business/">
+    <Project Path="Shared/Business/BRICOMA.ECOMMERCE.Business.csproj" />
+  </Folder>
+  <Folder Name="/Shared/Data/">
+    <Project Path="Shared/Data/BRICOMA.ECOMMERCE.Data.csproj" />
+  </Folder>
+  <Folder Name="/Shared/Models/">
+    <Project Path="Shared/Models/BRICOMA.ECOMMERCE.Models.csproj" />
+  </Folder>
+  <Folder Name="/Web/">
+    <Project Path="Web/BRICOMA.ECOMMERCE.Web.csproj" />
+  </Folder>
+</Solution>

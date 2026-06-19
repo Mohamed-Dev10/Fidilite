@@ -18,5 +18,6 @@ namespace BRICOMA.ECOMMERCE.Models.Enum
         BRICOMAARTISAN = 3
 
     }
+
 }
 

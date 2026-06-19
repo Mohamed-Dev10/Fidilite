@@ -1,0 +1,88 @@
+@model List<BRICOMA.ECOMMERCE.Data.ApplicationUser.ApplicationRole>
+@{
+    ViewData["Title"] = "Gestion de permissions";
+}
+
+<div class="page-header mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Gestion de permissions</h2>
+            <div class="text-muted mt-1">Rôles et permissions</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Créer un rôle -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Nouveau rôle</h3></div>
+            <div class="card-body">
+                <form method="post" asp-action="CreateRole">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label">Nom du rôle <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" placeholder="Ex: Responsable Casa" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <input type="text" name="description" class="form-control" placeholder="Description optionnelle" />
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="ti ti-plus me-1"></i> Créer le rôle
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des rôles -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><h3 class="card-title">Rôles existants</h3></div>
+            <div class="table-responsive">
+                <table class="table table-vcenter table-hover card-table">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model == null || !Model.Any())
+                        {
+                            <tr><td colspan="3" class="text-center text-muted py-4">Aucun rôle créé</td></tr>
+                        }
+                        else
+                        {
+                            foreach (var role in Model)
+                            {
+                                <tr>
+                                    <td class="fw-bold">@role.Name</td>
+                                    <td class="text-muted">@(role.Description ?? "-")</td>
+                                    <td>
+                                        <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn btn-sm btn-outline-primary me-1">
+                                            <i class="ti ti-shield-check me-1"></i> Permissions
+                                        </a>
+                                        <a href="@Url.Action("Utilisateurs")" class="btn btn-sm btn-outline-secondary me-1">
+                                            <i class="ti ti-users me-1"></i> Utilisateurs
+                                        </a>
+                                        <form method="post" asp-action="DeleteRole" style="display:inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@role.Id" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Supprimer ce rôle ?')">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

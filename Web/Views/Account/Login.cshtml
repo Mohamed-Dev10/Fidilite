@@ -1,0 +1,46 @@
+@model BRICOMA.ECOMMERCE.Models.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Connexion";
+    Layout = "~/Views/Shared/_LayoutLogin.cshtml";
+}
+
+<div class="container container-tight py-4">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold">BRICOMA</h2>
+        <p class="text-muted">Back Office Fidélité</p>
+    </div>
+
+    <div class="card card-md">
+        <div class="card-body">
+            <h2 class="h2 text-center mb-4">Connexion</h2>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    @Html.ValidationSummary(false)
+                </div>
+            }
+
+            <form method="post" asp-action="Login" asp-controller="Account">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" asp-for="Email" class="form-control" placeholder="votre@email.com" autocomplete="email" />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-2">
+                    <label class="form-label">Mot de passe</label>
+                    <input type="password" asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="form-footer">
+                    <button type="submit" class="btn btn-primary w-100">Se connecter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

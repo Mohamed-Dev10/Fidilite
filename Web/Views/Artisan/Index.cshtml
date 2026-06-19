@@ -1,0 +1,184 @@
+@model PagedResult<Cliente>
+@{
+    ViewData["Title"] = "Cartes Artisan";
+    var filter = ViewData["Filter"] as CarteListFilterModel;
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Cartes Artisan</h2>
+                <div class="text-muted mt-1">Gestion des cartes fidélité Artisan</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a asp-controller="Carte" asp-action="Creer" asp-route-carteTypeId="3" class="btn btn-primary">
+                    <i class="ti ti-plus me-1"></i> Nouvelle carte Artisan
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        @if (ViewData["Error"] != null)
+        {
+            <div class="alert alert-danger alert-dismissible" role="alert">
+                <i class="ti ti-alert-circle me-2"></i>
+                @ViewData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <!-- Filtres -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <form method="get">
+                    <div class="row g-2 align-items-end">
+                        <div class="col">
+                            <label class="form-label">Recherche</label>
+                            <input type="text" name="search" class="form-control"
+                                   placeholder="Nom, Prénom, GSM, CIN..."
+                                   value="@filter?.Search" />
+                        </div>
+                        <div class="col-auto">
+                            <label class="form-label">Statut</label>
+                            <select id="statutFilter" name="statutId" class="form-select">
+                                <option value="">Tous</option>
+                                <option value="1">Créé</option>
+                                <option value="2">Confirmé</option>
+                                <option value="3">Clôturé</option>
+                            </select>
+                            <script>document.getElementById('statutFilter').value = '@(filter?.StatutId?.ToString() ?? "")';</script>
+                        </div>
+                        <div class="col-auto">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="ti ti-search me-1"></i> Rechercher
+                                </button>
+                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                                    <i class="ti ti-x me-1"></i> Réinitialiser
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tableau -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-tool me-2 text-primary"></i>
+                    Total : <strong>@Model.TotalCount</strong> carte(s)
+                </h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom & Prénom</th>
+                            <th>GSM</th>
+                            <th>CIN</th>
+                            <th>Raison Sociale</th>
+                            <th>Magasin</th>
+                            <th>Statut</th>
+                            <th>Date création</th>
+                            <th>Confirmé</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Items.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center text-muted py-5">
+                                    <i class="ti ti-database-off fs-1 d-block mb-2"></i>
+                                    Aucune carte Artisan trouvée
+                                </td>
+                            </tr>
+                        }
+                        @foreach (var item in Model.Items)
+                        {
+                            string badgeClass, statutLabel;
+                            switch (item.RefClienteStatutId)
+                            {
+                                case 2: badgeClass = "bg-success"; statutLabel = "Confirmé"; break;
+                                case 3: badgeClass = "bg-secondary"; statutLabel = "Clôturé"; break;
+                                default: badgeClass = "bg-warning text-dark"; statutLabel = "Créé"; break;
+                            }
+                            <tr>
+                                <td>
+                                    <div class="fw-bold">@item.Nom @item.Prenom</div>
+                                    @if (!string.IsNullOrEmpty(item.Email))
+                                    {
+                                        <div class="text-muted small">@item.Email</div>
+                                    }
+                                </td>
+                                <td>@item.Gsm</td>
+                                <td>@(string.IsNullOrEmpty(item.Cin) ? "-" : item.Cin)</td>
+                                <td>@(string.IsNullOrEmpty(item.RaisonSociale) ? "-" : item.RaisonSociale)</td>
+                                <td>@(item.RefMagasin?.Name ?? "-")</td>
+                                <td><span class="badge @badgeClass">@statutLabel</span></td>
+                                <td>@item.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.IsConfirmed == true)
+                                    {
+                                        <span class="badge bg-success-lt"><i class="ti ti-check"></i> Oui</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning-lt"><i class="ti ti-clock"></i> Non</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-controller="Carte" asp-action="Detail" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Voir détail">
+                                        <i class="ti ti-eye"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            @if (Model.TotalPages > 1)
+            {
+                <div class="card-footer d-flex align-items-center">
+                    <p class="m-0 text-muted">
+                        Page <strong>@Model.Page</strong> sur <strong>@Model.TotalPages</strong>
+                        &nbsp;–&nbsp; @Model.TotalCount résultat(s)
+                    </p>
+                    <ul class="pagination m-0 ms-auto">
+                        @if (Model.HasPrevious)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?page=@(Model.Page - 1)&search=@filter?.Search&statutId=@filter?.StatutId">
+                                    <i class="ti ti-chevron-left"></i>
+                                </a>
+                            </li>
+                        }
+                        @for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.Page ? "active" : "")">
+                                <a class="page-link" href="?page=@i&search=@filter?.Search&statutId=@filter?.StatutId">@i</a>
+                            </li>
+                        }
+                        @if (Model.HasNext)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="?page=@(Model.Page + 1)&search=@filter?.Search&statutId=@filter?.StatutId">
+                                    <i class="ti ti-chevron-right"></i>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+        </div>
+    </div>
+</div>

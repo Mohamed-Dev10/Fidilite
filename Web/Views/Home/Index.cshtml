@@ -1,8 +1,172 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model DashboardStatsModel
+@{
+    ViewData["Title"] = "Dashboard";
+    var stats = Model ?? new DashboardStatsModel();
+    var maxMagasin = stats.ParMagasin.Any() ? stats.ParMagasin.Max(m => m.Count) : 0;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="page-header d-print-none mb-3">
+    <div class="row g-2 align-items-center">
+        <div class="col">
+            <h2 class="page-title">Tableau de bord</h2>
+            <div class="text-muted mt-1">Vue d'ensemble des cartes fidélité</div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI principaux -->
+<div class="row row-deck row-cards mb-3">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-primary text-white avatar"><i class="ti ti-id-badge"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">@stats.TotalCartes</div>
+                        <div class="text-muted">Total cartes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-azure text-white avatar"><i class="ti ti-calendar-plus"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">@stats.CartesCeMois</div>
+                        <div class="text-muted">Créées ce mois</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-success text-white avatar"><i class="ti ti-circle-check"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">@stats.CartesActives</div>
+                        <div class="text-muted">Cartes actives</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card card-sm">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-auto">
+                        <span class="bg-danger text-white avatar"><i class="ti ti-lock"></i></span>
+                    </div>
+                    <div class="col">
+                        <div class="font-weight-medium">@stats.CartesBloquees</div>
+                        <div class="text-muted">Cartes bloquées</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KPI cliquables par type -->
+<div class="row row-cards mb-3">
+    <div class="col-md-6">
+        <a href="@Url.Action("Index", "M3alem")" class="card card-link card-link-pop">
+            <div class="card-body d-flex align-items-center">
+                <span class="bg-primary text-white avatar avatar-lg me-3"><i class="ti ti-id-badge fs-2"></i></span>
+                <div>
+                    <div class="h1 m-0">@stats.CartesM3alem</div>
+                    <div class="text-muted">Cartes M3alem</div>
+                </div>
+                <span class="ms-auto text-primary"><i class="ti ti-chevron-right fs-2"></i></span>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a href="@Url.Action("Index", "Artisan")" class="card card-link card-link-pop">
+            <div class="card-body d-flex align-items-center">
+                <span class="bg-yellow text-white avatar avatar-lg me-3"><i class="ti ti-tool fs-2"></i></span>
+                <div>
+                    <div class="h1 m-0">@stats.CartesArtisan</div>
+                    <div class="text-muted">Cartes Artisan</div>
+                </div>
+                <span class="ms-auto text-yellow"><i class="ti ti-chevron-right fs-2"></i></span>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Répartition par magasin -->
+@{
+    var totalMagasin = stats.ParMagasin.Sum(m => m.Count);
+    var rang = 0;
+    var palette = new[] { "primary", "azure", "indigo", "purple", "teal", "green", "orange", "pink" };
+}
+<div class="row row-cards">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="ti ti-building-store me-2 text-primary"></i>Répartition par magasin</h3>
+                <div class="card-actions">
+                    <span class="badge bg-primary-lt">@stats.ParMagasin.Count magasin(s)</span>
+                </div>
+            </div>
+            @if (!stats.ParMagasin.Any())
+            {
+                <div class="card-body">
+                    <div class="empty">
+                        <div class="empty-icon"><i class="ti ti-database-off fs-1"></i></div>
+                        <p class="empty-title">Aucune donnée</p>
+                        <p class="empty-subtitle text-muted">Aucune carte n'est encore rattachée à un magasin.</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="list-group list-group-flush" style="max-height: 460px; overflow-y: auto;">
+                    @foreach (var m in stats.ParMagasin)
+                    {
+                        rang++;
+                        var pct = maxMagasin > 0 ? Math.Round(100.0 * m.Count / maxMagasin, 1) : 0;
+                        var part = totalMagasin > 0 ? Math.Round(100.0 * m.Count / totalMagasin, 1) : 0;
+                        var couleur = palette[(rang - 1) % palette.Length];
+                        <div class="list-group-item">
+                            <div class="row align-items-center g-2">
+                                <div class="col-auto">
+                                    <span class="badge bg-@couleur-lt fw-bold" style="width: 2rem;">@rang</span>
+                                </div>
+                                <div class="col">
+                                    <div class="d-flex align-items-center justify-content-between mb-1">
+                                        <span class="fw-bold text-truncate">@m.Magasin</span>
+                                        <span class="text-nowrap ms-2">
+                                            <strong>@m.Count</strong>
+                                            <span class="text-muted small">cartes · @part%</span>
+                                        </span>
+                                    </div>
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-@couleur" style="width: @pct.ToString(System.Globalization.CultureInfo.InvariantCulture)%"
+                                             role="progressbar" aria-valuenow="@m.Count" aria-valuemin="0" aria-valuemax="@maxMagasin">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="card-footer text-muted">
+                    Total : <strong>@totalMagasin</strong> carte(s) réparties sur <strong>@stats.ParMagasin.Count</strong> magasin(s)
+                </div>
+            }
+        </div>
+    </div>
 </div>

@@ -1,76 +1,126 @@
+@{
+    var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+    string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - BRICOMA</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/core@1.0.0-beta17/dist/css/tabler.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@@tabler/icons-webfont@latest/tabler-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/tabler-icons/css/tabler-icons.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/adminlte/css/adminlte.min.css" />
+    <link rel="stylesheet" href="~/css/app-theme.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
 </head>
-<body class="antialiased">
-    <div class="wrapper">
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+
+        <!-- Top navbar -->
+        <nav class="app-header navbar navbar-expand bg-body shadow-sm">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" data-lte-toggle="sidebar" href="#" role="button">
+                            <i class="ti ti-menu-2 fs-3"></i>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="dropdown">
+                            <span class="avatar bg-primary text-white me-2"><i class="ti ti-user"></i></span>
+                            <span class="d-none d-md-block text-start">
+                                <span class="d-block fw-bold lh-1">@User.Identity?.Name</span>
+                                <span class="d-block small text-muted">BRICOMA</span>
+                            </span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end shadow">
+                            <form method="post" asp-controller="Account" asp-action="Logout">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="ti ti-logout me-2"></i> Déconnexion
+                                </button>
+                            </form>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
         <!-- Sidebar -->
-        <aside class="navbar navbar-vertical navbar-expand-lg navbar-dark" style="background-color: #1e2a3a;">
-            <div class="container-fluid">
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <h1 class="navbar-brand py-3">
-                    <span class="text-white fw-bold">BRICOMA</span>
-                </h1>
-                <div class="collapse navbar-collapse" id="navbar-menu">
-                    <ul class="navbar-nav pt-lg-3">
+        <aside class="app-sidebar shadow" data-bs-theme="dark">
+            <div class="sidebar-brand">
+                <a asp-controller="Home" asp-action="Index" class="brand-link">
+                    <span class="brand-text fw-bold">BRICOMA</span>
+                </a>
+            </div>
+            <div class="sidebar-wrapper">
+                <nav class="mt-2">
+                    <ul class="nav sidebar-menu flex-column" role="menu">
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Home" asp-action="Index">
-                                <span class="nav-link-icon"><i class="ti ti-home"></i></span>
-                                <span class="nav-link-title">Dashboard</span>
+                            <a asp-controller="Home" asp-action="Index" class="nav-link @Active("Home")">
+                                <i class="nav-icon ti ti-home"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-header">Cartes Fidélité</li>
+                        <li class="nav-item">
+                            <a asp-controller="Carte" asp-action="Creer" class="nav-link @Active("Carte")">
+                                <i class="nav-icon ti ti-plus"></i>
+                                <p>Nouvelle carte</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="M3alem" asp-action="Index" class="nav-link @Active("M3alem")">
+                                <i class="nav-icon ti ti-id-badge"></i>
+                                <p>Cartes M3alem</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="Artisan" asp-action="Index" class="nav-link @Active("Artisan")">
+                                <i class="nav-icon ti ti-tool"></i>
+                                <p>Cartes Artisan</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-header">Configuration</li>
+                        <li class="nav-item">
+                            <a asp-controller="Parametrage" asp-action="Index" class="nav-link @Active("Parametrage")">
+                                <i class="nav-icon ti ti-settings"></i>
+                                <p>Paramétrage</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a asp-controller="GestionPermissions" asp-action="Index" class="nav-link @Active("GestionPermissions")">
+                                <i class="nav-icon ti ti-shield-lock"></i>
+                                <p>Gestion de permissions</p>
                             </a>
                         </li>
                     </ul>
-                </div>
+                </nav>
             </div>
         </aside>
 
         <!-- Main content -->
-        <div class="page-wrapper">
-            <!-- Top navbar -->
-            <header class="navbar navbar-expand-md navbar-light d-print-none shadow-sm">
-                <div class="container-fluid">
-                    <div class="navbar-nav flex-row ms-auto">
-                        <div class="nav-item dropdown">
-                            <a href="#" class="nav-link d-flex lh-1 text-reset p-0" data-bs-toggle="dropdown">
-                                <div class="d-none d-xl-block ps-2">
-                                    <div class="fw-bold">Admin</div>
-                                    <div class="mt-1 small text-muted">BRICOMA</div>
-                                </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Page content -->
-            <div class="page-body">
-                <div class="container-xl py-4">
+        <main class="app-main">
+            <div class="app-content">
+                <div class="container-fluid py-3">
                     @RenderBody()
                 </div>
             </div>
+        </main>
 
-            <!-- Footer -->
-            <footer class="footer footer-transparent d-print-none">
-                <div class="container-xl">
-                    <div class="row text-center">
-                        <div class="col-12">
-                            <span class="text-muted">&copy; 2026 BRICOMA. Tous droits réservés.</span>
-                        </div>
-                    </div>
-                </div>
-            </footer>
-        </div>
+        <!-- Footer -->
+        <footer class="app-footer d-print-none">
+            <div class="text-muted">&copy; 2026 BRICOMA. Tous droits réservés.</div>
+        </footer>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@@tabler/core@1.0.0-beta17/dist/js/tabler.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/adminlte/js/adminlte.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

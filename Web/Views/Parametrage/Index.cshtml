@@ -1,0 +1,61 @@
+@model List<BRICOMA.ECOMMERCE.Data.Models.RefCarteType>
+@{
+    ViewData["Title"] = "Paramétrage — Types de cartes";
+}
+
+<div class="page-header mb-3">
+    <div class="row align-items-center">
+        <div class="col">
+            <h2 class="page-title">Types de cartes</h2>
+            <div class="text-muted mt-1">Paramétrage des types de cartes fidélité</div>
+        </div>
+        <div class="col-auto">
+            <a href="@Url.Action("Create")" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Nouveau type
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-vcenter table-hover card-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Nom</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model == null || !Model.Any())
+                {
+                    <tr><td colspan="3" class="text-center text-muted py-4">Aucun type de carte</td></tr>
+                }
+                else
+                {
+                    foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="text-muted">@item.Id</td>
+                            <td class="fw-bold">@item.Name</td>
+                            <td>
+                                <a href="@Url.Action("Edit", new { id = item.Id })" class="btn btn-sm btn-outline-secondary me-1">
+                                    <i class="ti ti-edit me-1"></i> Modifier
+                                </a>
+                                <form method="post" asp-action="Delete" style="display:inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Supprimer ce type de carte ?')">
+                                        <i class="ti ti-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

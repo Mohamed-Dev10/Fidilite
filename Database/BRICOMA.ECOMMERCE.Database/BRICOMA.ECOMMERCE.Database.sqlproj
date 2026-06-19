@@ -56,5 +56,42 @@
   <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
   <ItemGroup>
     <Folder Include="Properties" />
+    <Folder Include="dbo" />
+    <Folder Include="dbo\Tables" />
+    <Folder Include="dbo\Tables\DATA" />
+    <Folder Include="dbo\Tables\MAP" />
+    <Folder Include="dbo\Tables\REF" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- REF tables (no FK dependencies) -->
+    <Build Include="dbo\Tables\REF\REF_CarteType.sql" />
+    <Build Include="dbo\Tables\REF\REF_ClienteStatut.sql" />
+    <Build Include="dbo\Tables\REF\REF_ClienteType.sql" />
+    <Build Include="dbo\Tables\REF\REF_Genre.sql" />
+    <Build Include="dbo\Tables\REF\REF_Magasin.sql" />
+    <Build Include="dbo\Tables\REF\REF_Metier.sql" />
+    <Build Include="dbo\Tables\REF\REF_Ville.sql" />
+    <Build Include="dbo\Tables\REF\REF_AnniversaireCarte.sql" />
+    <!-- Identity tables -->
+    <Build Include="dbo\Tables\DATA\__EFMigrationsHistory.sql" />
+    <Build Include="dbo\Tables\DATA\AspNetRoles.sql" />
+    <Build Include="dbo\Tables\DATA\AspNetUsers.sql" />
+    <Build Include="dbo\Tables\DATA\AspNetRoleClaims.sql" />
+    <Build Include="dbo\Tables\DATA\AspNetUserClaims.sql" />
+    <Build Include="dbo\Tables\DATA\AspNetUserLogins.sql" />
+    <Build Include="dbo\Tables\DATA\AspNetUserRoles.sql" />
+    <Build Include="dbo\Tables\DATA\AspNetUserTokens.sql" />
+    <!-- Permission tables (new) -->
+    <Build Include="dbo\Tables\DATA\Permissions.sql" />
+    <Build Include="dbo\Tables\DATA\RolePermissions.sql" />
+    <!-- Business tables -->
+    <Build Include="dbo\Tables\DATA\Profil.sql" />
+    <Build Include="dbo\Tables\DATA\AppFile.sql" />
+    <Build Include="dbo\Tables\DATA\Cliente.sql" />
+    <Build Include="dbo\Tables\DATA\ClienteAudit.sql" />
+    <Build Include="dbo\Tables\DATA\AnniversaireSuivi.sql" />
+    <Build Include="dbo\Tables\ClienteEvent.sql" />
+    <!-- MAP tables -->
+    <Build Include="dbo\Tables\MAP\MAP_Cliente_AppFile.sql" />
   </ItemGroup>
 </Project>

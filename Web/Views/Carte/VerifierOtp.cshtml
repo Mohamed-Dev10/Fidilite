@@ -1,0 +1,85 @@
+@{
+    ViewData["Title"] = "Vérification OTP";
+    var token = ViewBag.Token as string;
+    var gsm = ViewBag.Gsm as string;
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Vérification du code OTP</h2>
+                <div class="text-muted mt-1">Saisissez le code reçu par WhatsApp pour finaliser la carte</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a asp-action="Creer" class="btn btn-outline-secondary">
+                    <i class="ti ti-arrow-left me-1"></i> Annuler
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+
+                @if (ViewData["Error"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible" role="alert">
+                        <i class="ti ti-alert-circle me-2"></i>
+                        @ViewData["Error"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                @if (ViewData["Success"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible" role="alert">
+                        <i class="ti ti-circle-check me-2"></i>
+                        @ViewData["Success"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <span class="avatar avatar-lg bg-green-lt">
+                                <i class="ti ti-brand-whatsapp" style="font-size: 1.8rem;"></i>
+                            </span>
+                        </div>
+                        <h3 class="card-title">Code envoyé au @gsm</h3>
+                        <p class="text-muted">
+                            Le client a reçu un code à 6 chiffres par WhatsApp.
+                            Saisissez-le ci-dessous (valable 10 minutes).
+                        </p>
+
+                        <form asp-action="VerifierOtp" method="post" class="mt-4">
+                            <input type="hidden" name="token" value="@token" />
+                            <input type="hidden" name="gsm" value="@gsm" />
+
+                            <div class="mb-3">
+                                <input type="text" name="otpCode" class="form-control form-control-lg text-center"
+                                       inputmode="numeric" maxlength="6" autocomplete="one-time-code"
+                                       placeholder="● ● ● ● ● ●" autofocus required
+                                       style="letter-spacing: 0.5rem; font-size: 1.5rem;" />
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="ti ti-circle-check me-1"></i> Vérifier et créer la carte
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="text-center text-muted mt-3">
+                    Code non reçu ?
+                    <a asp-action="Creer">Recommencer</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

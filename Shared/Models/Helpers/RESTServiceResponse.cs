@@ -20,12 +20,17 @@ namespace BRICOMA.ECOMMERCE.Models.Helpers
             this.Data = data;
         }
 
+        //public RESTServiceResponse(bool success, T data)
+        //{
+        //    this.Success = success;
+        //    this.Data = data;
+        //}
+
         public RESTServiceResponse(bool success, T data)
         {
             this.Success = success;
             this.Data = data;
         }
-
         public RESTServiceResponse(bool success, string message)
         {
             this.Success = success;

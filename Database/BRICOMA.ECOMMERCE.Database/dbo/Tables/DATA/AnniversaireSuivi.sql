@@ -1,0 +1,25 @@
+CREATE TABLE [dbo].[AnniversaireSuivi]
+(
+    [Id]                  BIGINT        NOT NULL IDENTITY (1, 1) PRIMARY KEY,
+    [Code]                NVARCHAR(255) NULL,
+    [Magasin]             NVARCHAR(MAX) NULL,
+    [NomPrenom]           NVARCHAR(MAX) NULL,
+    [Email]               NVARCHAR(MAX) NULL,
+    [Telephone]           NVARCHAR(MAX) NULL,
+    [TelephoneMobile]     NVARCHAR(MAX) NULL,
+    [Metier]              NVARCHAR(MAX) NULL,
+    [DateNaissance]       DATETIME      NULL,
+    [DateCreation]        DATETIME      NULL,
+    [JourAnniversaire]    NVARCHAR(MAX) NULL,
+    [MoisAnniversaire]    NVARCHAR(MAX) NULL,
+    [AnneeAnniversaire]   INT           NULL,
+    [TypeClient]          NVARCHAR(MAX) NULL,
+    [CA_NET_HT]           DECIMAL       NULL,
+    [CA_NET_TTC]          DECIMAL       NULL,
+    [CARTE]               NVARCHAR(MAX) NULL,
+    [Envoye]              BIT           NULL,
+    [DateEnvoi]           DATETIME      NULL,
+    [Consulte]            BIT           NULL,
+    [DateConsultation]    DATETIME      NULL,
+    [DateCreationSuivi]   DATETIME      NOT NULL
+)

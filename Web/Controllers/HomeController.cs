@@ -1,21 +1,25 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using BRICOMA.ECOMMERCE.Web.Models;
+using BRICOMA.ECOMMERCE.Business.Interfaces;
 
 namespace BRICOMA.ECOMMERCE.Web.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
+    private readonly IClienteBOService _clienteBOService;
 
-    public HomeController(ILogger<HomeController> logger)
+    public HomeController(ILogger<HomeController> logger, IClienteBOService clienteBOService)
     {
         _logger = logger;
+        _clienteBOService = clienteBOService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
-        return View();
+        var result = await _clienteBOService.GetDashboardStats();
+        return View(result.Data);
     }
 
     public IActionResult Privacy()

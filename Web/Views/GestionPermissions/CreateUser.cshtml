@@ -1,0 +1,64 @@
+@model BRICOMA.ECOMMERCE.Models.Models.CreateUserModel
+@{
+    ViewData["Title"] = "Créer un utilisateur";
+}
+
+<div class="page-header mb-3">
+    <div class="row align-items-center">
+        <div class="col-auto">
+            <a href="@Url.Action("Utilisateurs")" class="btn btn-outline-secondary btn-sm">
+                <i class="ti ti-arrow-left me-1"></i> Retour
+            </a>
+        </div>
+        <div class="col">
+            <h2 class="page-title">Nouvel utilisateur</h2>
+        </div>
+    </div>
+</div>
+
+@if (ViewData["Error"] != null)
+{
+    <div class="alert alert-danger">@ViewData["Error"]</div>
+}
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" asp-action="CreateUser">
+            @Html.AntiForgeryToken()
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Nom <span class="text-danger">*</span></label>
+                    <input type="text" asp-for="Nom" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Prénom <span class="text-danger">*</span></label>
+                    <input type="text" asp-for="Prenom" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Email <span class="text-danger">*</span></label>
+                    <input type="email" asp-for="Email" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Mot de passe <span class="text-danger">*</span></label>
+                    <input type="password" asp-for="Password" class="form-control" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Rôle <span class="text-danger">*</span></label>
+                    <select asp-for="RoleId" asp-items="ViewBag.Roles" class="form-select">
+                        <option value="">-- Sélectionner un rôle --</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Magasin</label>
+                    <select asp-for="RefMagasinId" asp-items="ViewBag.Magasins" class="form-select">
+                        <option value="">-- Tous les magasins --</option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Créer
+            </button>
+            <a href="@Url.Action("Utilisateurs")" class="btn btn-outline-secondary ms-2">Annuler</a>
+        </form>
+    </div>
+</div>

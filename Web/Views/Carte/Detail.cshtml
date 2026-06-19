@@ -1,0 +1,131 @@
+@model Cliente
+@{
+    ViewData["Title"] = "Détail de la carte";
+
+    string badgeClass, statutLabel;
+    switch (Model.RefClienteStatutId)
+    {
+        case 2: badgeClass = "bg-success"; statutLabel = "Confirmé"; break;
+        case 3: badgeClass = "bg-secondary"; statutLabel = "Clôturé"; break;
+        default: badgeClass = "bg-warning text-dark"; statutLabel = "Créé"; break;
+    }
+    var actif = Model.IsActif != false;
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">@Model.Nom @Model.Prenom</h2>
+                <div class="text-muted mt-1">
+                    Code : <strong>@Model.Code</strong>
+                    <span class="badge @badgeClass ms-2">@statutLabel</span>
+                    @if (actif)
+                    {
+                        <span class="badge bg-success-lt ms-1"><i class="ti ti-check"></i> Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger-lt ms-1"><i class="ti ti-lock"></i> Bloquée</span>
+                    }
+                </div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary me-1">
+                    <i class="ti ti-arrow-left me-1"></i> Retour
+                </a>
+                <a asp-action="Modifier" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="ti ti-edit me-1"></i> Modifier
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success alert-dismissible" role="alert">
+                <i class="ti ti-circle-check me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        <div class="row g-3">
+
+            <!-- Infos -->
+            <div class="col-lg-7">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-user me-2 text-primary"></i>Informations personnelles</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-sm-6"><div class="text-muted small">Nom</div><div class="fw-medium">@Model.Nom</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Prénom</div><div class="fw-medium">@Model.Prenom</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">GSM</div><div class="fw-medium">@Model.Gsm</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">CIN</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Cin) ? "-" : Model.Cin)</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Email</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Email) ? "-" : Model.Email)</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Date de naissance</div><div class="fw-medium">@Model.DateNaissance.ToString("dd/MM/yyyy")</div></div>
+                            <div class="col-12"><div class="text-muted small">Adresse</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Adresse) ? "-" : Model.Adresse)</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-briefcase me-2 text-primary"></i>Informations professionnelles</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-sm-6"><div class="text-muted small">Raison sociale</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.RaisonSociale) ? "-" : Model.RaisonSociale)</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Fonction</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Fonction) ? "-" : Model.Fonction)</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Métier</div><div class="fw-medium">@(Model.RefMetier?.Name ?? "-")</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">NIA</div><div class="fw-medium">@(Model.Nia?.ToString() ?? "-")</div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-credit-card me-2 text-primary"></i>Carte</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-sm-6"><div class="text-muted small">Magasin</div><div class="fw-medium">@(Model.RefMagasin?.Name ?? "-")</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Code-barres</div><div class="fw-medium">@Model.CodeBarre</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Date création</div><div class="fw-medium">@Model.DateCreation.ToString("dd/MM/yyyy HH:mm")</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Date confirmation</div><div class="fw-medium">@(Model.DateConfirmation?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image carte -->
+            <div class="col-lg-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-photo me-2 text-primary"></i>Carte générée</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="/cartes/@(Model.Code).png" alt="Carte @Model.Code"
+                             class="img-fluid border rounded"
+                             onerror="this.style.display='none';document.getElementById('noImg').style.display='block';" />
+                        <div id="noImg" style="display:none;" class="text-muted py-5">
+                            <i class="ti ti-photo-off fs-1 d-block mb-2"></i>
+                            Image non disponible
+                        </div>
+                        <div class="mt-2">
+                            <a href="/cartes/@(Model.Code).png" target="_blank" class="btn btn-outline-primary btn-sm">
+                                <i class="ti ti-external-link me-1"></i>Ouvrir l'image
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

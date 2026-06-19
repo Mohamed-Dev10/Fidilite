@@ -1,0 +1,141 @@
+/* ============================================================
+   BRICOMA - Thème applicatif (AdminLTE 4 / Bootstrap 5)
+   Inclut un jeu de compatibilité pour les classes utilisées
+   dans les vues (équivalents Bootstrap étendus).
+   ============================================================ */
+
+:root {
+    --brico-azure:  #4299e1;
+    --brico-indigo: #4263eb;
+    --brico-purple: #ae3ec9;
+    --brico-teal:   #0ca678;
+    --brico-green:  #2fb344;
+    --brico-orange: #f76707;
+    --brico-pink:   #d6336c;
+    --brico-yellow: #f59f00;
+    --brico-sidebar: #1e2a3a;
+}
+
+/* ---------- En-tête de page ---------- */
+.page-header {
+    margin-bottom: 1.25rem;
+}
+.page-title {
+    font-size: 1.375rem;
+    font-weight: 600;
+    line-height: 1.3;
+    margin: 0;
+}
+.page-pretitle {
+    text-transform: uppercase;
+    font-size: .75rem;
+    letter-spacing: .04em;
+    color: var(--bs-secondary-color);
+}
+.page-body { margin-top: 0; }
+
+/* ---------- Espacement type "cards" ---------- */
+.row-cards > * { margin-bottom: 1rem; }
+.row-deck > .col,
+.row-deck > [class*="col-"] { display: flex; align-items: stretch; }
+.row-deck > .col > .card,
+.row-deck > [class*="col-"] > .card { width: 100%; }
+.card-sm .card-body { padding: 1rem; }
+.card-actions { margin-left: auto; }
+
+/* ---------- Avatars ---------- */
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.avatar-lg { width: 3.5rem; height: 3.5rem; font-size: 1.4rem; }
+.avatar i { line-height: 1; }
+
+/* ---------- Cartes cliquables ---------- */
+.card-link { text-decoration: none; color: inherit; display: block; transition: transform .15s ease, box-shadow .15s ease; }
+.card-link:hover { color: inherit; }
+.card-link-pop:hover { transform: translateY(-3px); box-shadow: 0 .5rem 1.25rem rgba(0,0,0,.12); }
+
+/* ---------- Tables ---------- */
+.table-vcenter td, .table-vcenter th { vertical-align: middle; }
+.card-table { margin-bottom: 0; }
+.card > .table-responsive > .card-table:last-child { margin-bottom: 0; }
+
+/* ---------- Progress ---------- */
+.progress-sm { height: .5rem; }
+
+/* ---------- État vide ---------- */
+.empty { text-align: center; padding: 2.5rem 1rem; }
+.empty-icon { color: var(--bs-secondary-color); margin-bottom: .75rem; }
+.empty-title { font-weight: 600; font-size: 1.05rem; margin-bottom: .25rem; }
+.empty-subtitle { color: var(--bs-secondary-color); }
+
+/* ---------- Couleurs étendues (fond plein) ---------- */
+.bg-azure  { background-color: var(--brico-azure)  !important; }
+.bg-indigo { background-color: var(--brico-indigo) !important; }
+.bg-purple { background-color: var(--brico-purple) !important; }
+.bg-teal   { background-color: var(--brico-teal)   !important; }
+.bg-green  { background-color: var(--brico-green)  !important; }
+.bg-orange { background-color: var(--brico-orange) !important; }
+.bg-pink   { background-color: var(--brico-pink)   !important; }
+.bg-yellow { background-color: var(--brico-yellow) !important; }
+
+.text-azure  { color: var(--brico-azure)  !important; }
+.text-indigo { color: var(--brico-indigo) !important; }
+.text-purple { color: var(--brico-purple) !important; }
+.text-teal   { color: var(--brico-teal)   !important; }
+.text-orange { color: var(--brico-orange) !important; }
+.text-pink   { color: var(--brico-pink)   !important; }
+.text-yellow { color: var(--brico-yellow) !important; }
+
+/* ---------- Couleurs étendues (fond clair "-lt") ---------- */
+.bg-primary-lt { background-color: rgba(var(--bs-primary-rgb), .12) !important; color: var(--bs-primary) !important; }
+.bg-success-lt { background-color: rgba(var(--bs-success-rgb), .14) !important; color: var(--bs-success) !important; }
+.bg-warning-lt { background-color: rgba(var(--bs-warning-rgb), .16) !important; color: #b3760a !important; }
+.bg-danger-lt  { background-color: rgba(var(--bs-danger-rgb),  .12) !important; color: var(--bs-danger) !important; }
+.bg-info-lt    { background-color: rgba(var(--bs-info-rgb),    .14) !important; color: var(--bs-info) !important; }
+.bg-secondary-lt { background-color: rgba(var(--bs-secondary-rgb), .14) !important; color: var(--bs-secondary) !important; }
+
+.bg-azure-lt  { background-color: rgba(66,153,225,.14)  !important; color: var(--brico-azure)  !important; }
+.bg-indigo-lt { background-color: rgba(66,99,235,.14)   !important; color: var(--brico-indigo) !important; }
+.bg-purple-lt { background-color: rgba(174,62,201,.14)  !important; color: var(--brico-purple) !important; }
+.bg-teal-lt   { background-color: rgba(12,166,120,.14)  !important; color: var(--brico-teal)   !important; }
+.bg-green-lt  { background-color: rgba(47,179,68,.14)   !important; color: var(--brico-green)  !important; }
+.bg-orange-lt { background-color: rgba(247,103,7,.14)   !important; color: var(--brico-orange) !important; }
+.bg-pink-lt   { background-color: rgba(214,51,108,.14)  !important; color: var(--brico-pink)   !important; }
+.bg-yellow-lt { background-color: rgba(245,159,0,.16)   !important; color: #b3760a              !important; }
+
+/* ---------- Sidebar BRICOMA ---------- */
+.app-sidebar { background-color: var(--brico-sidebar) !important; }
+.sidebar-brand { background-color: rgba(0,0,0,.18); }
+.app-sidebar .brand-text { color: #fff; letter-spacing: .04em; }
+.sidebar-menu .nav-header {
+    color: rgba(255,255,255,.45);
+    text-transform: uppercase;
+    font-size: .7rem;
+    letter-spacing: .08em;
+    font-weight: 600;
+    padding: 1rem 1rem .35rem;
+}
+.app-main { background-color: var(--bs-body-bg); }
+
+/* ---------- Libellés obligatoires ---------- */
+.form-label.required::after,
+label.required::after {
+    content: "*";
+    color: var(--bs-danger);
+    margin-left: .25rem;
+    font-weight: 700;
+}
+
+/* ---------- Page de connexion ---------- */
+.container-tight { max-width: 480px; margin-left: auto; margin-right: auto; width: 100%; }
+.card-md .card-body { padding: 2rem; }
+.form-footer { margin-top: 1.5rem; }

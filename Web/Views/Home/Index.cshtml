@@ -4,8 +4,12 @@
     var stats = Model ?? new DashboardStatsModel();
 }
 
+@{
+    var sessionUser = User.Identity?.Name ?? "Utilisateur";
+    var displayName = sessionUser.Contains('@') ? sessionUser.Split('@')[0] : sessionUser;
+}
 <div class="page-header d-print-none">
-    <h2 class="page-title">Tableau de bord</h2>
+    <h2 class="page-title">Bonjour, @displayName</h2>
     <div class="page-subtitle">Vue d'ensemble des cartes fidélité</div>
 </div>
 

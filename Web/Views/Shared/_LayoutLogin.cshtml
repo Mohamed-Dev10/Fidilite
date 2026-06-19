@@ -10,10 +10,8 @@
     <link rel="stylesheet" href="~/css/app-theme.css" />
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
-<body class="login-page bg-body-secondary">
-    <div class="d-flex flex-column justify-content-center align-items-center min-vh-100 py-4">
-        @RenderBody()
-    </div>
+<body class="login-page">
+    @RenderBody()
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/adminlte/js/adminlte.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)

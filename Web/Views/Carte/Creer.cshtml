@@ -5,16 +5,17 @@
 
 <div class="page-header d-print-none">
     <div class="container-xl">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <h2 class="page-title">Créer une carte fidélité</h2>
-                <div class="text-muted mt-1">Nouvelle inscription client</div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="kpi-icon kpi-icon-lg ic-indigo" style="background:var(--bc-grad);color:#fff;">
+                <i class="ti ti-id-badge"></i>
+            </span>
+            <div>
+                <h2 class="page-title mb-0">Nouvelle carte fidélité</h2>
+                <div class="text-muted mt-1">Inscription d'un nouveau client</div>
             </div>
-            <div class="col-auto ms-auto d-print-none">
-                <a href="javascript:history.back()" class="btn btn-outline-secondary">
-                    <i class="ti ti-arrow-left me-1"></i> Retour
-                </a>
-            </div>
+            <a href="javascript:history.back()" class="btn-soft btn-soft-gray ms-auto">
+                <i class="ti ti-arrow-left"></i> Retour
+            </a>
         </div>
     </div>
 </div>
@@ -68,8 +69,9 @@
                     <!-- Informations personnelles -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="ti ti-user me-2 text-primary"></i>Informations personnelles
+                            <h3 class="card-title d-flex align-items-center gap-2">
+                                <span class="avatar ic-indigo" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-user"></i></span>
+                                Informations personnelles
                             </h3>
                         </div>
                         <div class="card-body">
@@ -100,8 +102,18 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label required">Date de naissance</label>
-                                    <input asp-for="DateNaissance" type="date" class="form-control" required
-                                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                    @{
+                                        var dnHasValue = Model != null && Model.DateNaissance > DateTime.MinValue;
+                                        var dnIso = dnHasValue ? Model!.DateNaissance.ToString("yyyy-MM-dd") : "";
+                                        var dnDisp = dnHasValue ? Model!.DateNaissance.ToString("dd/MM/yyyy") : "jj/mm/aaaa";
+                                    }
+                                    <div class="dp" data-dp data-max="today">
+                                        <input type="hidden" id="DateNaissance" name="DateNaissance" value="@dnIso" />
+                                        <button type="button" class="form-control input-date dp-trigger" aria-haspopup="dialog">
+                                            <span class="dp-value @(dnHasValue ? "" : "is-placeholder")">@dnDisp</span>
+                                        </button>
+                                        <div class="dp-pop" hidden></div>
+                                    </div>
                                     <span asp-validation-for="DateNaissance" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
@@ -126,11 +138,15 @@
 
                     <!-- Informations professionnelles -->
                     <div class="card mb-3">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="ti ti-briefcase me-2 text-primary"></i>Informations professionnelles
+                        <div class="card-header collapse-header" role="button" data-bs-toggle="collapse"
+                             data-bs-target="#proSection" aria-expanded="true" aria-controls="proSection">
+                            <h3 class="card-title d-flex align-items-center gap-2">
+                                <span class="avatar ic-orange" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-briefcase"></i></span>
+                                Informations professionnelles
                             </h3>
+                            <i class="ti ti-chevron-down collapse-chevron ms-auto"></i>
                         </div>
+                        <div id="proSection" class="collapse show">
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-sm-6">
@@ -156,6 +172,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
 
                 </div>
@@ -166,8 +183,9 @@
                     <!-- Type de carte + Magasin -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="ti ti-credit-card me-2 text-primary"></i>Carte fidélité
+                            <h3 class="card-title d-flex align-items-center gap-2">
+                                <span class="avatar ic-teal" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-credit-card"></i></span>
+                                Carte fidélité
                             </h3>
                         </div>
                         <div class="card-body">
@@ -193,13 +211,11 @@
                     </div>
 
                     <!-- Info OTP -->
-                    <div class="alert alert-info mb-3">
-                        <div class="d-flex">
-                            <i class="ti ti-info-circle me-2 mt-1"></i>
-                            <div>
-                                <strong>Workflow OTP</strong><br />
-                                Après création, un OTP sera envoyé au GSM du client. Le client communique ce code au responsable pour confirmer la carte.
-                            </div>
+                    <div class="otp-callout mb-3">
+                        <span class="avatar ic-blue" style="width:2.2rem;height:2.2rem;flex:0 0 auto;"><i class="ti ti-message-2-code"></i></span>
+                        <div>
+                            <div class="fw-bold mb-1">Workflow OTP</div>
+                            <div class="text-muted small">Après création, un code OTP est envoyé au GSM du client. Il communique ce code au responsable pour confirmer la carte.</div>
                         </div>
                     </div>
 
@@ -219,6 +235,7 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/datepicker.js"></script>
     <script>
         // NIA obligatoire (18-20 chiffres) uniquement pour la carte Artisan (RefCarteTypeId = 3)
         (function () {

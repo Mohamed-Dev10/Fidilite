@@ -525,9 +525,184 @@ a.chip, a.chip:hover { text-decoration: none; }
     content: "*"; color: var(--c-red); margin-left: .25rem; font-weight: 700;
 }
 
+/* ---- En-tête de carte repliable ---- */
+.collapse-header {
+    cursor: pointer;
+    display: flex; align-items: center;
+    user-select: none;
+    transition: background .15s ease;
+}
+.collapse-header:hover { background: rgba(var(--bc-primary-rgb), .04); }
+.collapse-chevron {
+    font-size: 1.25rem; color: var(--bc-muted);
+    transition: transform .25s ease;
+}
+.collapse-header[aria-expanded="false"] .collapse-chevron { transform: rotate(-90deg); }
+
+/* ---- Champ date stylé ---- */
+.input-date {
+    height: 3rem;
+    border-radius: 12px;
+    border: 1px solid var(--bc-border);
+    background: #fff;
+    font-weight: 600;
+    color: var(--bc-text);
+    padding-left: 2.7rem;
+    position: relative;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='5' width='16' height='16' rx='2'/%3E%3Cline x1='16' y1='3' x2='16' y2='7'/%3E%3Cline x1='8' y1='3' x2='8' y2='7'/%3E%3Cline x1='4' y1='11' x2='20' y2='11'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: .85rem center;
+    background-size: 1.15rem;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+.input-date:hover { border-color: rgba(var(--bc-primary-rgb), .5); }
+.input-date:focus {
+    border-color: var(--bc-primary);
+    box-shadow: 0 0 0 .2rem rgba(var(--bc-primary-rgb), .18);
+    outline: none;
+}
+/* recolore l'icône calendrier native (WebKit/Chromium/Edge) */
+.input-date::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: .55;
+    padding: .25rem;
+    border-radius: 6px;
+    transition: background .15s ease, opacity .15s ease;
+}
+.input-date::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background: rgba(var(--bc-primary-rgb), .12);
+}
+.input-date::-webkit-datetime-edit { padding: 0; }
+
+/* ---- Datepicker custom (calendrier moderne) ---- */
+.dp { position: relative; }
+.dp-trigger {
+    display: flex; align-items: center; width: 100%;
+    text-align: left; cursor: pointer;
+}
+.dp-value { font-weight: 600; }
+.dp-value.is-placeholder { color: var(--bc-muted); font-weight: 500; }
+.dp.is-open .dp-trigger {
+    border-color: var(--bc-primary);
+    box-shadow: 0 0 0 .2rem rgba(var(--bc-primary-rgb), .18);
+}
+.dp-pop {
+    position: absolute; z-index: 60; top: calc(100% + .45rem); left: 0;
+    width: 300px; max-width: calc(100vw - 2rem);
+    background: #fff; border: 1px solid var(--bc-border); border-radius: 16px;
+    box-shadow: 0 18px 44px rgba(20, 26, 50, .18);
+    padding: .9rem;
+    animation: dpIn .15s ease;
+}
+@keyframes dpIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+.dp-head { display: flex; align-items: center; gap: .2rem; margin-bottom: .6rem; }
+.dp-title { flex: 1; text-align: center; font-weight: 700; font-size: .95rem; color: var(--bc-text); }
+.dp-nav {
+    width: 2rem; height: 2rem; flex: 0 0 auto;
+    border: none; background: transparent; border-radius: 9px;
+    color: var(--bc-muted); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all .15s ease;
+}
+.dp-nav:hover { background: rgba(var(--bc-primary-rgb), .1); color: var(--bc-primary); }
+.dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.dp-dow span {
+    text-align: center; font-size: .7rem; font-weight: 700;
+    color: var(--bc-muted); text-transform: uppercase; padding: .25rem 0;
+}
+.dp-empty { aspect-ratio: 1 / 1; }
+.dp-day {
+    aspect-ratio: 1 / 1; border: none; background: transparent;
+    border-radius: 10px; font-size: .85rem; font-weight: 600;
+    color: var(--bc-text); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: all .12s ease;
+}
+.dp-day:hover:not(:disabled) { background: rgba(var(--bc-primary-rgb), .12); color: var(--bc-primary); }
+.dp-day.is-today { box-shadow: inset 0 0 0 1.5px rgba(var(--bc-primary-rgb), .45); }
+.dp-day.is-selected {
+    background: var(--bc-grad); color: #fff;
+    box-shadow: 0 6px 14px rgba(var(--bc-primary-rgb), .35);
+}
+.dp-day:disabled { opacity: .28; cursor: not-allowed; }
+
+/* ---- Callout info (workflow OTP, etc.) ---- */
+.otp-callout {
+    display: flex; align-items: flex-start; gap: .8rem;
+    padding: 1rem; border-radius: 14px;
+    background: rgba(var(--c-blue-rgb), .07);
+    border: 1px solid rgba(var(--c-blue-rgb), .18);
+}
+
 /* ============================================================
    PAGE DE CONNEXION
    ============================================================ */
 .container-tight { max-width: 460px; margin-left: auto; margin-right: auto; width: 100%; }
 .card-md .card-body { padding: 2.25rem; }
 .form-footer { margin-top: 1.5rem; }
+
+/* ---- Login split-screen moderne ---- */
+.auth-wrap {
+    display: grid; grid-template-columns: 1.05fr .95fr;
+    width: 100%; min-height: 100vh; background: #fff;
+}
+@media (max-width: 900px) {
+    .auth-wrap { grid-template-columns: 1fr; }
+    .auth-hero { display: none !important; }
+}
+
+/* Panneau marque (gauche) */
+.auth-hero {
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding: 3rem; color: #fff;
+    background: linear-gradient(150deg, #4f46e5 0%, #6d28d9 55%, #7c3aed 100%);
+}
+.auth-hero::before, .auth-hero::after {
+    content: ""; position: absolute; border-radius: 50%;
+    background: rgba(255, 255, 255, .08); pointer-events: none;
+}
+.auth-hero::before { width: 340px; height: 340px; top: -90px; right: -80px; }
+.auth-hero::after { width: 240px; height: 240px; bottom: -70px; left: -50px; background: rgba(255,255,255,.06); }
+.auth-brand { display: inline-flex; align-items: center; gap: .7rem; position: relative; z-index: 1; }
+.auth-brand-logo {
+    width: 3rem; height: 3rem; border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, .18); backdrop-filter: blur(6px);
+    font-size: 1.6rem;
+}
+.auth-brand-name { font-size: 1.35rem; font-weight: 800; letter-spacing: .14em; }
+.auth-hero-body { position: relative; z-index: 1; }
+.auth-hero-title { font-size: 2.1rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+.auth-hero-sub { font-size: 1.02rem; opacity: .85; max-width: 30rem; margin-bottom: 2rem; }
+.auth-features { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .9rem; }
+.auth-features li { display: flex; align-items: center; gap: .75rem; font-weight: 500; opacity: .95; }
+.auth-features .ti {
+    width: 2rem; height: 2rem; flex: 0 0 auto;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, .15); border-radius: 9px; font-size: 1.1rem;
+}
+.auth-foot { position: relative; z-index: 1; font-size: .82rem; opacity: .7; }
+
+/* Panneau formulaire (droite) */
+.auth-form-side {
+    display: flex; align-items: center; justify-content: center;
+    padding: 2.5rem 1.5rem; background: var(--bc-body);
+}
+.auth-card { width: 100%; max-width: 410px; }
+.auth-card-head { margin-bottom: 1.75rem; }
+.auth-card-head h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: .35rem; }
+.auth-card-head p { color: var(--bc-muted); margin: 0; }
+.auth-mobile-brand {
+    display: none; align-items: center; gap: .6rem; margin-bottom: 1.5rem;
+    font-weight: 800; letter-spacing: .12em; color: var(--bc-primary);
+}
+.auth-mobile-brand .auth-brand-logo { background: var(--bc-grad); color: #fff; width: 2.6rem; height: 2.6rem; font-size: 1.3rem; }
+@media (max-width: 900px) { .auth-mobile-brand { display: inline-flex; } }
+.auth-field { position: relative; margin-bottom: 1.1rem; }
+.auth-field > .ti {
+    position: absolute; left: 1rem; top: 2.45rem;
+    color: var(--bc-muted); font-size: 1.15rem; pointer-events: none;
+}
+.auth-field .form-control { padding-left: 2.7rem; height: 3rem; border-radius: 12px; }

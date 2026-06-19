@@ -56,10 +56,12 @@
                     </select>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">
-                <i class="ti ti-device-floppy me-1"></i> Enregistrer
-            </button>
-            <a href="@Url.Action("Utilisateurs")" class="btn btn-outline-secondary ms-2">Annuler</a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn-gradient">
+                    <i class="ti ti-device-floppy me-1"></i> Enregistrer
+                </button>
+                <a href="@Url.Action("Utilisateurs")" class="btn btn-outline-secondary">Annuler</a>
+            </div>
         </form>
     </div>
 </div>

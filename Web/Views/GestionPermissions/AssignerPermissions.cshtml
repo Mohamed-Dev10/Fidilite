@@ -4,6 +4,7 @@
     var allPermissions = ViewBag.AllPermissions as List<BRICOMA.ECOMMERCE.Data.ApplicationUser.Permission> ?? new();
     var assignedIds = ViewBag.AssignedIds as List<int> ?? new();
     var categories = allPermissions.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
+    var palette = new[] { "indigo", "purple", "blue", "orange", "red", "green", "teal", "pink", "cyan", "yellow" };
 }
 
 <div class="page-header mb-3">
@@ -24,14 +25,19 @@
     @Html.AntiForgeryToken()
 
     <div class="row">
-        @foreach (var category in categories)
+        @for (int ci = 0; ci < categories.Count; ci++)
         {
+            var category = categories[ci];
+            var color = palette[ci % palette.Length];
+            var count = allPermissions.Count(p => p.Category == category);
             <div class="col-md-4 mb-3">
-                <div class="card">
+                <div class="card h-100">
                     <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="ti ti-category me-1"></i> @category
-                        </h3>
+                        <span class="avatar ic-@color me-2" style="width:2.2rem;height:2.2rem;font-size:1rem;"><i class="ti ti-category"></i></span>
+                        <div>
+                            <h3 class="card-title">@category</h3>
+                            <div class="text-muted small">@count permission(s)</div>
+                        </div>
                     </div>
                     <div class="card-body">
                         @foreach (var perm in allPermissions.Where(p => p.Category == category))
@@ -54,10 +60,10 @@
         }
     </div>
 
-    <div class="mt-2">
-        <button type="submit" class="btn btn-primary">
+    <div class="mt-2 d-flex gap-2">
+        <button type="submit" class="btn-gradient">
             <i class="ti ti-device-floppy me-1"></i> Enregistrer
         </button>
-        <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Annuler</a>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Annuler</a>
     </div>
 </form>

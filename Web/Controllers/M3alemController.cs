@@ -24,8 +24,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 Search = search,
                 StatutId = statutId,
                 MagasinId = magasinId,
-                Page = page,
-                PageSize = 20
+                Page = 1,
+                PageSize = 5000
             };
 
             var result = await _clienteBOService.GetList(filter);

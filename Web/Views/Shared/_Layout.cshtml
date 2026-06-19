@@ -57,30 +57,30 @@
                 </a>
             </div>
             <div class="sidebar-wrapper">
-                <nav class="mt-2">
+                <nav class="mt-2 flex-grow-1">
                     <ul class="nav sidebar-menu flex-column" role="menu">
                         <li class="nav-item">
-                            <a asp-controller="Home" asp-action="Index" class="nav-link @Active("Home")">
-                                <i class="nav-icon ti ti-home"></i>
+                            <a asp-controller="Home" asp-action="Index" class="nav-link si-indigo @Active("Home")">
+                                <i class="nav-icon ti ti-layout-dashboard"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
 
                         <li class="nav-header">Cartes Fidélité</li>
                         <li class="nav-item">
-                            <a asp-controller="Carte" asp-action="Creer" class="nav-link @Active("Carte")">
+                            <a asp-controller="Carte" asp-action="Creer" class="nav-link si-green @Active("Carte")">
                                 <i class="nav-icon ti ti-plus"></i>
                                 <p>Nouvelle carte</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a asp-controller="M3alem" asp-action="Index" class="nav-link @Active("M3alem")">
+                            <a asp-controller="M3alem" asp-action="Index" class="nav-link si-blue @Active("M3alem")">
                                 <i class="nav-icon ti ti-id-badge"></i>
                                 <p>Cartes M3alem</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a asp-controller="Artisan" asp-action="Index" class="nav-link @Active("Artisan")">
+                            <a asp-controller="Artisan" asp-action="Index" class="nav-link si-orange @Active("Artisan")">
                                 <i class="nav-icon ti ti-tool"></i>
                                 <p>Cartes Artisan</p>
                             </a>
@@ -88,19 +88,39 @@
 
                         <li class="nav-header">Configuration</li>
                         <li class="nav-item">
-                            <a asp-controller="Parametrage" asp-action="Index" class="nav-link @Active("Parametrage")">
+                            <a asp-controller="Parametrage" asp-action="Index" class="nav-link si-teal @Active("Parametrage")">
                                 <i class="nav-icon ti ti-settings"></i>
                                 <p>Paramétrage</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a asp-controller="GestionPermissions" asp-action="Index" class="nav-link @Active("GestionPermissions")">
+                            <a asp-controller="GestionPermissions" asp-action="Index" class="nav-link si-purple @Active("GestionPermissions")">
                                 <i class="nav-icon ti ti-shield-lock"></i>
                                 <p>Gestion de permissions</p>
                             </a>
                         </li>
                     </ul>
                 </nav>
+
+                @{
+                    var userName = User.Identity?.Name ?? "Utilisateur";
+                    var initials = string.Concat(userName.Split(new[] { ' ', '.', '@' }, StringSplitOptions.RemoveEmptyEntries)
+                                        .Take(2).Select(p => char.ToUpper(p[0])));
+                    if (string.IsNullOrEmpty(initials)) { initials = "U"; }
+                }
+                <div class="sidebar-profile">
+                    <span class="sp-avatar">@initials</span>
+                    <div class="overflow-hidden">
+                        <div class="sp-name text-truncate">@userName</div>
+                        <div class="sp-role">BRICOMA</div>
+                    </div>
+                    <form method="post" asp-controller="Account" asp-action="Logout" class="ms-auto d-flex">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="sp-logout" title="Déconnexion">
+                            <i class="ti ti-logout fs-5"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </aside>
 

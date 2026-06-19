@@ -28,7 +28,7 @@
                         <label class="form-label">Description</label>
                         <input type="text" name="description" class="form-control" placeholder="Description optionnelle" />
                     </div>
-                    <button type="submit" class="btn btn-primary w-100">
+                    <button type="submit" class="btn-gradient w-100">
                         <i class="ti ti-plus me-1"></i> Créer le rôle
                     </button>
                 </form>
@@ -59,23 +59,30 @@
                             foreach (var role in Model)
                             {
                                 <tr>
-                                    <td class="fw-bold">@role.Name</td>
-                                    <td class="text-muted">@(role.Description ?? "-")</td>
                                     <td>
-                                        <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn btn-sm btn-outline-primary me-1">
-                                            <i class="ti ti-shield-check me-1"></i> Permissions
-                                        </a>
-                                        <a href="@Url.Action("Utilisateurs")" class="btn btn-sm btn-outline-secondary me-1">
-                                            <i class="ti ti-users me-1"></i> Utilisateurs
-                                        </a>
-                                        <form method="post" asp-action="DeleteRole" style="display:inline">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@role.Id" />
-                                            <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                    onclick="return confirm('Supprimer ce rôle ?')">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
-                                        </form>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="avatar ic-purple" style="width:2.2rem;height:2.2rem;font-size:1rem;"><i class="ti ti-shield-lock"></i></span>
+                                            <span class="fw-bold">@role.Name</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">@(string.IsNullOrEmpty(role.Description) ? "-" : role.Description)</td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn-soft btn-soft-indigo">
+                                                <i class="ti ti-shield-check"></i> Permissions
+                                            </a>
+                                            <a href="@Url.Action("Utilisateurs")" class="btn-soft btn-soft-gray">
+                                                <i class="ti ti-users"></i> Utilisateurs
+                                            </a>
+                                            <form method="post" asp-action="DeleteRole" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@role.Id" />
+                                                <button type="submit" class="btn-soft btn-soft-red"
+                                                        onclick="return confirm('Supprimer ce rôle ?')">
+                                                    <i class="ti ti-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             }

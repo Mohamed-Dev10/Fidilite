@@ -12,7 +12,7 @@
                 <div class="text-muted mt-1">Gestion des cartes fidélité M3alem</div>
             </div>
             <div class="col-auto ms-auto d-print-none">
-                <a asp-controller="Carte" asp-action="Creer" asp-route-carteTypeId="2" class="btn btn-primary">
+                <a asp-controller="Carte" asp-action="Creer" asp-route-carteTypeId="2" class="btn-gradient">
                     <i class="ti ti-plus me-1"></i> Nouvelle carte M3alem
                 </a>
             </div>
@@ -32,40 +32,31 @@
             </div>
         }
 
-        <!-- Filtres -->
+        <!-- Filtres temps réel -->
         <div class="card mb-3">
             <div class="card-body">
-                <form method="get">
-                    <div class="row g-2 align-items-end">
-                        <div class="col">
-                            <label class="form-label">Recherche</label>
-                            <input type="text" name="search" class="form-control"
-                                   placeholder="Nom, Prénom, GSM, CIN..."
-                                   value="@filter?.Search" />
-                        </div>
-                        <div class="col-auto">
-                            <label class="form-label">Statut</label>
-                            <select id="statutFilter" name="statutId" class="form-select">
-                                <option value="">Tous</option>
-                                <option value="1">Créé</option>
-                                <option value="2">Confirmé</option>
-                                <option value="3">Clôturé</option>
-                            </select>
-                            <script>document.getElementById('statutFilter').value = '@(filter?.StatutId?.ToString() ?? "")';</script>
-                        </div>
-                        <div class="col-auto">
-                            <label class="form-label">&nbsp;</label>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="ti ti-search me-1"></i> Rechercher
-                                </button>
-                                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
-                                    <i class="ti ti-x me-1"></i> Réinitialiser
-                                </a>
-                            </div>
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <div class="search-pill">
+                            <i class="ti ti-search"></i>
+                            <input type="text" id="searchInput" class="form-control"
+                                   placeholder="Rechercher nom, prénom, GSM, CIN, magasin..." autocomplete="off" />
                         </div>
                     </div>
-                </form>
+                    <div class="col-auto">
+                        <select id="statutFilter" class="form-select" style="border-radius:12px;">
+                            <option value="">Tous les statuts</option>
+                            <option value="1">Créé</option>
+                            <option value="2">Confirmé</option>
+                            <option value="3">Clôturé</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" id="resetBtn" class="btn-soft btn-soft-gray">
+                            <i class="ti ti-x"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -74,7 +65,7 @@
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="ti ti-id-badge me-2 text-primary"></i>
-                    Total : <strong>@Model.TotalCount</strong> carte(s)
+                    Total : <strong id="totalCount">@Model.TotalCount</strong> carte(s)
                 </h3>
             </div>
             <div class="table-responsive">
@@ -91,51 +82,61 @@
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @if (!Model.Items.Any())
-                        {
-                            <tr>
-                                <td colspan="8" class="text-center text-muted py-5">
-                                    <i class="ti ti-database-off fs-1 d-block mb-2"></i>
-                                    Aucune carte M3alem trouvée
-                                </td>
-                            </tr>
-                        }
+                    <tbody id="listBody">
+                        <tr id="emptyRow" style="display:none;">
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="ti ti-database-off fs-1 d-block mb-2"></i>
+                                Aucune carte M3alem trouvée
+                            </td>
+                        </tr>
                         @foreach (var item in Model.Items)
                         {
-                            string badgeClass, statutLabel;
+                            string chipClass, statutIcon, statutLabel;
                             switch (item.RefClienteStatutId)
                             {
-                                case 2: badgeClass = "bg-success"; statutLabel = "Confirmé"; break;
-                                case 3: badgeClass = "bg-secondary"; statutLabel = "Clôturé"; break;
-                                default: badgeClass = "bg-warning text-dark"; statutLabel = "Créé"; break;
+                                case 2: chipClass = "chip-green"; statutIcon = "ti-circle-check"; statutLabel = "Confirmé"; break;
+                                case 3: chipClass = "chip-gray"; statutIcon = "ti-lock"; statutLabel = "Clôturé"; break;
+                                default: chipClass = "chip-yellow"; statutIcon = "ti-clock-hour-4"; statutLabel = "Créé"; break;
                             }
-                            <tr>
+                            var initials = string.Concat(($"{item.Nom} {item.Prenom}").Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+                            var searchData = $"{item.Nom} {item.Prenom} {item.Gsm} {item.Cin} {item.Email} {item.RefMagasin?.Name}".ToLowerInvariant();
+                            <tr class="data-row" data-search="@searchData" data-statut="@item.RefClienteStatutId">
                                 <td>
-                                    <div class="fw-bold">@item.Nom @item.Prenom</div>
-                                    @if (!string.IsNullOrEmpty(item.Email))
-                                    {
-                                        <div class="text-muted small">@item.Email</div>
-                                    }
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.8rem;">@(string.IsNullOrEmpty(initials) ? "?" : initials)</span>
+                                        <div>
+                                            <div class="fw-bold">@item.Nom @item.Prenom</div>
+                                            @if (!string.IsNullOrEmpty(item.Email))
+                                            {
+                                                <div class="text-muted small">@item.Email</div>
+                                            }
+                                        </div>
+                                    </div>
                                 </td>
-                                <td>@item.Gsm</td>
+                                <td>@(string.IsNullOrEmpty(item.Gsm) ? "-" : item.Gsm)</td>
                                 <td>@(string.IsNullOrEmpty(item.Cin) ? "-" : item.Cin)</td>
-                                <td>@(item.RefMagasin?.Name ?? "-")</td>
-                                <td><span class="badge @badgeClass">@statutLabel</span></td>
-                                <td>@item.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.RefMagasin?.Name != null)
+                                    {
+                                        <span class="chip chip-blue"><i class="ti ti-building-store"></i> @item.RefMagasin.Name</span>
+                                    }
+                                    else { <span class="text-muted">-</span> }
+                                </td>
+                                <td><span class="chip @chipClass"><i class="ti @statutIcon"></i> @statutLabel</span></td>
+                                <td class="text-muted">@item.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
                                 <td>
                                     @if (item.IsConfirmed == true)
                                     {
-                                        <span class="badge bg-success-lt"><i class="ti ti-check"></i> Oui</span>
+                                        <span class="chip chip-green"><i class="ti ti-check"></i> Oui</span>
                                     }
                                     else
                                     {
-                                        <span class="badge bg-warning-lt"><i class="ti ti-clock"></i> Non</span>
+                                        <span class="chip chip-yellow"><i class="ti ti-clock"></i> Non</span>
                                     }
                                 </td>
                                 <td class="text-end">
-                                    <a asp-controller="Carte" asp-action="Detail" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary" title="Voir détail">
-                                        <i class="ti ti-eye"></i>
+                                    <a asp-controller="Carte" asp-action="Detail" asp-route-id="@item.Id" class="btn-soft btn-soft-blue" title="Voir détail">
+                                        <i class="ti ti-eye"></i> Voir
                                     </a>
                                 </td>
                             </tr>
@@ -144,39 +145,15 @@
                 </table>
             </div>
 
-            @if (Model.TotalPages > 1)
-            {
-                <div class="card-footer d-flex align-items-center">
-                    <p class="m-0 text-muted">
-                        Page <strong>@Model.Page</strong> sur <strong>@Model.TotalPages</strong>
-                        &nbsp;–&nbsp; @Model.TotalCount résultat(s)
-                    </p>
-                    <ul class="pagination m-0 ms-auto">
-                        @if (Model.HasPrevious)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="?page=@(Model.Page - 1)&search=@filter?.Search&statutId=@filter?.StatutId">
-                                    <i class="ti ti-chevron-left"></i>
-                                </a>
-                            </li>
-                        }
-                        @for (int i = Math.Max(1, Model.Page - 2); i <= Math.Min(Model.TotalPages, Model.Page + 2); i++)
-                        {
-                            <li class="page-item @(i == Model.Page ? "active" : "")">
-                                <a class="page-link" href="?page=@i&search=@filter?.Search&statutId=@filter?.StatutId">@i</a>
-                            </li>
-                        }
-                        @if (Model.HasNext)
-                        {
-                            <li class="page-item">
-                                <a class="page-link" href="?page=@(Model.Page + 1)&search=@filter?.Search&statutId=@filter?.StatutId">
-                                    <i class="ti ti-chevron-right"></i>
-                                </a>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            }
+            <div class="card-footer d-flex align-items-center">
+                <p class="m-0 text-muted small" id="pageInfo"></p>
+                <div class="pager ms-auto" id="pager"></div>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/list-filter.js"></script>
+    <script>bricoListFilter({ perPage: 6, label: "carte(s)" });</script>
+}

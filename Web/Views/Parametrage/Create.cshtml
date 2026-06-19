@@ -28,10 +28,12 @@
                 <label class="form-label">Nom du type <span class="text-danger">*</span></label>
                 <input type="text" name="name" class="form-control" placeholder="Ex: Carte Gold" required />
             </div>
-            <button type="submit" class="btn btn-primary">
-                <i class="ti ti-plus me-1"></i> Créer
-            </button>
-            <a href="@Url.Action("Index")" class="btn btn-outline-secondary ms-2">Annuler</a>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn-gradient">
+                    <i class="ti ti-plus me-1"></i> Créer
+                </button>
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Annuler</a>
+            </div>
         </form>
     </div>
 </div>

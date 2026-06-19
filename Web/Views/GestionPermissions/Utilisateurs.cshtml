@@ -9,7 +9,7 @@
             <h2 class="page-title">Utilisateurs back-office</h2>
         </div>
         <div class="col-auto">
-            <a href="@Url.Action("CreateUser")" class="btn btn-primary">
+            <a href="@Url.Action("CreateUser")" class="btn-gradient">
                 <i class="ti ti-plus me-1"></i> Nouvel utilisateur
             </a>
         </div>
@@ -36,13 +36,18 @@
                     foreach (var (user, role) in userWithRoles)
                     {
                         <tr>
-                            <td>@user.Email</td>
                             <td>
-                                <span class="badge bg-blue-lt">@role</span>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.85rem;"><i class="ti ti-user"></i></span>
+                                    <span class="fw-medium">@user.Email</span>
+                                </div>
                             </td>
                             <td>
-                                <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn btn-sm btn-outline-secondary">
-                                    <i class="ti ti-edit me-1"></i> Modifier
+                                <span class="chip chip-indigo"><i class="ti ti-shield-lock"></i> @role</span>
+                            </td>
+                            <td>
+                                <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn-soft btn-soft-indigo">
+                                    <i class="ti ti-edit"></i> Modifier
                                 </a>
                             </td>
                         </tr>

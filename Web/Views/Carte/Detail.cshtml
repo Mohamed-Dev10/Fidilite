@@ -2,12 +2,12 @@
 @{
     ViewData["Title"] = "Détail de la carte";
 
-    string badgeClass, statutLabel;
+    string chipClass, statutIcon, statutLabel;
     switch (Model.RefClienteStatutId)
     {
-        case 2: badgeClass = "bg-success"; statutLabel = "Confirmé"; break;
-        case 3: badgeClass = "bg-secondary"; statutLabel = "Clôturé"; break;
-        default: badgeClass = "bg-warning text-dark"; statutLabel = "Créé"; break;
+        case 2: chipClass = "chip-green"; statutIcon = "ti-circle-check"; statutLabel = "Confirmé"; break;
+        case 3: chipClass = "chip-gray"; statutIcon = "ti-lock"; statutLabel = "Clôturé"; break;
+        default: chipClass = "chip-yellow"; statutIcon = "ti-clock-hour-4"; statutLabel = "Créé"; break;
     }
     var actif = Model.IsActif != false;
 }
@@ -19,14 +19,14 @@
                 <h2 class="page-title">@Model.Nom @Model.Prenom</h2>
                 <div class="text-muted mt-1">
                     Code : <strong>@Model.Code</strong>
-                    <span class="badge @badgeClass ms-2">@statutLabel</span>
+                    <span class="chip @chipClass ms-2"><i class="ti @statutIcon"></i> @statutLabel</span>
                     @if (actif)
                     {
-                        <span class="badge bg-success-lt ms-1"><i class="ti ti-check"></i> Active</span>
+                        <span class="chip chip-green ms-1"><i class="ti ti-check"></i> Active</span>
                     }
                     else
                     {
-                        <span class="badge bg-danger-lt ms-1"><i class="ti ti-lock"></i> Bloquée</span>
+                        <span class="chip chip-red ms-1"><i class="ti ti-lock"></i> Bloquée</span>
                     }
                 </div>
             </div>
@@ -34,7 +34,7 @@
                 <a href="javascript:history.back()" class="btn btn-outline-secondary me-1">
                     <i class="ti ti-arrow-left me-1"></i> Retour
                 </a>
-                <a asp-action="Modifier" asp-route-id="@Model.Id" class="btn btn-primary">
+                <a asp-action="Modifier" asp-route-id="@Model.Id" class="btn-gradient">
                     <i class="ti ti-edit me-1"></i> Modifier
                 </a>
             </div>

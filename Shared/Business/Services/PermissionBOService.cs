@@ -278,6 +278,8 @@ namespace BRICOMA.ECOMMERCE.Business.Services
 
                 await _userManager.SetLockoutEnabledAsync(user, true);
                 await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+                // Invalide la session active du compte (déconnexion auto s'il est déjà connecté)
+                await _userManager.UpdateSecurityStampAsync(user);
                 _logger.LogInformation("Compte suspendu : {Id}", id);
                 return new RESTServiceResponse<bool>(true, "Compte suspendu.", true);
             }

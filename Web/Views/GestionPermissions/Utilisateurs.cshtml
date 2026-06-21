@@ -106,6 +106,7 @@
                                         <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn-soft btn-soft-indigo">
                                             <i class="ti ti-edit"></i> Modifier
                                         </a>
+                                        @* Bouton Suspendre/Activer désactivé pour l'instant — décommenter pour le réactiver
                                         <form method="post" asp-action="ToggleUserSuspension" class="d-inline">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@user.Id" />
@@ -126,6 +127,7 @@
                                                 </button>
                                             }
                                         </form>
+                                        *@
                                         <form method="post" asp-action="DeleteUser" class="d-inline">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@user.Id" />

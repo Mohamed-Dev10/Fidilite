@@ -39,6 +39,12 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
+            if (result.IsLockedOut)
+            {
+                ModelState.AddModelError(string.Empty, "Ce compte est suspendu. Contactez l'administrateur.");
+                return View(model);
+            }
+
             ModelState.AddModelError(string.Empty, "Email ou mot de passe incorrect.");
             return View(model);
         }

@@ -39,8 +39,9 @@
 
             @if (!ViewData.ModelState.IsValid)
             {
-                <div class="alert alert-danger">
-                    @Html.ValidationSummary(false)
+                <div class="alert-modern alert-modern-danger" role="alert">
+                    <span class="am-ic"><i class="ti ti-alert-triangle"></i></span>
+                    <div class="am-body">@Html.ValidationSummary(false)</div>
                 </div>
             }
 

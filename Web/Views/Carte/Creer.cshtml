@@ -13,33 +13,12 @@
                 <h2 class="page-title mb-0">Nouvelle carte fidélité</h2>
                 <div class="text-muted mt-1">Inscription d'un nouveau client</div>
             </div>
-            <a href="javascript:history.back()" class="btn-soft btn-soft-gray ms-auto">
-                <i class="ti ti-arrow-left"></i> Retour
-            </a>
         </div>
     </div>
 </div>
 
 <div class="page-body">
     <div class="container-xl">
-
-        @if (ViewData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible" role="alert">
-                <i class="ti ti-alert-circle me-2"></i>
-                @ViewData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
-
-        @if (ViewData["Success"] != null || TempData["Success"] != null)
-        {
-            <div class="alert alert-success alert-dismissible" role="alert">
-                <i class="ti ti-circle-check me-2"></i>
-                @(ViewData["Success"] ?? TempData["Success"])
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
 
         @if (TempData["CarteImageUrl"] != null)
         {

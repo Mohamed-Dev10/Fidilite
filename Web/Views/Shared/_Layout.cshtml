@@ -1,6 +1,10 @@
 @{
     var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+    var act = ViewContext.RouteData.Values["action"]?.ToString();
     string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+    string ActiveAction(string c, params string[] actions) =>
+        string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase)
+        && actions.Any(a => string.Equals(act, a, StringComparison.OrdinalIgnoreCase)) ? "active" : "";
 }
 <!DOCTYPE html>
 <html lang="fr">
@@ -88,13 +92,19 @@
 
                         <li class="nav-header">Configuration</li>
                         <li class="nav-item">
+                            <a asp-controller="GestionPermissions" asp-action="Utilisateurs" class="nav-link si-blue @ActiveAction("GestionPermissions", "Utilisateurs", "CreateUser", "EditUser")">
+                                <i class="nav-icon ti ti-users"></i>
+                                <p>Utilisateurs</p>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a asp-controller="Parametrage" asp-action="Index" class="nav-link si-teal @Active("Parametrage")">
                                 <i class="nav-icon ti ti-settings"></i>
                                 <p>Paramétrage</p>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a asp-controller="GestionPermissions" asp-action="Index" class="nav-link si-purple @Active("GestionPermissions")">
+                            <a asp-controller="GestionPermissions" asp-action="Index" class="nav-link si-purple @ActiveAction("GestionPermissions", "Index", "AssignerPermissions")">
                                 <i class="nav-icon ti ti-shield-lock"></i>
                                 <p>Gestion de permissions</p>
                             </a>
@@ -141,6 +151,8 @@
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/adminlte/js/adminlte.min.js"></script>
+    <script src="~/js/app-popup.js"></script>
+    <partial name="_Toasts" />
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

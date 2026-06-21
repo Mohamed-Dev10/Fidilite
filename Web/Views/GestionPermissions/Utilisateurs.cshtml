@@ -1,59 +1,157 @@
 @{
     ViewData["Title"] = "Utilisateurs";
     var userWithRoles = ViewBag.UserWithRoles as List<(BRICOMA.ECOMMERCE.Data.ApplicationUser.ApplicationUser User, string Role)> ?? new();
+    var roles = userWithRoles.Select(x => x.Role).Where(r => !string.IsNullOrEmpty(r) && r != "-").Distinct().OrderBy(r => r).ToList();
 }
 
-<div class="page-header mb-3">
-    <div class="row align-items-center">
-        <div class="col">
-            <h2 class="page-title">Utilisateurs back-office</h2>
-        </div>
-        <div class="col-auto">
-            <a href="@Url.Action("CreateUser")" class="btn-gradient">
-                <i class="ti ti-plus me-1"></i> Nouvel utilisateur
-            </a>
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">Utilisateurs back-office</h2>
+                <div class="text-muted mt-1">Comptes et rôles d'accès</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a href="@Url.Action("CreateUser")" class="btn-gradient">
+                    <i class="ti ti-plus me-1"></i> Nouvel utilisateur
+                </a>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="table-responsive">
-        <table class="table table-vcenter table-hover card-table">
-            <thead>
-                <tr>
-                    <th>Email</th>
-                    <th>Rôle</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (!userWithRoles.Any())
-                {
-                    <tr><td colspan="3" class="text-center text-muted py-4">Aucun utilisateur</td></tr>
-                }
-                else
-                {
-                    foreach (var (user, role) in userWithRoles)
-                    {
+<div class="page-body">
+    <div class="container-xl">
+
+        <!-- Filtres temps réel -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <div class="search-pill">
+                            <i class="ti ti-search"></i>
+                            <input type="text" id="searchInput" class="form-control"
+                                   placeholder="Rechercher un email, un rôle..." autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <select id="statutFilter" class="form-select" style="border-radius:12px;">
+                            <option value="">Tous les rôles</option>
+                            @foreach (var r in roles)
+                            {
+                                <option value="@r">@r</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" id="resetBtn" class="btn-soft btn-soft-gray">
+                            <i class="ti ti-x"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-users me-2 text-primary"></i>
+                    Total : <strong id="totalCount">@userWithRoles.Count</strong> utilisateur(s)
+                </h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-hover">
+                    <thead>
                         <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.85rem;"><i class="ti ti-user"></i></span>
-                                    <span class="fw-medium">@user.Email</span>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="chip chip-indigo"><i class="ti ti-shield-lock"></i> @role</span>
-                            </td>
-                            <td>
-                                <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn-soft btn-soft-indigo">
-                                    <i class="ti ti-edit"></i> Modifier
-                                </a>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listBody">
+                        <tr id="emptyRow" style="display:none;">
+                            <td colspan="4" class="text-center text-muted py-5">
+                                <i class="ti ti-user-off fs-1 d-block mb-2"></i>
+                                Aucun utilisateur trouvé
                             </td>
                         </tr>
-                    }
-                }
-            </tbody>
-        </table>
+                        @foreach (var (user, role) in userWithRoles)
+                        {
+                            var suspended = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
+                            var searchData = $"{user.Email} {role}".ToLowerInvariant();
+                            <tr class="data-row" data-search="@searchData" data-statut="@role">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.85rem;"><i class="ti ti-user"></i></span>
+                                        <span class="fw-medium">@user.Email</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="chip chip-indigo"><i class="ti ti-shield-lock"></i> @role</span>
+                                </td>
+                                <td>
+                                    @if (suspended)
+                                    {
+                                        <span class="chip chip-red"><i class="ti ti-ban"></i> Suspendu</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="chip chip-green"><i class="ti ti-circle-check"></i> Actif</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn-soft btn-soft-indigo">
+                                            <i class="ti ti-edit"></i> Modifier
+                                        </a>
+                                        <form method="post" asp-action="ToggleUserSuspension" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            @if (suspended)
+                                            {
+                                                <button type="submit" class="btn-soft btn-soft-green"
+                                                        title="Réactiver le compte"
+                                                        onclick="return confirm('Réactiver ce compte ?')">
+                                                    <i class="ti ti-player-play"></i> Activer
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn-soft btn-soft-orange"
+                                                        title="Suspendre le compte"
+                                                        onclick="return confirm('Suspendre ce compte ?')">
+                                                    <i class="ti ti-ban"></i> Suspendre
+                                                </button>
+                                            }
+                                        </form>
+                                        <form method="post" asp-action="DeleteUser" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button type="submit" class="btn-soft btn-soft-red"
+                                                    title="Supprimer"
+                                                    onclick="return confirm('Supprimer définitivement cet utilisateur ?')">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer d-flex align-items-center">
+                <p class="m-0 text-muted small" id="pageInfo"></p>
+                <div class="pager ms-auto" id="pager"></div>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/list-filter.js"></script>
+    <script>bricoListFilter({ perPage: 7, label: "utilisateur(s)" });</script>
+}

@@ -1,0 +1,25 @@
+@{
+    var msgs = new List<(string Type, string Message)>();
+    void Push(string type, object? val)
+    {
+        var s = val?.ToString();
+        if (!string.IsNullOrWhiteSpace(s)) msgs.Add((type, s));
+    }
+
+    Push("success", ViewData["Success"]);
+    Push("success", TempData["Success"]);
+    Push("danger",  ViewData["Error"]);
+    Push("danger",  TempData["Error"]);
+    Push("info",    ViewData["Info"]);
+    Push("info",    TempData["Info"]);
+}
+
+@if (msgs.Count > 0)
+{
+    <script>
+        window.__bricoToasts = (window.__bricoToasts || []).concat([
+            @Html.Raw(string.Join(",\n            ", msgs.Select(m =>
+                $"{{ type: '{m.Type}', message: {System.Text.Json.JsonSerializer.Serialize(m.Message)} }}")))
+        ]);
+    </script>
+}

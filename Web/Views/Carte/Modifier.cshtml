@@ -10,26 +10,12 @@
                 <h2 class="page-title">Modifier la carte</h2>
                 <div class="text-muted mt-1">@Model.Code</div>
             </div>
-            <div class="col-auto ms-auto d-print-none">
-                <a asp-action="Detail" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
-                    <i class="ti ti-arrow-left me-1"></i> Retour
-                </a>
-            </div>
         </div>
     </div>
 </div>
 
 <div class="page-body">
     <div class="container-xl">
-
-        @if (ViewData["Error"] != null)
-        {
-            <div class="alert alert-danger alert-dismissible" role="alert">
-                <i class="ti ti-alert-circle me-2"></i>
-                @ViewData["Error"]
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        }
 
         <form asp-controller="Carte" asp-action="Modifier" method="post">
             @Html.AntiForgeryToken()

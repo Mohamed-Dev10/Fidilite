@@ -9,11 +9,6 @@
 
 <div class="page-header mb-3">
     <div class="row align-items-center">
-        <div class="col-auto">
-            <a href="@Url.Action("Index")" class="btn btn-outline-secondary btn-sm">
-                <i class="ti ti-arrow-left me-1"></i> Retour
-            </a>
-        </div>
         <div class="col">
             <h2 class="page-title">Permissions — @Model.Name</h2>
             <div class="text-muted">@(Model.Description ?? "")</div>
@@ -31,7 +26,7 @@
             var color = palette[ci % palette.Length];
             var count = allPermissions.Count(p => p.Category == category);
             <div class="col-md-4 mb-3">
-                <div class="card h-100">
+                <div class="card h-100 cat-card cat-@color">
                     <div class="card-header">
                         <span class="avatar ic-@color me-2" style="width:2.2rem;height:2.2rem;font-size:1rem;"><i class="ti ti-category"></i></span>
                         <div>
@@ -42,17 +37,18 @@
                     <div class="card-body">
                         @foreach (var perm in allPermissions.Where(p => p.Category == category))
                         {
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" type="checkbox"
+                            <label class="perm-card" for="perm_@perm.Id">
+                                <input class="perm-input" type="checkbox"
                                        name="permissionIds"
                                        value="@perm.Id"
                                        id="perm_@perm.Id"
                                        @(assignedIds.Contains(perm.Id) ? "checked" : "") />
-                                <label class="form-check-label" for="perm_@perm.Id">
-                                    <span class="fw-medium">@perm.Label</span>
-                                    <br /><small class="text-muted">@perm.Code</small>
-                                </label>
-                            </div>
+                                <span class="perm-check"><i class="ti ti-check"></i></span>
+                                <span class="perm-body">
+                                    <span class="perm-label">@perm.Label</span>
+                                    <span class="perm-code">@perm.Code</span>
+                                </span>
+                            </label>
                         }
                     </div>
                 </div>

@@ -148,7 +148,10 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var metiers  = await _clienteBOService.GetAllMetiers();
             var villes   = await _clienteBOService.GetAllVilles();
 
-            ViewBag.CarteTypes = new SelectList(types.Data    ?? new List<RefCarteType>(), "Id", "Name");
+            // AMIBRICOMA (id 1) n'est plus proposé à la création dans le back-office
+            ViewBag.CarteTypes = new SelectList(
+                (types.Data ?? new List<RefCarteType>()).Where(t => t.Id != (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.AMIBRICOMA),
+                "Id", "Name");
             ViewBag.Magasins   = new SelectList(magasins.Data ?? new List<RefMagasin>(),   "Id", "Name");
             ViewBag.Genres     = new SelectList(genres.Data   ?? new List<RefGenre>(),     "Id", "Name");
             ViewBag.Metiers    = new SelectList(metiers.Data  ?? new List<RefMetier>(),    "Id", "Name");

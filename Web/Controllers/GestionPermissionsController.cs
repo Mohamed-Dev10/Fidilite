@@ -146,6 +146,46 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             return RedirectToAction(nameof(Utilisateurs));
         }
 
+        [Authorize(Policy = "admin.users")]
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(string id)
+        {
+            var currentId = _userManager.GetUserId(User);
+            if (currentId == id)
+            {
+                TempData["Error"] = "Vous ne pouvez pas supprimer votre propre compte.";
+                return RedirectToAction(nameof(Utilisateurs));
+            }
+
+            var result = await _permissionBOService.DeleteUser(id);
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
+
+            return RedirectToAction(nameof(Utilisateurs));
+        }
+
+        [Authorize(Policy = "admin.users")]
+        [HttpPost]
+        public async Task<IActionResult> ToggleUserSuspension(string id)
+        {
+            var currentId = _userManager.GetUserId(User);
+            if (currentId == id)
+            {
+                TempData["Error"] = "Vous ne pouvez pas suspendre votre propre compte.";
+                return RedirectToAction(nameof(Utilisateurs));
+            }
+
+            var result = await _permissionBOService.ToggleUserSuspension(id);
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
+
+            return RedirectToAction(nameof(Utilisateurs));
+        }
+
         private async Task LoadDropdowns()
         {
             var roles = await _permissionBOService.GetAllRoles();

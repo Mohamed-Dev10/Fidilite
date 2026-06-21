@@ -16,8 +16,6 @@ public partial class BRICOMAMARKETContext : DbContext
     {
     }
 
-    public virtual DbSet<AnniversairesAmibricoma> AnniversairesAmibricomas { get; set; }
-
     public virtual DbSet<BonsachatsFid> BonsachatsFids { get; set; }
 
     public virtual DbSet<Category> Categories { get; set; }
@@ -50,66 +48,6 @@ public partial class BRICOMAMARKETContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AnniversairesAmibricoma>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToTable("ANNIVERSAIRES_AMIBRICOMA");
-
-            entity.Property(e => e.Annee).HasColumnName("ANNEE");
-            entity.Property(e => e.CaNetHt)
-                .HasColumnType("decimal(38, 2)")
-                .HasColumnName("CA_NET_HT");
-            entity.Property(e => e.CaNetTtc)
-                .HasColumnType("decimal(38, 2)")
-                .HasColumnName("CA_NET_TTC");
-            entity.Property(e => e.Carte)
-                .HasMaxLength(9)
-                .IsUnicode(false)
-                .HasColumnName("CARTE");
-            entity.Property(e => e.Client)
-                .HasMaxLength(100)
-                .IsUnicode(false)
-                .HasColumnName("client");
-            entity.Property(e => e.CodeClt)
-                .IsRequired()
-                .HasMaxLength(7)
-                .IsUnicode(false)
-                .HasColumnName("code_clt");
-            entity.Property(e => e.Datecreat).HasColumnName("datecreat");
-            entity.Property(e => e.Datenaiss).HasColumnName("datenaiss");
-            entity.Property(e => e.Email)
-                .HasMaxLength(60)
-                .IsUnicode(false)
-                .HasColumnName("email");
-            entity.Property(e => e.JourAnniv)
-                .HasMaxLength(4000)
-                .HasColumnName("JOUR_ANNIV");
-            entity.Property(e => e.Magasin)
-                .HasMaxLength(40)
-                .IsUnicode(false)
-                .HasColumnName("MAGASIN");
-            entity.Property(e => e.Metier)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("metier");
-            entity.Property(e => e.MoisAnniv)
-                .HasMaxLength(30)
-                .HasColumnName("MOIS_ANNIV");
-            entity.Property(e => e.Tel)
-                .HasMaxLength(40)
-                .IsUnicode(false)
-                .HasColumnName("tel");
-            entity.Property(e => e.Telmob)
-                .HasMaxLength(20)
-                .IsUnicode(false)
-                .HasColumnName("telmob");
-            entity.Property(e => e.TypeClient)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("type_client");
-        });
-
         modelBuilder.Entity<BonsachatsFid>(entity =>
         {
             entity.HasKey(e => e.RefBon);

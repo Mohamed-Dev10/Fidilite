@@ -16,5 +16,7 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<List<ApplicationUser>>> GetAllUsers();
         Task<RESTServiceResponse<bool>> CreateUser(CreateUserModel model);
         Task<RESTServiceResponse<bool>> UpdateUser(UpdateUserModel model);
+        Task<RESTServiceResponse<bool>> DeleteUser(string id);
+        Task<RESTServiceResponse<bool>> ToggleUserSuspension(string id);
     }
 }

@@ -17,7 +17,11 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var result = await _clienteBOService.GetAllRefCarteTypes();
-            return View(result.Data);
+            // AMIBRICOMA (id 1) n'est pas géré dans le back-office
+            var data = result.Data?
+                .Where(t => t.Id != (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.AMIBRICOMA)
+                .ToList();
+            return View(data);
         }
 
         [Authorize(Policy = "parametrage.edit")]

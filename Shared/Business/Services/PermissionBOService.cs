@@ -236,5 +236,56 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 return new RESTServiceResponse<bool>(false, ex.Message, false);
             }
         }
+
+        public async Task<RESTServiceResponse<bool>> DeleteUser(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                    return new RESTServiceResponse<bool>(false, "Utilisateur introuvable.", false);
+
+                var result = await _userManager.DeleteAsync(user);
+                if (!result.Succeeded)
+                    return new RESTServiceResponse<bool>(false, string.Join(", ", result.Errors.Select(e => e.Description)), false);
+
+                _logger.LogInformation("Utilisateur supprimé : {Id}", id);
+                return new RESTServiceResponse<bool>(true, "Utilisateur supprimé.", true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur DeleteUser - Id: {Id}", id);
+                return new RESTServiceResponse<bool>(false, ex.Message, false);
+            }
+        }
+
+        public async Task<RESTServiceResponse<bool>> ToggleUserSuspension(string id)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(id);
+                if (user == null)
+                    return new RESTServiceResponse<bool>(false, "Utilisateur introuvable.", false);
+
+                var isSuspended = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
+
+                if (isSuspended)
+                {
+                    await _userManager.SetLockoutEndDateAsync(user, null);
+                    _logger.LogInformation("Compte réactivé : {Id}", id);
+                    return new RESTServiceResponse<bool>(true, "Compte réactivé.", true);
+                }
+
+                await _userManager.SetLockoutEnabledAsync(user, true);
+                await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+                _logger.LogInformation("Compte suspendu : {Id}", id);
+                return new RESTServiceResponse<bool>(true, "Compte suspendu.", true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur ToggleUserSuspension - Id: {Id}", id);
+                return new RESTServiceResponse<bool>(false, ex.Message, false);
+            }
+        }
     }
 }

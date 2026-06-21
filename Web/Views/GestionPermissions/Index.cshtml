@@ -15,7 +15,7 @@
 <div class="row">
     <!-- Créer un rôle -->
     <div class="col-md-4">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header"><h3 class="card-title">Nouveau rôle</h3></div>
             <div class="card-body">
                 <form method="post" asp-action="CreateRole">
@@ -26,7 +26,7 @@
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Description</label>
-                        <input type="text" name="description" class="form-control" placeholder="Description optionnelle" />
+                        <textarea name="description" class="form-control" rows="4" placeholder="Description optionnelle"></textarea>
                     </div>
                     <button type="submit" class="btn-gradient w-100">
                         <i class="ti ti-plus me-1"></i> Créer le rôle
@@ -38,7 +38,7 @@
 
     <!-- Liste des rôles -->
     <div class="col-md-8">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header"><h3 class="card-title">Rôles existants</h3></div>
             <div class="table-responsive">
                 <table class="table table-vcenter table-hover card-table">
@@ -70,9 +70,6 @@
                                         <div class="d-flex gap-2">
                                             <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn-soft btn-soft-indigo">
                                                 <i class="ti ti-shield-check"></i> Permissions
-                                            </a>
-                                            <a href="@Url.Action("Utilisateurs")" class="btn-soft btn-soft-gray">
-                                                <i class="ti ti-users"></i> Utilisateurs
                                             </a>
                                             <form method="post" asp-action="DeleteRole" class="d-inline">
                                                 @Html.AntiForgeryToken()

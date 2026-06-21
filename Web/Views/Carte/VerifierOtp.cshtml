@@ -25,24 +25,6 @@
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
 
-                @if (ViewData["Error"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible" role="alert">
-                        <i class="ti ti-alert-circle me-2"></i>
-                        @ViewData["Error"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
-                @if (ViewData["Success"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible" role="alert">
-                        <i class="ti ti-circle-check me-2"></i>
-                        @ViewData["Success"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-
                 <div class="card">
                     <div class="card-body text-center">
                         <div class="mb-3">

@@ -910,6 +910,19 @@ a.chip, a.chip:hover { text-decoration: none; }
 .bpop-btn:active { transform: translateY(0); }
 .bpop-btn:focus-visible { outline: none; box-shadow: 0 0 0 .25rem var(--pc-bg, rgba(var(--bc-primary-rgb), .3)); }
 
+/* Confirmation : 2 boutons (Annuler / Confirmer) */
+.bpop-actions { display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; }
+.bpop-actions .bpop-btn { min-width: 7.5rem; }
+.bpop-btn-cancel {
+    min-width: 7.5rem; padding: .7rem 1.4rem; border: 1px solid var(--bc-border); cursor: pointer;
+    border-radius: 12px; font-weight: 700; font-size: .95rem;
+    color: var(--bc-text); background: #fff;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+.bpop-btn-cancel:hover { background: var(--bc-body); transform: translateY(-1px); box-shadow: 0 8px 18px rgba(0, 0, 0, .08); }
+.bpop-btn-cancel:active { transform: translateY(0); }
+.bpop-btn-cancel:focus-visible { outline: none; box-shadow: 0 0 0 .25rem rgba(var(--bc-primary-rgb), .18); }
+
 /* Variantes couleur du popup */
 .bpop-success { --pc: var(--c-green); --pc-bg: rgba(var(--c-green-rgb), .14); --pc-sh: rgba(var(--c-green-rgb), .4); }
 .bpop-danger  { --pc: var(--c-red);   --pc-bg: rgba(var(--c-red-rgb), .12);   --pc-sh: rgba(var(--c-red-rgb), .4); }

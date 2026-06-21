@@ -1,6 +1,8 @@
 /* ============================================================
    BRICOMA — Popup modal centré (style SweetAlert), 100% maison
-   Usage : bricoPopup('success' | 'danger' | 'warning' | 'info', 'message', 'Titre optionnel')
+   Usage info    : bricoPopup('success' | 'danger' | 'warning' | 'info', 'message', 'Titre optionnel')
+   Usage confirm : bricoConfirm({ message, title, type, confirmText, cancelText, onConfirm })
+   Confirm auto  : <form data-confirm="Message ?" data-confirm-title="..." data-confirm-ok="Supprimer">
    ============================================================ */
 (function () {
     var ICONS = {
@@ -39,25 +41,41 @@
 
         var overlay = document.createElement('div');
         overlay.className = 'bpop-overlay';
+
+        var buttons = item.confirm
+            ? '<div class="bpop-actions">' +
+                  '<button type="button" class="bpop-btn-cancel">' + (item.cancelText || 'Annuler') + '</button>' +
+                  '<button type="button" class="bpop-btn">' + (item.confirmText || 'Confirmer') + '</button>' +
+              '</div>'
+            : '<button type="button" class="bpop-btn">OK</button>';
+
         overlay.innerHTML =
             '<div class="bpop bpop-' + type + '" role="alertdialog" aria-modal="true">' +
                 '<div class="bpop-ic"><i class="ti ' + ICONS[type] + '"></i></div>' +
                 '<div class="bpop-title">' + (item.title || TITLES[type]) + '</div>' +
                 '<div class="bpop-msg">' + item.message + '</div>' +
-                '<button type="button" class="bpop-btn">OK</button>' +
+                buttons +
             '</div>';
 
         document.body.appendChild(overlay);
 
-        var btn = overlay.querySelector('.bpop-btn');
-        btn.addEventListener('click', function () { close(overlay); });
-        // Clic sur le fond grisé = fermer
-        overlay.addEventListener('mousedown', function (e) { if (e.target === overlay) close(overlay); });
-        // Touche Échap = fermer
-        escHandler = function (e) { if (e.key === 'Escape') close(overlay); };
+        var okBtn = overlay.querySelector('.bpop-btn');
+        var cancelBtn = overlay.querySelector('.bpop-btn-cancel');
+
+        function dismiss(confirmed) {
+            close(overlay);
+            if (item.confirm && confirmed && typeof item.onConfirm === 'function') item.onConfirm();
+        }
+
+        okBtn.addEventListener('click', function () { dismiss(true); });
+        if (cancelBtn) cancelBtn.addEventListener('click', function () { dismiss(false); });
+        // Clic sur le fond grisé = annuler / fermer
+        overlay.addEventListener('mousedown', function (e) { if (e.target === overlay) dismiss(false); });
+        // Touche Échap = annuler / fermer
+        escHandler = function (e) { if (e.key === 'Escape') dismiss(false); };
         document.addEventListener('keydown', escHandler);
 
-        setTimeout(function () { btn.focus(); }, 50);
+        setTimeout(function () { (cancelBtn || okBtn).focus(); }, 50);
     }
 
     function next() {
@@ -71,6 +89,35 @@
         queue.push({ type: type, message: message, title: title });
         next();
     };
+
+    window.bricoConfirm = function (opts) {
+        opts = opts || {};
+        queue.push({
+            confirm: true,
+            type: opts.type || 'warning',
+            message: opts.message || 'Confirmer cette action ?',
+            title: opts.title,
+            confirmText: opts.confirmText,
+            cancelText: opts.cancelText,
+            onConfirm: opts.onConfirm
+        });
+        next();
+    };
+
+    // Intercepte les formulaires marqués data-confirm pour afficher le popup de confirmation
+    document.addEventListener('submit', function (e) {
+        var form = e.target;
+        if (!form || !form.dataset || !form.dataset.confirm || form.__bricoConfirmed) return;
+        e.preventDefault();
+        window.bricoConfirm({
+            message: form.dataset.confirm,
+            title: form.dataset.confirmTitle,
+            confirmText: form.dataset.confirmOk,
+            cancelText: form.dataset.confirmCancel,
+            type: form.dataset.confirmType || 'danger',
+            onConfirm: function () { form.__bricoConfirmed = true; form.submit(); }
+        });
+    }, true);
 
     // Affiche les messages serveur déposés par le partial _Toasts
     document.addEventListener('DOMContentLoaded', function () {

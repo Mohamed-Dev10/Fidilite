@@ -107,33 +107,34 @@
                                             <i class="ti ti-edit"></i> Modifier
                                         </a>
                                         @* Bouton Suspendre/Activer désactivé pour l'instant — décommenter pour le réactiver
-                                        <form method="post" asp-action="ToggleUserSuspension" class="d-inline">
+                                        <form method="post" asp-action="ToggleUserSuspension" class="d-inline"
+                                              data-confirm="@(suspended ? "Réactiver ce compte ?" : "Suspendre ce compte ? L'utilisateur sera déconnecté.")"
+                                              data-confirm-title="@(suspended ? "Réactiver le compte ?" : "Suspendre le compte ?")"
+                                              data-confirm-ok="@(suspended ? "Réactiver" : "Suspendre")"
+                                              data-confirm-type="@(suspended ? "success" : "warning")">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@user.Id" />
                                             @if (suspended)
                                             {
-                                                <button type="submit" class="btn-soft btn-soft-green"
-                                                        title="Réactiver le compte"
-                                                        onclick="return confirm('Réactiver ce compte ?')">
+                                                <button type="submit" class="btn-soft btn-soft-green" title="Réactiver le compte">
                                                     <i class="ti ti-player-play"></i> Activer
                                                 </button>
                                             }
                                             else
                                             {
-                                                <button type="submit" class="btn-soft btn-soft-orange"
-                                                        title="Suspendre le compte"
-                                                        onclick="return confirm('Suspendre ce compte ?')">
+                                                <button type="submit" class="btn-soft btn-soft-orange" title="Suspendre le compte">
                                                     <i class="ti ti-ban"></i> Suspendre
                                                 </button>
                                             }
                                         </form>
                                         *@
-                                        <form method="post" asp-action="DeleteUser" class="d-inline">
+                                        <form method="post" asp-action="DeleteUser" class="d-inline"
+                                              data-confirm="Voulez-vous vraiment supprimer définitivement le compte « @user.Email » ? Cette action est irréversible."
+                                              data-confirm-title="Supprimer cet utilisateur ?"
+                                              data-confirm-ok="Supprimer">
                                             @Html.AntiForgeryToken()
                                             <input type="hidden" name="id" value="@user.Id" />
-                                            <button type="submit" class="btn-soft btn-soft-red"
-                                                    title="Supprimer"
-                                                    onclick="return confirm('Supprimer définitivement cet utilisateur ?')">
+                                            <button type="submit" class="btn-soft btn-soft-red" title="Supprimer">
                                                 <i class="ti ti-trash"></i>
                                             </button>
                                         </form>

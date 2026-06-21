@@ -49,11 +49,13 @@
                                     <a href="@Url.Action("Edit", new { id = item.Id })" class="btn-soft btn-soft-indigo">
                                         <i class="ti ti-edit"></i> Modifier
                                     </a>
-                                    <form method="post" asp-action="Delete" class="d-inline">
+                                    <form method="post" asp-action="Delete" class="d-inline"
+                                          data-confirm="Voulez-vous vraiment supprimer le type de carte « @item.Name » ? Cette action est irréversible."
+                                          data-confirm-title="Supprimer ce type de carte ?"
+                                          data-confirm-ok="Supprimer">
                                         @Html.AntiForgeryToken()
                                         <input type="hidden" name="id" value="@item.Id" />
-                                        <button type="submit" class="btn-soft btn-soft-red"
-                                                onclick="return confirm('Supprimer ce type de carte ?')">
+                                        <button type="submit" class="btn-soft btn-soft-red">
                                             <i class="ti ti-trash"></i>
                                         </button>
                                     </form>

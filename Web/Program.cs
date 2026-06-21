@@ -56,6 +56,16 @@ builder.Services.Configure<SecurityStampValidatorOptions>(options =>
 builder.Services.AddScoped<IClaimsTransformation, PermissionClaimsTransformation>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
+// Règle globale : toute page exige une session connectée par défaut.
+// Les pages marquées [AllowAnonymous] (ex. Login) restent accessibles.
+// Sinon, redirection automatique vers /Account/Login.
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 builder.Services.AddScoped<IClienteBORepository, ClienteBORepository>();
 builder.Services.AddScoped<IClienteBOService, ClienteBOService>();
 builder.Services.AddScoped<IPermissionBORepository, PermissionBORepository>();

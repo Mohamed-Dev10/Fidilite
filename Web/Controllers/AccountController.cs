@@ -1,10 +1,12 @@
 using BRICOMA.ECOMMERCE.Data.ApplicationUser;
 using BRICOMA.ECOMMERCE.Models.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BRICOMA.ECOMMERCE.Web.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly SignInManager<ApplicationUser> _signInManager;

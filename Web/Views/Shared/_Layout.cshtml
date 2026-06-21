@@ -90,25 +90,42 @@
                             </a>
                         </li>
 
-                        <li class="nav-header">Configuration</li>
-                        <li class="nav-item">
-                            <a asp-controller="GestionPermissions" asp-action="Utilisateurs" class="nav-link si-blue @ActiveAction("GestionPermissions", "Utilisateurs", "CreateUser", "EditUser")">
-                                <i class="nav-icon ti ti-users"></i>
-                                <p>Utilisateurs</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-controller="Parametrage" asp-action="Index" class="nav-link si-teal @Active("Parametrage")">
-                                <i class="nav-icon ti ti-settings"></i>
-                                <p>Paramétrage</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-controller="GestionPermissions" asp-action="Index" class="nav-link si-purple @ActiveAction("GestionPermissions", "Index", "AssignerPermissions")">
-                                <i class="nav-icon ti ti-shield-lock"></i>
-                                <p>Gestion de permissions</p>
-                            </a>
-                        </li>
+                        @{
+                            var canUsers = User.HasClaim("perm", "admin.users");
+                            var canParam = User.HasClaim("perm", "parametrage.view");
+                            var canRoles = User.HasClaim("perm", "admin.roles");
+                        }
+                        @if (canUsers || canParam || canRoles)
+                        {
+                            <li class="nav-header">Configuration</li>
+                        }
+                        @if (canUsers)
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="GestionPermissions" asp-action="Utilisateurs" class="nav-link si-blue @ActiveAction("GestionPermissions", "Utilisateurs", "CreateUser", "EditUser")">
+                                    <i class="nav-icon ti ti-users"></i>
+                                    <p>Utilisateurs</p>
+                                </a>
+                            </li>
+                        }
+                        @if (canParam)
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="Parametrage" asp-action="Index" class="nav-link si-teal @Active("Parametrage")">
+                                    <i class="nav-icon ti ti-settings"></i>
+                                    <p>Paramétrage</p>
+                                </a>
+                            </li>
+                        }
+                        @if (canRoles)
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="GestionPermissions" asp-action="Index" class="nav-link si-purple @ActiveAction("GestionPermissions", "Index", "AssignerPermissions")">
+                                    <i class="nav-icon ti ti-shield-lock"></i>
+                                    <p>Gestion de permissions</p>
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </nav>
 

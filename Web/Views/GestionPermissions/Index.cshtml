@@ -71,11 +71,13 @@
                                             <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn-soft btn-soft-indigo">
                                                 <i class="ti ti-shield-check"></i> Permissions
                                             </a>
-                                            <form method="post" asp-action="DeleteRole" class="d-inline">
+                                            <form method="post" asp-action="DeleteRole" class="d-inline"
+                                                  data-confirm="Voulez-vous vraiment supprimer le rôle « @role.Name » ? Cette action est irréversible."
+                                                  data-confirm-title="Supprimer ce rôle ?"
+                                                  data-confirm-ok="Supprimer">
                                                 @Html.AntiForgeryToken()
                                                 <input type="hidden" name="id" value="@role.Id" />
-                                                <button type="submit" class="btn-soft btn-soft-red"
-                                                        onclick="return confirm('Supprimer ce rôle ?')">
+                                                <button type="submit" class="btn-soft btn-soft-red">
                                                     <i class="ti ti-trash"></i>
                                                 </button>
                                             </form>

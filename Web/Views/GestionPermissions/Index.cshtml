@@ -1,94 +1,324 @@
 @model List<BRICOMA.ECOMMERCE.Data.ApplicationUser.ApplicationRole>
 @{
     ViewData["Title"] = "Gestion de permissions";
+    var roles = Model ?? new();
+    var userWithRoles = ViewBag.Users as List<(BRICOMA.ECOMMERCE.Data.ApplicationUser.ApplicationUser User, string Role)> ?? new();
+    var permissions = ViewBag.Permissions as List<BRICOMA.ECOMMERCE.Data.ApplicationUser.Permission> ?? new();
+    var userRolesList = userWithRoles.Select(x => x.Role).Where(r => !string.IsNullOrEmpty(r) && r != "-").Distinct().OrderBy(r => r).ToList();
+    var categories = permissions.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
+    var palette = new[] { "indigo", "purple", "blue", "orange", "red", "green", "teal", "pink", "cyan", "yellow" };
+    var canUsers = User.HasClaim("perm", "admin.users");
 }
 
 <div class="page-header mb-3">
     <div class="row align-items-center">
         <div class="col">
             <h2 class="page-title">Gestion de permissions</h2>
-            <div class="text-muted mt-1">Rôles et permissions</div>
+            <div class="text-muted mt-1">Utilisateurs, rôles et permissions</div>
         </div>
     </div>
 </div>
 
-<div class="row">
-    <!-- Créer un rôle -->
-    <div class="col-md-4">
-        <div class="card h-100">
-            <div class="card-header"><h3 class="card-title">Nouveau rôle</h3></div>
-            <div class="card-body">
-                <form method="post" asp-action="CreateRole">
-                    @Html.AntiForgeryToken()
-                    <div class="mb-3">
-                        <label class="form-label">Nom du rôle <span class="text-danger">*</span></label>
-                        <input type="text" name="name" class="form-control" placeholder="Ex: Responsable Casa" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="4" placeholder="Description optionnelle"></textarea>
-                    </div>
-                    <button type="submit" class="btn-gradient w-100">
-                        <i class="ti ti-plus me-1"></i> Créer le rôle
-                    </button>
-                </form>
-            </div>
+<!-- Cartes-onglets -->
+<div class="row g-3 mb-4">
+    @if (canUsers)
+    {
+        <div class="col-md-4">
+            <button type="button" class="stat-tab stat-tab-indigo active" data-tab-target="#tab-users">
+                <span class="stat-ic ic-indigo"><i class="ti ti-users"></i></span>
+                <span><span class="stat-num">@userWithRoles.Count</span><span class="stat-lbl d-block">Utilisateurs</span></span>
+            </button>
         </div>
+    }
+    <div class="col-md-4">
+        <button type="button" class="stat-tab stat-tab-green @(canUsers ? "" : "active")" data-tab-target="#tab-roles">
+            <span class="stat-ic ic-green"><i class="ti ti-shield-lock"></i></span>
+            <span><span class="stat-num">@roles.Count</span><span class="stat-lbl d-block">Rôles</span></span>
+        </button>
     </div>
+    <div class="col-md-4">
+        <button type="button" class="stat-tab stat-tab-orange" data-tab-target="#tab-perms">
+            <span class="stat-ic ic-orange"><i class="ti ti-lock"></i></span>
+            <span><span class="stat-num">@permissions.Count</span><span class="stat-lbl d-block">Permissions</span></span>
+        </button>
+    </div>
+</div>
 
-    <!-- Liste des rôles -->
-    <div class="col-md-8">
-        <div class="card h-100">
-            <div class="card-header"><h3 class="card-title">Rôles existants</h3></div>
+@* ════════════════ ONGLET UTILISATEURS ════════════════ *@
+@if (canUsers)
+{
+    <div class="gp-pane" id="tab-users">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <h3 class="card-title m-0"><i class="ti ti-users me-2 text-primary"></i>Liste des utilisateurs</h3>
+                <a href="@Url.Action("CreateUser")" class="btn-gradient ms-auto">
+                    <i class="ti ti-plus me-1"></i> Ajouter
+                </a>
+            </div>
+            <div class="card-body pb-0">
+                <div class="row g-2 align-items-center mb-2">
+                    <div class="col">
+                        <div class="search-pill">
+                            <i class="ti ti-search"></i>
+                            <input type="text" id="searchInput" class="form-control"
+                                   placeholder="Rechercher un email, un rôle..." autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <select id="statutFilter" class="form-select" style="border-radius:12px;">
+                            <option value="">Tous les rôles</option>
+                            @foreach (var r in userRolesList)
+                            {
+                                <option value="@r">@r</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" id="resetBtn" class="btn-soft btn-soft-gray">
+                            <i class="ti ti-x"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div class="table-responsive">
-                <table class="table table-vcenter table-hover card-table">
+                <table class="table table-vcenter card-table table-hover">
                     <thead>
                         <tr>
-                            <th>Nom</th>
-                            <th>Description</th>
-                            <th>Actions</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @if (Model == null || !Model.Any())
+                    <tbody id="listBody">
+                        <tr id="emptyRow" style="display:none;">
+                            <td colspan="4" class="text-center text-muted py-5">
+                                <i class="ti ti-user-off fs-1 d-block mb-2"></i>
+                                Aucun utilisateur trouvé
+                            </td>
+                        </tr>
+                        @foreach (var (user, role) in userWithRoles)
                         {
-                            <tr><td colspan="3" class="text-center text-muted py-4">Aucun rôle créé</td></tr>
-                        }
-                        else
-                        {
-                            foreach (var role in Model)
-                            {
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="avatar ic-purple" style="width:2.2rem;height:2.2rem;font-size:1rem;"><i class="ti ti-shield-lock"></i></span>
-                                            <span class="fw-bold">@role.Name</span>
-                                        </div>
-                                    </td>
-                                    <td class="text-muted">@(string.IsNullOrEmpty(role.Description) ? "-" : role.Description)</td>
-                                    <td>
-                                        <div class="d-flex gap-2">
-                                            <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn-soft btn-soft-indigo">
-                                                <i class="ti ti-shield-check"></i> Permissions
-                                            </a>
-                                            <form method="post" asp-action="DeleteRole" class="d-inline"
-                                                  data-confirm="Voulez-vous vraiment supprimer le rôle « @role.Name » ? Cette action est irréversible."
-                                                  data-confirm-title="Supprimer ce rôle ?"
-                                                  data-confirm-ok="Supprimer">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="id" value="@role.Id" />
-                                                <button type="submit" class="btn-soft btn-soft-red">
-                                                    <i class="ti ti-trash"></i>
+                            var suspended = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
+                            var searchData = $"{user.Email} {role}".ToLowerInvariant();
+                            <tr class="data-row" data-search="@searchData" data-statut="@role">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.85rem;"><i class="ti ti-user"></i></span>
+                                        <span class="fw-medium">@user.Email</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="chip chip-indigo"><i class="ti ti-shield-lock"></i> @role</span>
+                                </td>
+                                <td>
+                                    @if (suspended)
+                                    {
+                                        <span class="chip chip-red"><i class="ti ti-ban"></i> Suspendu</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="chip chip-green"><i class="ti ti-circle-check"></i> Actif</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn-soft btn-soft-indigo">
+                                            <i class="ti ti-edit"></i> Modifier
+                                        </a>
+                                        @* Bouton Suspendre/Activer désactivé pour l'instant — décommenter pour le réactiver
+                                        <form method="post" asp-action="ToggleUserSuspension" class="d-inline"
+                                              data-confirm="@(suspended ? "Réactiver ce compte ?" : "Suspendre ce compte ? L'utilisateur sera déconnecté.")"
+                                              data-confirm-title="@(suspended ? "Réactiver le compte ?" : "Suspendre le compte ?")"
+                                              data-confirm-ok="@(suspended ? "Réactiver" : "Suspendre")"
+                                              data-confirm-type="@(suspended ? "success" : "warning")">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            @if (suspended)
+                                            {
+                                                <button type="submit" class="btn-soft btn-soft-green" title="Réactiver le compte">
+                                                    <i class="ti ti-player-play"></i> Activer
                                                 </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
+                                            }
+                                            else
+                                            {
+                                                <button type="submit" class="btn-soft btn-soft-orange" title="Suspendre le compte">
+                                                    <i class="ti ti-ban"></i> Suspendre
+                                                </button>
+                                            }
+                                        </form>
+                                        *@
+                                        <form method="post" asp-action="DeleteUser" class="d-inline"
+                                              data-confirm="Voulez-vous vraiment supprimer définitivement le compte « @user.Email » ? Cette action est irréversible."
+                                              data-confirm-title="Supprimer cet utilisateur ?"
+                                              data-confirm-ok="Supprimer">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@user.Id" />
+                                            <button type="submit" class="btn-soft btn-soft-red" title="Supprimer">
+                                                <i class="ti ti-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
                         }
                     </tbody>
                 </table>
             </div>
+            <div class="card-footer d-flex align-items-center">
+                <p class="m-0 text-muted small" id="pageInfo"></p>
+                <span class="d-none" id="totalCount">@userWithRoles.Count</span>
+                <div class="pager ms-auto" id="pager"></div>
+            </div>
+        </div>
+    </div>
+}
+
+@* ════════════════ ONGLET RÔLES ════════════════ *@
+<div class="gp-pane @(canUsers ? "d-none" : "")" id="tab-roles">
+    <div class="row">
+        <!-- Créer un rôle -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header"><h3 class="card-title">Nouveau rôle</h3></div>
+                <div class="card-body">
+                    <form method="post" asp-action="CreateRole">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label">Nom du rôle <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" placeholder="Ex: Responsable Casa" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="4" placeholder="Description optionnelle"></textarea>
+                        </div>
+                        <button type="submit" class="btn-gradient w-100">
+                            <i class="ti ti-plus me-1"></i> Créer le rôle
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des rôles -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header"><h3 class="card-title">Rôles existants</h3></div>
+                <div class="table-responsive">
+                    <table class="table table-vcenter table-hover card-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!roles.Any())
+                            {
+                                <tr><td colspan="3" class="text-center text-muted py-4">Aucun rôle créé</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var role in roles)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <span class="avatar ic-purple" style="width:2.2rem;height:2.2rem;font-size:1rem;"><i class="ti ti-shield-lock"></i></span>
+                                                <span class="fw-bold">@role.Name</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-muted">@(string.IsNullOrEmpty(role.Description) ? "-" : role.Description)</td>
+                                        <td>
+                                            <div class="d-flex gap-2">
+                                                <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn-soft btn-soft-indigo">
+                                                    <i class="ti ti-shield-check"></i> Permissions
+                                                </a>
+                                                <form method="post" asp-action="DeleteRole" class="d-inline"
+                                                      data-confirm="Voulez-vous vraiment supprimer le rôle « @role.Name » ? Cette action est irréversible."
+                                                      data-confirm-title="Supprimer ce rôle ?"
+                                                      data-confirm-ok="Supprimer">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@role.Id" />
+                                                    <button type="submit" class="btn-soft btn-soft-red">
+                                                        <i class="ti ti-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+@* ════════════════ ONGLET PERMISSIONS (catalogue lecture seule) ════════════════ *@
+<div class="gp-pane d-none" id="tab-perms">
+    <div class="row">
+        @for (int ci = 0; ci < categories.Count; ci++)
+        {
+            var category = categories[ci];
+            var color = palette[ci % palette.Length];
+            var count = permissions.Count(p => p.Category == category);
+            <div class="col-md-4 mb-3">
+                <div class="card h-100 cat-card cat-@color">
+                    <div class="card-header">
+                        <span class="avatar ic-@color me-2" style="width:2.2rem;height:2.2rem;font-size:1rem;"><i class="ti ti-category"></i></span>
+                        <div>
+                            <h3 class="card-title">@category</h3>
+                            <div class="text-muted small">@count permission(s)</div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @foreach (var perm in permissions.Where(p => p.Category == category))
+                        {
+                            <div class="perm-static">
+                                <i class="ti ti-circle-check ps-dot"></i>
+                                <span>
+                                    <span class="perm-label">@perm.Label</span>
+                                    <span class="perm-code">@perm.Code</span>
+                                </span>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/list-filter.js"></script>
+    <script>
+        (function () {
+            var KEY = 'gpActiveTab';
+            function activate(target) {
+                document.querySelectorAll('[data-tab-target]').forEach(function (b) {
+                    b.classList.toggle('active', b.getAttribute('data-tab-target') === target);
+                });
+                document.querySelectorAll('.gp-pane').forEach(function (p) {
+                    p.classList.toggle('d-none', '#' + p.id !== target);
+                });
+            }
+            document.querySelectorAll('[data-tab-target]').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var t = btn.getAttribute('data-tab-target');
+                    sessionStorage.setItem(KEY, t);
+                    activate(t);
+                });
+            });
+            // Restaure le dernier onglet ouvert (utile après création/suppression)
+            var saved = sessionStorage.getItem(KEY);
+            if (saved && document.querySelector(saved) && document.querySelector('[data-tab-target="' + saved + '"]')) {
+                activate(saved);
+            }
+        })();
+        bricoListFilter({ perPage: 7, label: "utilisateur(s)" });
+    </script>
+}

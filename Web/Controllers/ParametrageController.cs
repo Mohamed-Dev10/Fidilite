@@ -38,6 +38,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 ViewData["Error"] = result.Message;
                 return View();
             }
+            TempData["Success"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -61,6 +62,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 ViewData["Error"] = result.Message;
                 return View();
             }
+            TempData["Success"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -68,7 +70,11 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(int id)
         {
-            await _clienteBOService.DeleteRefCarteType(id);
+            var result = await _clienteBOService.DeleteRefCarteType(id);
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
     }

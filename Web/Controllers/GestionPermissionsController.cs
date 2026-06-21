@@ -26,21 +26,44 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var result = await _permissionBOService.GetAllRoles();
-            return View(result.Data);
+            var rolesResult = await _permissionBOService.GetAllRoles();
+            var roles = rolesResult.Data ?? new List<ApplicationRole>();
+
+            var usersResult = await _permissionBOService.GetAllUsers();
+            var users = usersResult.Data ?? new List<ApplicationUser>();
+            var userWithRoles = new List<(ApplicationUser User, string Role)>();
+            foreach (var user in users)
+            {
+                var userRoles = await _userManager.GetRolesAsync(user);
+                userWithRoles.Add((user, userRoles.FirstOrDefault() ?? "-"));
+            }
+
+            var permsResult = await _permissionBOService.GetAllPermissions();
+
+            ViewBag.Users = userWithRoles;
+            ViewBag.Permissions = permsResult.Data ?? new List<Permission>();
+            return View(roles);
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateRole(string name, string? description)
         {
-            await _permissionBOService.CreateRole(name, description);
+            var result = await _permissionBOService.CreateRole(name, description);
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteRole(string id)
         {
-            await _permissionBOService.DeleteRole(id);
+            var result = await _permissionBOService.DeleteRole(id);
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -64,7 +87,11 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> AssignerPermissions(string id, List<int> permissionIds)
         {
-            await _permissionBOService.SetRolePermissions(id, permissionIds ?? new List<int>());
+            var result = await _permissionBOService.SetRolePermissions(id, permissionIds ?? new List<int>());
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
 
@@ -106,7 +133,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 await LoadDropdowns();
                 return View(model);
             }
-            return RedirectToAction(nameof(Utilisateurs));
+            TempData["Success"] = result.Message;
+            return RedirectToAction(nameof(Index));
         }
 
         [Authorize(Policy = "admin.users")]
@@ -143,7 +171,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 await LoadDropdowns();
                 return View(model);
             }
-            return RedirectToAction(nameof(Utilisateurs));
+            TempData["Success"] = result.Message;
+            return RedirectToAction(nameof(Index));
         }
 
         [Authorize(Policy = "admin.users")]
@@ -154,7 +183,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             if (currentId == id)
             {
                 TempData["Error"] = "Vous ne pouvez pas supprimer votre propre compte.";
-                return RedirectToAction(nameof(Utilisateurs));
+                return RedirectToAction(nameof(Index));
             }
 
             var result = await _permissionBOService.DeleteUser(id);
@@ -163,7 +192,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             else
                 TempData["Error"] = result.Message;
 
-            return RedirectToAction(nameof(Utilisateurs));
+            return RedirectToAction(nameof(Index));
         }
 
         [Authorize(Policy = "admin.users")]
@@ -174,7 +203,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             if (currentId == id)
             {
                 TempData["Error"] = "Vous ne pouvez pas suspendre votre propre compte.";
-                return RedirectToAction(nameof(Utilisateurs));
+                return RedirectToAction(nameof(Index));
             }
 
             var result = await _permissionBOService.ToggleUserSuspension(id);
@@ -183,7 +212,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             else
                 TempData["Error"] = result.Message;
 
-            return RedirectToAction(nameof(Utilisateurs));
+            return RedirectToAction(nameof(Index));
         }
 
         private async Task LoadDropdowns()

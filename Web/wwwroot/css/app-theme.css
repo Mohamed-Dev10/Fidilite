@@ -574,20 +574,22 @@ a.chip, a.chip:hover { text-decoration: none; }
 .cat-pink   { --cat: var(--c-pink);   --cat-rgb: var(--c-pink-rgb);   }
 
 .cat-card {
-    border: 1px solid rgba(var(--cat-rgb), .22);
-    border-top: 3px solid var(--cat);
+    border: 2px solid rgba(var(--cat-rgb), .5);
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 6px 18px rgba(var(--cat-rgb), .08);
-    transition: box-shadow .18s ease, transform .18s ease;
+    transition: box-shadow .18s ease, transform .18s ease, border-color .18s ease;
 }
-.cat-card:hover { box-shadow: 0 10px 26px rgba(var(--cat-rgb), .16); transform: translateY(-2px); }
+.cat-card:hover { box-shadow: 0 10px 26px rgba(var(--cat-rgb), .16); transform: translateY(-2px); border-color: var(--cat); }
 .cat-card .card-header {
     display: flex; align-items: center;
     background: linear-gradient(135deg, rgba(var(--cat-rgb), .14), rgba(var(--cat-rgb), .03));
     border-bottom: 1px solid rgba(var(--cat-rgb), .14);
 }
+.cat-card .card-header > div { min-width: 0; }
 .cat-card .card-title { color: var(--cat); }
+/* Compteur « N permission(s) » sur une seule ligne */
+.cat-card .card-header .small { white-space: nowrap; }
 
 /* Lignes de permission teintées avec la couleur de la catégorie */
 .cat-card .perm-card {
@@ -934,3 +936,34 @@ a.chip, a.chip:hover { text-decoration: none; }
 @keyframes bpopIn      { 0% { opacity: 0; transform: translateY(14px) scale(.9); } 100% { opacity: 1; transform: none; } }
 @keyframes bpopOut     { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(.94); } }
 @keyframes bpopPop     { 0% { transform: scale(0); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+/* ============================================================
+   Cartes-onglets (page Gestion de permissions)
+   ============================================================ */
+.stat-tab {
+    display: flex; align-items: center; gap: 1rem; width: 100%;
+    padding: 1.1rem 1.3rem; background: #fff; text-align: left;
+    border: 2px solid var(--bc-border); border-radius: 18px; cursor: pointer;
+    transition: border-color .15s ease, box-shadow .15s ease, transform .15s ease;
+}
+.stat-tab:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(0, 0, 0, .06); }
+.stat-tab .stat-ic {
+    width: 3rem; height: 3rem; border-radius: 14px; flex-shrink: 0;
+    display: inline-flex; align-items: center; justify-content: center; font-size: 1.4rem;
+}
+.stat-tab .stat-num { font-size: 1.7rem; font-weight: 800; line-height: 1; color: var(--bc-text); }
+.stat-tab .stat-lbl { color: var(--bc-muted); font-weight: 600; margin-top: .25rem; }
+.stat-tab.active { border-color: var(--st, var(--bc-primary)); box-shadow: 0 8px 22px rgba(var(--st-rgb, var(--bc-primary-rgb)), .18); }
+.stat-tab.active .stat-lbl { color: var(--st, var(--bc-primary)); }
+.stat-tab-indigo { --st: var(--c-indigo); --st-rgb: var(--c-indigo-rgb); }
+.stat-tab-green  { --st: var(--c-green);  --st-rgb: var(--c-green-rgb); }
+.stat-tab-orange { --st: var(--c-orange); --st-rgb: var(--c-orange-rgb); }
+
+/* Permission en lecture seule (onglet catalogue) */
+.perm-static {
+    display: flex; align-items: center; gap: .6rem; padding: .5rem .65rem;
+    border-radius: 10px; background: rgba(var(--cat-rgb), .04); margin-bottom: .4rem;
+}
+.perm-static .ps-dot { color: var(--cat); font-size: 1.1rem; flex-shrink: 0; }
+.perm-static .perm-label { display: block; font-weight: 600; color: var(--bc-text); font-size: .9rem; }
+.perm-static .perm-code { display: block; font-size: .72rem; color: var(--bc-muted); font-family: monospace; }

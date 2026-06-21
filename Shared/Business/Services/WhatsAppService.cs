@@ -44,9 +44,27 @@ namespace BRICOMA.ECOMMERCE.Business.Services
 
                 var message = await MessageResource.CreateAsync(options);
 
-                _logger.LogInformation("WhatsApp envoyé - To: {To}, Sid: {Sid}, Status: {Status}", to, message.Sid, message.Status);
+                _logger.LogInformation(
+                    "WhatsApp - To: {To}, From: {From}, Sid: {Sid}, Status: {Status}, ErrorCode: {ErrorCode}, ErrorMessage: {ErrorMessage}",
+                    to, _settings.WhatsAppFrom, message.Sid, message.Status, message.ErrorCode, message.ErrorMessage);
 
-                return new RESTServiceResponse<bool>(true, "Message envoyé.", true);
+                // Twilio renvoie immédiatement un statut "queued"/"accepted"/"sending"/"sent" tant que tout va bien.
+                // Un statut "failed"/"undelivered" (ou un ErrorCode non nul) signale un échec dès la création
+                // (ex. 63015/63016 : destinataire non inscrit au Sandbox, ou hors fenêtre de session 24h).
+                var status = message.Status;
+                var failed = status == MessageResource.StatusEnum.Failed
+                          || status == MessageResource.StatusEnum.Undelivered
+                          || message.ErrorCode.HasValue;
+
+                if (failed)
+                {
+                    var reason = message.ErrorCode.HasValue
+                        ? $"Twilio {message.ErrorCode} : {message.ErrorMessage}"
+                        : $"Statut Twilio : {status}";
+                    return new RESTServiceResponse<bool>(false, reason, false);
+                }
+
+                return new RESTServiceResponse<bool>(true, $"Message {status}.", true);
             }
             catch (Exception ex)
             {

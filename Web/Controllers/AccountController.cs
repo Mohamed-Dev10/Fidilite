@@ -38,7 +38,14 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             {
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
-                return RedirectToAction("Index", "Home");
+
+                // Le tableau de bord est réservé aux administrateurs.
+                // Les autres rôles sont dirigés vers la liste des cartes.
+                var user = await _signInManager.UserManager.FindByEmailAsync(model.Email);
+                if (user != null && await _signInManager.UserManager.IsInRoleAsync(user, "SUPER_ADMIN"))
+                    return RedirectToAction("Index", "Home");
+
+                return RedirectToAction("Index", "M3alem");
             }
 
             if (result.IsLockedOut)
@@ -56,6 +63,18 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         {
             await _signInManager.SignOutAsync();
             return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult AccessDenied()
+        {
+            // Affiché lorsqu'un utilisateur connecté tente d'ouvrir une page
+            // pour laquelle il n'a pas la permission requise.
+            if (User.Identity?.IsAuthenticated != true)
+                return RedirectToAction("Login");
+
+            ViewData["Warning"] = "Vous n'avez pas le droit d'accéder à cette page.";
+            return View();
         }
     }
 }

@@ -52,19 +52,31 @@
         <!-- Sidebar -->
         <aside class="app-sidebar shadow" data-bs-theme="dark">
             <div class="sidebar-brand">
-                <a asp-controller="Home" asp-action="Index" class="brand-link">
-                    <span class="brand-text fw-bold">BRICOMA</span>
-                </a>
+                @if (User.IsInRole("SUPER_ADMIN"))
+                {
+                    <a asp-controller="Home" asp-action="Index" class="brand-link">
+                        <span class="brand-text fw-bold">BRICOMA</span>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="M3alem" asp-action="Index" class="brand-link">
+                        <span class="brand-text fw-bold">BRICOMA</span>
+                    </a>
+                }
             </div>
             <div class="sidebar-wrapper">
                 <nav class="mt-2 flex-grow-1">
                     <ul class="nav sidebar-menu flex-column" role="menu">
-                        <li class="nav-item">
-                            <a asp-controller="Home" asp-action="Index" class="nav-link si-indigo @Active("Home")">
-                                <i class="nav-icon ti ti-layout-dashboard"></i>
-                                <p>Dashboard</p>
-                            </a>
-                        </li>
+                        @if (User.IsInRole("SUPER_ADMIN"))
+                        {
+                            <li class="nav-item">
+                                <a asp-controller="Home" asp-action="Index" class="nav-link si-indigo @Active("Home")">
+                                    <i class="nav-icon ti ti-layout-dashboard"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+                        }
 
                         <li class="nav-header">Cartes Fidélité</li>
                         <li class="nav-item">

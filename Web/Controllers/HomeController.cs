@@ -17,6 +17,7 @@ public class HomeController : Controller
         _clienteBOService = clienteBOService;
     }
 
+    [Authorize(Roles = "SUPER_ADMIN")]
     public async Task<IActionResult> Index()
     {
         var result = await _clienteBOService.GetDashboardStats();

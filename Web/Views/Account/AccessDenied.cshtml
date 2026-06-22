@@ -1,0 +1,32 @@
+@{
+    ViewData["Title"] = "Accès refusé";
+}
+
+<div class="d-flex flex-column align-items-center justify-content-center text-center py-5">
+    <div class="card border-0 shadow-sm" style="max-width: 480px;">
+        <div class="card-body p-5">
+            <div class="mb-3">
+                <span class="d-inline-flex align-items-center justify-content-center rounded-circle"
+                      style="width:84px;height:84px;background:rgba(245,158,11,.12);">
+                    <i class="ti ti-lock-exclamation" style="font-size:42px;color:#f59e0b;"></i>
+                </span>
+            </div>
+            <h2 class="page-title mb-2">Accès refusé</h2>
+            <p class="text-muted mb-4">
+                Vous n'avez pas le droit d'accéder à cette page.<br />
+                Contactez l'administrateur si vous pensez qu'il s'agit d'une erreur.
+            </p>
+            <div class="d-flex gap-2 justify-content-center">
+                <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                    <i class="ti ti-arrow-left me-1"></i> Retour
+                </button>
+                <form method="post" asp-controller="Account" asp-action="Logout" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger">
+                        <i class="ti ti-logout me-1"></i> Déconnexion
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

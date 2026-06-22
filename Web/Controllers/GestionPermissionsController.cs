@@ -152,8 +152,11 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var model = new UpdateUserModel
             {
                 Id = user.Id,
+                Nom = user.Nom ?? string.Empty,
+                Prenom = user.Prenom ?? string.Empty,
                 Email = user.Email ?? string.Empty,
-                RoleId = userRole?.Id ?? string.Empty
+                RoleId = userRole?.Id ?? string.Empty,
+                RefMagasinId = user.RefMagasinId
             };
 
             await LoadDropdowns();

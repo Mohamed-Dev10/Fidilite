@@ -174,7 +174,10 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 {
                     UserName = model.Email,
                     Email = model.Email,
-                    EmailConfirmed = true
+                    EmailConfirmed = true,
+                    Nom = model.Nom,
+                    Prenom = model.Prenom,
+                    RefMagasinId = model.RefMagasinId
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
@@ -208,6 +211,9 @@ namespace BRICOMA.ECOMMERCE.Business.Services
 
                 user.Email = model.Email;
                 user.UserName = model.Email;
+                user.Nom = model.Nom;
+                user.Prenom = model.Prenom;
+                user.RefMagasinId = model.RefMagasinId;
 
                 if (!string.IsNullOrWhiteSpace(model.NewPassword))
                 {

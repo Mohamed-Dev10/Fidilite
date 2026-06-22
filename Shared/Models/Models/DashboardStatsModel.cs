@@ -9,6 +9,12 @@ namespace BRICOMA.ECOMMERCE.Models.Models
         public int CartesActives { get; set; }
         public int CartesBloquees { get; set; }
         public List<MagasinStat> ParMagasin { get; set; } = new();
+
+        // Contexte d'affichage : admin = vue globale (tous magasins) ;
+        // utilisateur magasin = chiffres filtrés sur son magasin.
+        public bool EstGlobal { get; set; } = true;
+        public string? MagasinNom { get; set; }
+        public bool SansMagasin { get; set; }
     }
 
     public class MagasinStat

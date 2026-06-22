@@ -1,7 +1,9 @@
 using BRICOMA.ECOMMERCE.Business.Interfaces;
+using BRICOMA.ECOMMERCE.Data.ApplicationUser;
 using BRICOMA.ECOMMERCE.Data.Models;
 using BRICOMA.ECOMMERCE.Models.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -11,10 +13,12 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
     public class CarteController : Controller
     {
         private readonly IClienteBOService _clienteBOService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CarteController(IClienteBOService clienteBOService)
+        public CarteController(IClienteBOService clienteBOService, UserManager<ApplicationUser> userManager)
         {
             _clienteBOService = clienteBOService;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -25,6 +29,12 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var model = new ClienteModel();
             if (carteTypeId.HasValue)
                 model.RefCarteTypeId = carteTypeId;
+
+            // Un responsable de magasin crée toujours pour son propre magasin (pré-sélectionné).
+            var scopeMagasinId = await GetScopeMagasinId();
+            if (scopeMagasinId.HasValue)
+                model.RefMagasinId = scopeMagasinId.Value;
+
             return View(model);
         }
 
@@ -33,6 +43,12 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         [Authorize(Policy = "carte.create")]
         public async Task<IActionResult> Creer(ClienteModel model)
         {
+            // Sécurité : le responsable ne peut créer une carte que pour son magasin,
+            // quel que soit le magasin envoyé par le formulaire.
+            var scopeMagasinId = await GetScopeMagasinId();
+            if (scopeMagasinId.HasValue)
+                model.RefMagasinId = scopeMagasinId.Value;
+
             var result = await _clienteBOService.InitCreate(model);
             if (!result.Success)
             {
@@ -148,14 +164,31 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var metiers  = await _clienteBOService.GetAllMetiers();
             var villes   = await _clienteBOService.GetAllVilles();
 
+            var magasinList = magasins.Data ?? new List<RefMagasin>();
+
+            // Un responsable de magasin ne voit que son magasin dans la liste déroulante.
+            var scopeMagasinId = await GetScopeMagasinId();
+            if (scopeMagasinId.HasValue)
+                magasinList = magasinList.Where(m => m.Id == scopeMagasinId.Value).ToList();
+
             // AMIBRICOMA (id 1) n'est plus proposé à la création dans le back-office
             ViewBag.CarteTypes = new SelectList(
                 (types.Data ?? new List<RefCarteType>()).Where(t => t.Id != (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.AMIBRICOMA),
                 "Id", "Name");
-            ViewBag.Magasins   = new SelectList(magasins.Data ?? new List<RefMagasin>(),   "Id", "Name");
+            ViewBag.Magasins   = new SelectList(magasinList,                                "Id", "Name");
             ViewBag.Genres     = new SelectList(genres.Data   ?? new List<RefGenre>(),     "Id", "Name");
             ViewBag.Metiers    = new SelectList(metiers.Data  ?? new List<RefMetier>(),    "Id", "Name");
             ViewBag.Villes     = new SelectList(villes.Data   ?? new List<RefVille>(),     "Id", "Name");
+        }
+
+        // null  => admin (accès global, tous les magasins)
+        // valeur => responsable rattaché à ce magasin (scope imposé)
+        private async Task<int?> GetScopeMagasinId()
+        {
+            if (User.IsInRole("SUPER_ADMIN"))
+                return null;
+            var currentUser = await _userManager.GetUserAsync(User);
+            return currentUser?.RefMagasinId;
         }
     }
 }

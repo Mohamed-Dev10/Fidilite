@@ -18,7 +18,7 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         /// </summary>
         Task<RESTServiceResponse<string>> ConfirmCreate(string token, string otpCode);
         Task<RESTServiceResponse<PagedResult<Cliente>>> GetList(CarteListFilterModel filter);
-        Task<RESTServiceResponse<DashboardStatsModel>> GetDashboardStats();
+        Task<RESTServiceResponse<DashboardStatsModel>> GetDashboardStats(int? magasinId = null);
         Task<RESTServiceResponse<Cliente>> GetById(long id);
         Task<RESTServiceResponse<bool>> UpdateCarte(ClienteModel model);
         Task<RESTServiceResponse<List<RefMagasin>>> GetAllMagasins();

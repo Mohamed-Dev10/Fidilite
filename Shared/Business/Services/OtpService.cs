@@ -11,7 +11,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
     public class OtpService : IOtpService
     {
         private const int ExpiryMinutes = 10;
-        private const int MaxAttempts = 5;
+        private const int MaxAttempts = 3;
 
         private readonly IOtpRepository _otpRepository;
         private readonly ILogger<OtpService> _logger;

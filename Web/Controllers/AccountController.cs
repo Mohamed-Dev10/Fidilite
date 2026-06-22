@@ -39,13 +39,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
 
-                // Le tableau de bord est réservé aux administrateurs.
-                // Les autres rôles sont dirigés vers la liste des cartes.
-                var user = await _signInManager.UserManager.FindByEmailAsync(model.Email);
-                if (user != null && await _signInManager.UserManager.IsInRoleAsync(user, "SUPER_ADMIN"))
-                    return RedirectToAction("Index", "Home");
-
-                return RedirectToAction("Index", "M3alem");
+                // Tous les rôles accèdent au tableau de bord (KPI filtrés sur leur magasin).
+                return RedirectToAction("Index", "Home");
             }
 
             if (result.IsLockedOut)

@@ -1,6 +1,7 @@
 using BRICOMA.ECOMMERCE.Business.Interfaces;
 using BRICOMA.ECOMMERCE.Data.Contexts;
 using BRICOMA.ECOMMERCE.Data.Models;
+using BRICOMA.ECOMMERCE.Models.Enum;
 using Microsoft.EntityFrameworkCore;
 
 namespace BRICOMA.ECOMMERCE.Business.Repositories
@@ -172,33 +173,52 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             return await query.CountAsync();
         }
 
-        public async Task<int> CountTotal()
+        public async Task<int> CountTotal(int? magasinId = null)
         {
-            return await _context.Cliente.CountAsync();
+            // Le back-office ne gère pas les cartes AMIBRICOMA (stock historique) : exclues des agrégats.
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+            return await query.CountAsync();
         }
 
-        public async Task<int> CountByCarteType(int carteTypeId)
+        public async Task<int> CountByCarteType(int carteTypeId, int? magasinId = null)
         {
-            return await _context.Cliente.CountAsync(c => c.RefCarteTypeId == carteTypeId);
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId == carteTypeId);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+            return await query.CountAsync();
         }
 
-        public async Task<int> CountCreatedThisMonth()
+        public async Task<int> CountCreatedThisMonth(int? magasinId = null)
         {
             var start = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             var end = start.AddMonths(1);
-            return await _context.Cliente.CountAsync(c => c.DateCreation >= start && c.DateCreation < end);
+            var query = _context.Cliente.Where(c => c.DateCreation >= start && c.DateCreation < end
+                && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+            return await query.CountAsync();
         }
 
-        public async Task<int> CountByActif(bool actif)
+        public async Task<int> CountByActif(bool actif, int? magasinId = null)
         {
-            return actif
-                ? await _context.Cliente.CountAsync(c => c.IsActif != false)
-                : await _context.Cliente.CountAsync(c => c.IsActif == false);
+            var query = actif
+                ? _context.Cliente.Where(c => c.IsActif != false)
+                : _context.Cliente.Where(c => c.IsActif == false);
+            query = query.Where(c => c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+            return await query.CountAsync();
         }
 
-        public async Task<List<(string Magasin, int Count)>> CountGroupedByMagasin()
+        public async Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null)
         {
-            var grouped = await _context.Cliente
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+
+            var grouped = await query
                 .GroupBy(c => c.RefMagasin.Name)
                 .Select(g => new { Magasin = g.Key, Count = g.Count() })
                 .OrderByDescending(x => x.Count)

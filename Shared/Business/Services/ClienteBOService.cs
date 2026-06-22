@@ -495,22 +495,30 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<DashboardStatsModel>> GetDashboardStats()
+        public async Task<RESTServiceResponse<DashboardStatsModel>> GetDashboardStats(int? magasinId = null)
         {
             try
             {
                 var stats = new DashboardStatsModel
                 {
-                    TotalCartes   = await _clienteBORepository.CountTotal(),
-                    CartesM3alem  = await _clienteBORepository.CountByCarteType((int)CarteType.BRICOMAM3ALEM),
-                    CartesArtisan = await _clienteBORepository.CountByCarteType((int)CarteType.BRICOMAARTISAN),
-                    CartesCeMois  = await _clienteBORepository.CountCreatedThisMonth(),
-                    CartesActives = await _clienteBORepository.CountByActif(true),
-                    CartesBloquees = await _clienteBORepository.CountByActif(false),
-                    ParMagasin = (await _clienteBORepository.CountGroupedByMagasin())
+                    TotalCartes   = await _clienteBORepository.CountTotal(magasinId),
+                    CartesM3alem  = await _clienteBORepository.CountByCarteType((int)CarteType.BRICOMAM3ALEM, magasinId),
+                    CartesArtisan = await _clienteBORepository.CountByCarteType((int)CarteType.BRICOMAARTISAN, magasinId),
+                    CartesCeMois  = await _clienteBORepository.CountCreatedThisMonth(magasinId),
+                    CartesActives = await _clienteBORepository.CountByActif(true, magasinId),
+                    CartesBloquees = await _clienteBORepository.CountByActif(false, magasinId),
+                    ParMagasin = (await _clienteBORepository.CountGroupedByMagasin(magasinId))
                         .Select(x => new MagasinStat { Magasin = x.Magasin, Count = x.Count })
-                        .ToList()
+                        .ToList(),
+                    EstGlobal = !magasinId.HasValue
                 };
+
+                // Vue filtrée sur un magasin : on récupère son nom pour l'en-tête.
+                if (magasinId.HasValue)
+                {
+                    var magasin = await _clienteBORepository.GetMagasinById(magasinId.Value);
+                    stats.MagasinNom = magasin?.Name;
+                }
 
                 return new RESTServiceResponse<DashboardStatsModel>(true, "OK", stats);
             }

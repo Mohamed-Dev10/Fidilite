@@ -18,11 +18,11 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<string> GenerateBarCode();
         Task<List<Cliente>> GetListByType(int carteTypeId, string? search, int? statutId, int? magasinId, int page, int pageSize);
         Task<int> CountByType(int carteTypeId, string? search, int? statutId, int? magasinId);
-        Task<int> CountTotal();
-        Task<int> CountByCarteType(int carteTypeId);
-        Task<int> CountCreatedThisMonth();
-        Task<int> CountByActif(bool actif);
-        Task<List<(string Magasin, int Count)>> CountGroupedByMagasin();
+        Task<int> CountTotal(int? magasinId = null);
+        Task<int> CountByCarteType(int carteTypeId, int? magasinId = null);
+        Task<int> CountCreatedThisMonth(int? magasinId = null);
+        Task<int> CountByActif(bool actif, int? magasinId = null);
+        Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null);
         Task<List<RefMagasin>> GetAllMagasins();
         Task<List<RefCarteType>> GetAllRefCarteTypes();
         Task<RefCarteType?> GetRefCarteTypeById2(int id);

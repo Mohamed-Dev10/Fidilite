@@ -10,8 +10,36 @@
 }
 <div class="page-header d-print-none">
     <h2 class="page-title">Bonjour, @displayName</h2>
-    <div class="page-subtitle">Vue d'ensemble des cartes fidélité</div>
+    @if (stats.SansMagasin)
+    {
+        <div class="page-subtitle text-warning"><i class="ti ti-alert-triangle me-1"></i>Aucun magasin assigné à votre compte</div>
+    }
+    else if (!stats.EstGlobal)
+    {
+        <div class="page-subtitle"><i class="ti ti-building-store me-1"></i>Magasin : <strong>@stats.MagasinNom</strong></div>
+    }
+    else
+    {
+        <div class="page-subtitle">Vue d'ensemble des cartes fidélité</div>
+    }
 </div>
+
+@if (stats.SansMagasin)
+{
+    <div class="card">
+        <div class="card-body">
+            <div class="empty">
+                <div class="empty-icon"><i class="ti ti-building-store-off fs-1 text-warning"></i></div>
+                <p class="empty-title">Aucun magasin assigné</p>
+                <p class="empty-subtitle text-muted">
+                    Votre compte n'est rattaché à aucun magasin, les statistiques ne peuvent donc pas être affichées.<br />
+                    Contactez l'administrateur pour qu'il vous attribue un magasin.
+                </p>
+            </div>
+        </div>
+    </div>
+    return;
+}
 
 <!-- KPI principaux (panneau teinté) -->
 <div class="kpi-group kpi-group-indigo">
@@ -80,7 +108,7 @@
     </div>
 </div>
 
-<!-- Répartition par magasin -->
+<!-- Répartition par magasin (admin : tous les magasins ; responsable : son magasin) -->
 @{
     var totalMagasin = stats.ParMagasin.Sum(m => m.Count);
     var topMagasins = stats.ParMagasin.OrderByDescending(m => m.Count).ToList();
@@ -90,7 +118,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-building-store me-2 text-primary"></i>Répartition par magasin</h3>
+                <h3 class="card-title"><i class="ti ti-building-store me-2 text-primary"></i>@(stats.EstGlobal ? "Répartition par magasin" : "Mon magasin")</h3>
                 <div class="card-actions">
                     <span class="badge bg-primary-lt">@stats.ParMagasin.Count magasin(s)</span>
                 </div>
@@ -132,7 +160,14 @@
                     </div>
                 </div>
                 <div class="card-footer text-muted">
-                    Total : <strong>@totalMagasin</strong> carte(s) réparties sur <strong>@stats.ParMagasin.Count</strong> magasin(s)
+                    @if (stats.EstGlobal)
+                    {
+                        <text>Total : <strong>@totalMagasin</strong> carte(s) réparties sur <strong>@stats.ParMagasin.Count</strong> magasin(s)</text>
+                    }
+                    else
+                    {
+                        <text>Total : <strong>@totalMagasin</strong> carte(s) pour <strong>@stats.MagasinNom</strong></text>
+                    }
                 </div>
             }
         </div>

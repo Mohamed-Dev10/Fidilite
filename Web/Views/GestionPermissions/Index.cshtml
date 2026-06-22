@@ -4,6 +4,7 @@
     var roles = Model ?? new();
     var userWithRoles = ViewBag.Users as List<(BRICOMA.ECOMMERCE.Data.ApplicationUser.ApplicationUser User, string Role)> ?? new();
     var permissions = ViewBag.Permissions as List<BRICOMA.ECOMMERCE.Data.ApplicationUser.Permission> ?? new();
+    var magasinNames = ViewBag.MagasinNames as Dictionary<int, string> ?? new();
     var userRolesList = userWithRoles.Select(x => x.Role).Where(r => !string.IsNullOrEmpty(r) && r != "-").Distinct().OrderBy(r => r).ToList();
     var categories = permissions.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
     var palette = new[] { "indigo", "purple", "blue", "orange", "red", "green", "teal", "pink", "cyan", "yellow" };
@@ -85,6 +86,7 @@
                     <thead>
                         <tr>
                             <th>Email</th>
+                            <th>Magasin</th>
                             <th>Rôle</th>
                             <th>Statut</th>
                             <th class="text-end">Actions</th>
@@ -92,7 +94,7 @@
                     </thead>
                     <tbody id="listBody">
                         <tr id="emptyRow" style="display:none;">
-                            <td colspan="4" class="text-center text-muted py-5">
+                            <td colspan="5" class="text-center text-muted py-5">
                                 <i class="ti ti-user-off fs-1 d-block mb-2"></i>
                                 Aucun utilisateur trouvé
                             </td>
@@ -100,13 +102,24 @@
                         @foreach (var (user, role) in userWithRoles)
                         {
                             var suspended = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
-                            var searchData = $"{user.Email} {role}".ToLowerInvariant();
+                            var magasinNom = user.RefMagasinId.HasValue && magasinNames.TryGetValue(user.RefMagasinId.Value, out var mn) ? mn : null;
+                            var searchData = $"{user.Email} {role} {magasinNom}".ToLowerInvariant();
                             <tr class="data-row" data-search="@searchData" data-statut="@role">
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.85rem;"><i class="ti ti-user"></i></span>
                                         <span class="fw-medium">@user.Email</span>
                                     </div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(magasinNom))
+                                    {
+                                        <span class="chip chip-blue"><i class="ti ti-building-store"></i> @magasinNom</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
                                 </td>
                                 <td>
                                     <span class="chip chip-indigo"><i class="ti ti-shield-lock"></i> @role</span>

@@ -175,8 +175,9 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
 
         public async Task<int> CountTotal(int? magasinId = null)
         {
-            // Le back-office ne gère pas les cartes AMIBRICOMA (stock historique) : exclues des agrégats.
-            var query = _context.Cliente.Where(c => c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            // Le back-office ne compte que les cartes typées qu'il gère (M3alem, Artisan, types paramétrables) :
+            // on exclut les cartes sans type (NULL, stock legacy) et les cartes AMIBRICOMA historiques.
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -195,7 +196,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             var start = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             var end = start.AddMonths(1);
             var query = _context.Cliente.Where(c => c.DateCreation >= start && c.DateCreation < end
-                && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -206,7 +207,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             var query = actif
                 ? _context.Cliente.Where(c => c.IsActif != false)
                 : _context.Cliente.Where(c => c.IsActif == false);
-            query = query.Where(c => c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            query = query.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -214,7 +215,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
 
         public async Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null)
         {
-            var query = _context.Cliente.Where(c => c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
 

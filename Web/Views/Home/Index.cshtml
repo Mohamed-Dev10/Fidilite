@@ -84,28 +84,36 @@
     </div>
 </div>
 
-<!-- KPI cliquables par type -->
+<!-- KPI cliquables par type (générés automatiquement : un par type de carte géré) -->
+@{
+    // Palette icône/couleur attribuée par ordre de type ; un nouveau type reçoit le style suivant.
+    var typePalette = new[]
+    {
+        new { Icon = "ti-id-badge", Color = "ic-blue",   Text = "text-blue" },
+        new { Icon = "ti-tool",     Color = "ic-orange", Text = "text-orange" },
+        new { Icon = "ti-diamond",  Color = "ic-teal",   Text = "text-teal" },
+        new { Icon = "ti-star",     Color = "ic-purple", Text = "text-purple" },
+        new { Icon = "ti-award",    Color = "ic-green",  Text = "text-green" },
+        new { Icon = "ti-crown",    Color = "ic-pink",   Text = "text-pink" },
+    };
+    var typeIdx = 0;
+}
 <div class="row g-3 mb-2">
-    <div class="col-md-6">
-        <a href="@Url.Action("Index", "M3alem")" class="kpi-card is-link">
-            <span class="kpi-icon kpi-icon-lg ic-blue me-1"><i class="ti ti-id-badge"></i></span>
-            <div class="flex-grow-1">
-                <div class="kpi-value">@stats.CartesM3alem</div>
-                <div class="kpi-label mb-0">Cartes M3alem</div>
-            </div>
-            <i class="ti ti-chevron-right fs-3 text-blue"></i>
-        </a>
-    </div>
-    <div class="col-md-6">
-        <a href="@Url.Action("Index", "Artisan")" class="kpi-card is-link">
-            <span class="kpi-icon kpi-icon-lg ic-orange me-1"><i class="ti ti-tool"></i></span>
-            <div class="flex-grow-1">
-                <div class="kpi-value">@stats.CartesArtisan</div>
-                <div class="kpi-label mb-0">Cartes Artisan</div>
-            </div>
-            <i class="ti ti-chevron-right fs-3 text-orange"></i>
-        </a>
-    </div>
+    @foreach (var type in stats.ParType)
+    {
+        var style = typePalette[typeIdx % typePalette.Length];
+        typeIdx++;
+        <div class="col-md-6">
+            <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card is-link">
+                <span class="kpi-icon kpi-icon-lg @style.Color me-1"><i class="ti @style.Icon"></i></span>
+                <div class="flex-grow-1">
+                    <div class="kpi-value">@type.Count</div>
+                    <div class="kpi-label mb-0">@type.TypeName</div>
+                </div>
+                <i class="ti ti-chevron-right fs-3 @style.Text"></i>
+            </a>
+        </div>
+    }
 </div>
 
 <!-- Répartition par magasin (admin : tous les magasins ; responsable : son magasin) -->

@@ -40,6 +40,11 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
 
             var permsResult = await _permissionBOService.GetAllPermissions();
 
+            // Table de correspondance Id magasin → nom, pour afficher le magasin de chaque utilisateur.
+            var magasinsResult = await _clienteBOService.GetAllMagasins();
+            ViewBag.MagasinNames = (magasinsResult.Data ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefMagasin>())
+                .ToDictionary(m => m.Id, m => m.Name);
+
             ViewBag.Users = userWithRoles;
             ViewBag.Permissions = permsResult.Data ?? new List<Permission>();
             return View(roles);

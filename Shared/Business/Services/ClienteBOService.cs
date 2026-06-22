@@ -502,8 +502,6 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 var stats = new DashboardStatsModel
                 {
                     TotalCartes   = await _clienteBORepository.CountTotal(magasinId),
-                    CartesM3alem  = await _clienteBORepository.CountByCarteType((int)CarteType.BRICOMAM3ALEM, magasinId),
-                    CartesArtisan = await _clienteBORepository.CountByCarteType((int)CarteType.BRICOMAARTISAN, magasinId),
                     CartesCeMois  = await _clienteBORepository.CountCreatedThisMonth(magasinId),
                     CartesActives = await _clienteBORepository.CountByActif(true, magasinId),
                     CartesBloquees = await _clienteBORepository.CountByActif(false, magasinId),
@@ -512,6 +510,21 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                         .ToList(),
                     EstGlobal = !magasinId.HasValue
                 };
+
+                // Un KPI par type de carte géré : on liste TOUS les types (hors AMIBRICOMA) avec leur compteur.
+                // Un nouveau type paramétrable apparaît ainsi automatiquement dans le dashboard, même à 0 carte.
+                var types = (await _clienteBORepository.GetAllRefCarteTypes())
+                    .Where(t => t.Id != (int)CarteType.AMIBRICOMA)
+                    .OrderBy(t => t.Id);
+                foreach (var t in types)
+                {
+                    stats.ParType.Add(new CarteTypeStat
+                    {
+                        TypeId = t.Id,
+                        TypeName = t.Name,
+                        Count = await _clienteBORepository.CountByCarteType(t.Id, magasinId)
+                    });
+                }
 
                 // Vue filtrée sur un magasin : on récupère son nom pour l'en-tête.
                 if (magasinId.HasValue)

@@ -1,0 +1,149 @@
+@model PagedResult<Cliente>
+@{
+    var typeName = ViewData["TypeName"] as string ?? "Cartes";
+    var typeId = ViewData["TypeId"] as int? ?? 0;
+    ViewData["Title"] = typeName;
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="row g-2 align-items-center">
+            <div class="col">
+                <h2 class="page-title">@typeName</h2>
+                <div class="text-muted mt-1">Gestion des cartes « @typeName »</div>
+            </div>
+            <div class="col-auto ms-auto d-print-none">
+                <a asp-controller="Carte" asp-action="Creer" asp-route-carteTypeId="@typeId" class="btn-gradient">
+                    <i class="ti ti-plus me-1"></i> Nouvelle carte
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+
+        <!-- Filtres temps réel -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="row g-2 align-items-center">
+                    <div class="col">
+                        <div class="search-pill">
+                            <i class="ti ti-search"></i>
+                            <input type="text" id="searchInput" class="form-control"
+                                   placeholder="Rechercher nom, prénom, GSM, CIN, magasin..." autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <select id="statutFilter" class="form-select" style="border-radius:12px;">
+                            <option value="">Tous les statuts</option>
+                            <option value="2">Confirmé</option>
+                        </select>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" id="resetBtn" class="btn-soft btn-soft-gray">
+                            <i class="ti ti-x"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="ti ti-id-badge me-2 text-primary"></i>
+                    Total : <strong id="totalCount">@Model.TotalCount</strong> carte(s)
+                </h3>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom & Prénom</th>
+                            <th>GSM</th>
+                            <th>CIN</th>
+                            <th>Magasin</th>
+                            <th>Statut</th>
+                            <th>Date création</th>
+                            <th>Confirmé</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listBody">
+                        <tr id="emptyRow" style="display:none;">
+                            <td colspan="8" class="text-center text-muted py-5">
+                                <i class="ti ti-database-off fs-1 d-block mb-2"></i>
+                                Aucune carte « @typeName » trouvée
+                            </td>
+                        </tr>
+                        @foreach (var item in Model.Items)
+                        {
+                            string chipClass, statutIcon, statutLabel;
+                            switch (item.RefClienteStatutId)
+                            {
+                                case 2: chipClass = "chip-green"; statutIcon = "ti-circle-check"; statutLabel = "Confirmé"; break;
+                                case 3: chipClass = "chip-gray"; statutIcon = "ti-lock"; statutLabel = "Clôturé"; break;
+                                default: chipClass = "chip-yellow"; statutIcon = "ti-clock-hour-4"; statutLabel = "Créé"; break;
+                            }
+                            var initials = string.Concat(($"{item.Nom} {item.Prenom}").Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+                            var searchData = $"{item.Nom} {item.Prenom} {item.Gsm} {item.Cin} {item.Email} {item.RefMagasin?.Name}".ToLowerInvariant();
+                            <tr class="data-row" data-search="@searchData" data-statut="@item.RefClienteStatutId">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.8rem;">@(string.IsNullOrEmpty(initials) ? "?" : initials)</span>
+                                        <div>
+                                            <div class="fw-bold">@item.Nom @item.Prenom</div>
+                                            @if (!string.IsNullOrEmpty(item.Email))
+                                            {
+                                                <div class="text-muted small">@item.Email</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@(string.IsNullOrEmpty(item.Gsm) ? "-" : item.Gsm)</td>
+                                <td>@(string.IsNullOrEmpty(item.Cin) ? "-" : item.Cin)</td>
+                                <td>
+                                    @if (item.RefMagasin?.Name != null)
+                                    {
+                                        <span class="chip chip-blue"><i class="ti ti-building-store"></i> @item.RefMagasin.Name</span>
+                                    }
+                                    else { <span class="text-muted">-</span> }
+                                </td>
+                                <td><span class="chip @chipClass"><i class="ti @statutIcon"></i> @statutLabel</span></td>
+                                <td class="text-muted">@item.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    @if (item.IsConfirmed == true)
+                                    {
+                                        <span class="chip chip-green"><i class="ti ti-check"></i> Oui</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="chip chip-yellow"><i class="ti ti-clock"></i> Non</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-controller="Carte" asp-action="Detail" asp-route-id="@item.Id" class="btn-soft btn-soft-blue" title="Voir détail">
+                                        <i class="ti ti-eye"></i> Voir
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="card-footer d-flex align-items-center">
+                <p class="m-0 text-muted small" id="pageInfo"></p>
+                <div class="pager ms-auto" id="pager"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/list-filter.js"></script>
+    <script>bricoListFilter({ perPage: 6, label: "carte(s)" });</script>
+}

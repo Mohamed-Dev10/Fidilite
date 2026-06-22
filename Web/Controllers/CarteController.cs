@@ -85,6 +85,40 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             return RedirectToAction(nameof(Creer));
         }
 
+        // Liste générique des cartes d'un type donné (M3alem, Artisan, ou tout type paramétrable).
+        // Utilisée par les KPI dynamiques du dashboard.
+        [HttpGet]
+        [Authorize(Policy = "carte.list")]
+        public async Task<IActionResult> Liste(int typeId, string? search, int? statutId, int page = 1)
+        {
+            // Un responsable de magasin ne voit que les cartes de son magasin.
+            var scopeMagasinId = await GetScopeMagasinId();
+            int? magasinId = scopeMagasinId.HasValue ? scopeMagasinId : null;
+            if (!User.IsInRole("SUPER_ADMIN") && !scopeMagasinId.HasValue)
+                magasinId = -1; // responsable sans magasin → liste vide
+
+            var filter = new CarteListFilterModel
+            {
+                CarteTypeId = typeId,
+                Search = search,
+                StatutId = statutId,
+                MagasinId = magasinId,
+                Page = 1,
+                PageSize = 5000
+            };
+
+            var result = await _clienteBOService.GetList(filter);
+            ViewData["Filter"] = filter;
+
+            var type = (await _clienteBOService.GetAllRefCarteTypes()).Data?.FirstOrDefault(t => t.Id == typeId);
+            ViewData["TypeId"] = typeId;
+            ViewData["TypeName"] = type?.Name ?? "Cartes";
+
+            if (!result.Success)
+                ViewData["Error"] = result.Message;
+            return View(result.Data);
+        }
+
         // Détail d'une carte (infos + image)
         [HttpGet]
         [Authorize(Policy = "carte.list")]

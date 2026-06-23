@@ -5,6 +5,7 @@
     var imageUrl = param != null && !string.IsNullOrWhiteSpace(param.ImagePath) ? "/" + param.ImagePath : null;
     var bx = param?.BarcodeX ?? 50;
     var by = param?.BarcodeY ?? 50;
+    var bscale = param != null && param.BarcodeScale > 0 ? param.BarcodeScale : 100;
 }
 
 <div class="page-header mb-3">
@@ -26,6 +27,8 @@
     <input type="hidden" name="id" value="@Model.Id" />
     <input type="hidden" name="barcodeX" id="barcodeX" value="@bx" />
     <input type="hidden" name="barcodeY" id="barcodeY" value="@by" />
+    <input type="hidden" name="barcodeScale" id="barcodeScale" value="@bscale" />
+    <input type="hidden" name="removeImage" id="removeImage" value="false" />
 
     <div class="row g-3">
         <!-- Colonne gauche : champs -->
@@ -79,12 +82,25 @@
                             <i class="ti ti-photo"></i>
                             <span>Aucune image — choisissez un fichier pour activer le positionnement</span>
                         </div>
+                        <button type="button" id="btnDeleteImg" class="card-preview-del @(imageUrl == null ? "d-none" : "")"
+                                title="Supprimer l'image">
+                            <i class="ti ti-x"></i>
+                        </button>
                         <img id="previewImg" src="@imageUrl" class="card-preview-img @(imageUrl == null ? "d-none" : "")" alt="Modèle de carte" />
                         <div id="fakeBarcode" class="fake-barcode @(imageUrl == null ? "d-none" : "")"
-                             style="left:@(bx)%; top:@(by)%;" title="Glissez-moi">
+                             style="left:@(bx)%; top:@(by)%; --bc-scale:@(((decimal)bscale / 100).ToString(System.Globalization.CultureInfo.InvariantCulture));"
+                             title="Glissez-moi">
                             <div class="fake-barcode-bars"></div>
                             <div class="fake-barcode-text">0 000000 000000</div>
                         </div>
+                    </div>
+
+                    <!-- Taille (zoom) du code-barres -->
+                    <div class="d-flex align-items-center gap-2 mt-3">
+                        <i class="ti ti-zoom-in text-muted"></i>
+                        <label for="barcodeSize" class="form-label mb-0 small text-muted" style="white-space:nowrap;">Taille du code-barres</label>
+                        <input type="range" id="barcodeSize" class="form-range flex-grow-1" min="50" max="200" step="5" value="@bscale" />
+                        <span class="badge bg-secondary" id="lblScale" style="min-width:3.2rem;">@bscale%</span>
                     </div>
                 </div>
             </div>
@@ -104,8 +120,13 @@
             const inY = document.getElementById("barcodeY");
             const lblX = document.getElementById("lblX");
             const lblY = document.getElementById("lblY");
+            const btnDel = document.getElementById("btnDeleteImg");
+            const inRemove = document.getElementById("removeImage");
+            const slider = document.getElementById("barcodeSize");
+            const inScale = document.getElementById("barcodeScale");
+            const lblScale = document.getElementById("lblScale");
 
-            // Aperçu de l'image choisie
+            // Aperçu de l'image choisie (un nouvel upload annule une suppression)
             input.addEventListener("change", function () {
                 const file = this.files && this.files[0];
                 if (!file) return;
@@ -114,6 +135,31 @@
                 img.classList.remove("d-none");
                 empty.classList.add("d-none");
                 bc.classList.remove("d-none");
+                btnDel.classList.remove("d-none");
+                inRemove.value = "false";
+            });
+
+            // Supprimer l'image : retire l'aperçu et réinitialise le champ fichier.
+            // À l'enregistrement, l'image sera retirée tant qu'aucune autre n'est choisie.
+            btnDel.addEventListener("click", function () {
+                input.value = "";
+                img.src = "";
+                img.classList.add("d-none");
+                bc.classList.add("d-none");
+                btnDel.classList.add("d-none");
+                empty.classList.remove("d-none");
+                inRemove.value = "true";
+            });
+
+            // Zoom : taille du faux code-barres (et valeur sauvegardée).
+            function applyScale(pct) {
+                pct = Math.max(50, Math.min(200, pct));
+                bc.style.setProperty("--bc-scale", (pct / 100).toString());
+                inScale.value = pct;
+                lblScale.textContent = pct + "%";
+            }
+            slider.addEventListener("input", function () {
+                applyScale(parseInt(this.value, 10) || 100);
             });
 
             // Place le code-barres au centre (x,y en %) avec bornage

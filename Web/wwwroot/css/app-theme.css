@@ -537,9 +537,26 @@ a.chip, a.chip:hover { text-decoration: none; }
 }
 .card-preview-empty i { font-size: 2.2rem; }
 
+.card-preview-del {
+    position: absolute;
+    top: 8px; right: 8px;
+    z-index: 3;
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0;
+    border: none; border-radius: 50%;
+    background: rgba(226, 0, 26, .92);
+    color: #fff; font-size: 1.05rem; line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+    transition: transform .12s ease, background .12s ease;
+}
+.card-preview-del:hover { background: #b00014; transform: scale(1.08); }
+
 .fake-barcode {
     position: absolute;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%) scale(var(--bc-scale, 1));
+    transform-origin: center center;
     width: 26%;
     max-width: 220px;
     min-width: 90px;

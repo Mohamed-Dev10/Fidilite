@@ -15,5 +15,8 @@ namespace BRICOMA.ECOMMERCE.Models.Helpers
 
         /// <summary>Position verticale du code-barres en pourcentage (0-100).</summary>
         public int BarcodeYPercent { get; set; }
+
+        /// <summary>Taille du code-barres en pourcentage de sa taille de base (défaut 100).</summary>
+        public int BarcodeScalePercent { get; set; } = 100;
     }
 }

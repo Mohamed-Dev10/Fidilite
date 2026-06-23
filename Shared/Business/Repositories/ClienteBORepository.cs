@@ -286,23 +286,28 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
         }
 
         // Upsert : un seul paramétrage par type de carte (contrainte d'unicité en base).
-        public async Task SaveParametrage(RefCarteTypeParametrage parametrage)
+        // removeImage : si true, l'image est explicitement retirée (ImagePath = null).
+        public async Task SaveParametrage(RefCarteTypeParametrage parametrage, bool removeImage = false)
         {
             var existing = await _context.RefCarteTypeParametrage
                 .FirstOrDefaultAsync(p => p.RefCarteTypeId == parametrage.RefCarteTypeId);
 
             if (existing == null)
             {
+                if (removeImage) parametrage.ImagePath = null;
                 _context.RefCarteTypeParametrage.Add(parametrage);
             }
             else
             {
                 existing.MessageReception = parametrage.MessageReception;
-                // Ne pas écraser l'image existante si aucune nouvelle n'est fournie.
-                if (!string.IsNullOrWhiteSpace(parametrage.ImagePath))
+                // Image : suppression explicite > nouvelle image > conservation de l'ancienne.
+                if (removeImage)
+                    existing.ImagePath = null;
+                else if (!string.IsNullOrWhiteSpace(parametrage.ImagePath))
                     existing.ImagePath = parametrage.ImagePath;
                 existing.BarcodeX = parametrage.BarcodeX;
                 existing.BarcodeY = parametrage.BarcodeY;
+                existing.BarcodeScale = parametrage.BarcodeScale;
                 _context.RefCarteTypeParametrage.Update(existing);
             }
 

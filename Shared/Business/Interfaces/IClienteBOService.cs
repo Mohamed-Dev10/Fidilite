@@ -32,7 +32,7 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<bool>> UpdateRefCarteType(int id, string name);
         Task<RESTServiceResponse<bool>> DeleteRefCarteType(int id);
         Task<RESTServiceResponse<RefCarteTypeParametrage>> GetParametrage(int carteTypeId);
-        Task<RESTServiceResponse<bool>> SaveParametrage(int carteTypeId, string messageReception, string imagePath, int barcodeX, int barcodeY);
+        Task<RESTServiceResponse<bool>> SaveParametrage(int carteTypeId, string messageReception, string imagePath, int barcodeX, int barcodeY, int barcodeScale = 100, bool removeImage = false);
         Task<RESTServiceResponse<List<RefGenre>>> GetAllGenres();
         Task<RESTServiceResponse<List<RefMetier>>> GetAllMetiers();
         Task<RESTServiceResponse<List<RefVille>>> GetAllVilles();

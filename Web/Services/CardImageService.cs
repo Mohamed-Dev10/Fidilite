@@ -31,6 +31,7 @@ namespace BRICOMA.ECOMMERCE.Web.Services
                 string templatePath;
                 bool positionEnPourcentage;
                 int x, y;
+                int scalePercent = 100;
 
                 var parametreImage = parametrage?.ImagePath;
                 if (!string.IsNullOrWhiteSpace(parametreImage))
@@ -39,6 +40,7 @@ namespace BRICOMA.ECOMMERCE.Web.Services
                     positionEnPourcentage = true;
                     x = parametrage!.BarcodeXPercent;
                     y = parametrage.BarcodeYPercent;
+                    scalePercent = parametrage.BarcodeScalePercent <= 0 ? 100 : parametrage.BarcodeScalePercent;
                 }
                 else
                 {
@@ -60,7 +62,7 @@ namespace BRICOMA.ECOMMERCE.Web.Services
                 var outputPath = Path.Combine(outputDir, $"{clienteCode}.png");
 
                 // Génération synchrone (System.Drawing) déportée sur le thread pool
-                await Task.Run(() => RenderCard(templatePath, codeBarre, x, y, positionEnPourcentage, outputPath));
+                await Task.Run(() => RenderCard(templatePath, codeBarre, x, y, positionEnPourcentage, scalePercent, outputPath));
 
                 _logger.LogInformation("Image carte générée : {Path}", outputPath);
 
@@ -84,7 +86,7 @@ namespace BRICOMA.ECOMMERCE.Web.Services
             }
         }
 
-        private static void RenderCard(string templatePath, string barCode, int x, int y, bool positionEnPourcentage, string outputPath)
+        private static void RenderCard(string templatePath, string barCode, int x, int y, bool positionEnPourcentage, int scalePercent, string outputPath)
         {
             var barcodeSettings = new BarcodeSettings
             {
@@ -108,6 +110,11 @@ namespace BRICOMA.ECOMMERCE.Web.Services
             using Image barCodeImage = generator.GenerateImage();
             using Image cardImage = Image.FromFile(templatePath);
 
+            // Taille finale du code-barres : taille de base × scalePercent (bornage 30-300 %).
+            var scale = Math.Clamp(scalePercent, 30, 300) / 100.0;
+            var drawW = (int)Math.Round(barCodeImage.Width * scale);
+            var drawH = (int)Math.Round(barCodeImage.Height * scale);
+
             // En mode pourcentage (x,y = position du CENTRE du code-barres en %), on convertit
             // en pixels selon la taille réelle de l'image-modèle, puis on centre le code-barres.
             int drawX, drawY;
@@ -115,8 +122,8 @@ namespace BRICOMA.ECOMMERCE.Web.Services
             {
                 var centerX = (int)Math.Round(x / 100.0 * cardImage.Width);
                 var centerY = (int)Math.Round(y / 100.0 * cardImage.Height);
-                drawX = centerX - barCodeImage.Width / 2;
-                drawY = centerY - barCodeImage.Height / 2;
+                drawX = centerX - drawW / 2;
+                drawY = centerY - drawH / 2;
             }
             else
             {
@@ -125,7 +132,7 @@ namespace BRICOMA.ECOMMERCE.Web.Services
             }
 
             using (var graphics = Graphics.FromImage(cardImage))
-                graphics.DrawImage(barCodeImage, new Rectangle(drawX, drawY, barCodeImage.Width, barCodeImage.Height));
+                graphics.DrawImage(barCodeImage, new Rectangle(drawX, drawY, drawW, drawH));
 
             cardImage.Save(outputPath, ImageFormat.Png);
         }

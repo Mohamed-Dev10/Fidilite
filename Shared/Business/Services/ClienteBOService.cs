@@ -169,7 +169,8 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     {
                         ImagePath = parametrage.ImagePath,
                         BarcodeXPercent = parametrage.BarcodeX,
-                        BarcodeYPercent = parametrage.BarcodeY
+                        BarcodeYPercent = parametrage.BarcodeY,
+                        BarcodeScalePercent = parametrage.BarcodeScale <= 0 ? 100 : parametrage.BarcodeScale
                     };
                 }
 
@@ -742,7 +743,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<bool>> SaveParametrage(int carteTypeId, string messageReception, string imagePath, int barcodeX, int barcodeY)
+        public async Task<RESTServiceResponse<bool>> SaveParametrage(int carteTypeId, string messageReception, string imagePath, int barcodeX, int barcodeY, int barcodeScale = 100, bool removeImage = false)
         {
             try
             {
@@ -750,9 +751,10 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 if (type == null)
                     return new RESTServiceResponse<bool>(false, "Type de carte introuvable.", false);
 
-                // Bornage des pourcentages de position (0-100).
+                // Bornage des pourcentages de position (0-100) et de taille (30-300).
                 barcodeX = Math.Clamp(barcodeX, 0, 100);
                 barcodeY = Math.Clamp(barcodeY, 0, 100);
+                barcodeScale = Math.Clamp(barcodeScale <= 0 ? 100 : barcodeScale, 30, 300);
 
                 await _clienteBORepository.SaveParametrage(new RefCarteTypeParametrage
                 {
@@ -760,8 +762,9 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     MessageReception = string.IsNullOrWhiteSpace(messageReception) ? null : messageReception.Trim(),
                     ImagePath = imagePath,
                     BarcodeX = barcodeX,
-                    BarcodeY = barcodeY
-                });
+                    BarcodeY = barcodeY,
+                    BarcodeScale = barcodeScale
+                }, removeImage);
 
                 _logger.LogInformation("Paramétrage enregistré pour le type {Id}", carteTypeId);
                 return new RESTServiceResponse<bool>(true, "Paramétrage enregistré.", true);

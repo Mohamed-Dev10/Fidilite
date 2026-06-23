@@ -26,6 +26,11 @@ namespace BRICOMA.ECOMMERCE.Data.Models
         /// </summary>
         public int BarcodeY { get; set; }
 
+        /// <summary>
+        /// Taille du code-barres en pourcentage de sa taille de base (50-200, défaut 100).
+        /// </summary>
+        public int BarcodeScale { get; set; } = 100;
+
         public virtual RefCarteType RefCarteType { get; set; }
     }
 }

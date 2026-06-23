@@ -31,7 +31,7 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task UpdateRefCarteType(RefCarteType refCarteType);
         Task DeleteRefCarteType(RefCarteType refCarteType);
         Task<RefCarteTypeParametrage?> GetParametrageByCarteTypeId(int carteTypeId);
-        Task SaveParametrage(RefCarteTypeParametrage parametrage);
+        Task SaveParametrage(RefCarteTypeParametrage parametrage, bool removeImage = false);
         Task<List<RefGenre>> GetAllGenres();
         Task<List<RefMetier>> GetAllMetiers();
         Task<List<RefVille>> GetAllVilles();

@@ -12,6 +12,9 @@ namespace BRICOMA.ECOMMERCE.Models.Models
         // Généré dynamiquement : un nouveau type apparaît automatiquement dans le dashboard.
         public List<CarteTypeStat> ParType { get; set; } = new();
 
+        // Tendance des créations : une entrée par jour sur les 30 derniers jours (séries complètes, jours vides à 0).
+        public List<DailyStat> Tendance { get; set; } = new();
+
         // Contexte d'affichage : admin = vue globale (tous magasins) ;
         // utilisateur magasin = chiffres filtrés sur son magasin.
         public bool EstGlobal { get; set; } = true;
@@ -29,6 +32,12 @@ namespace BRICOMA.ECOMMERCE.Models.Models
     {
         public int TypeId { get; set; }
         public string TypeName { get; set; } = string.Empty;
+        public int Count { get; set; }
+    }
+
+    public class DailyStat
+    {
+        public DateTime Date { get; set; }
         public int Count { get; set; }
     }
 }

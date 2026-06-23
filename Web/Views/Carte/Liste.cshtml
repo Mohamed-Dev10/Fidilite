@@ -1,7 +1,6 @@
 @model PagedResult<Cliente>
 @{
     var typeName = ViewData["TypeName"] as string ?? "Cartes";
-    var typeId = ViewData["TypeId"] as int? ?? 0;
     ViewData["Title"] = typeName;
 }
 
@@ -11,11 +10,6 @@
             <div class="col">
                 <h2 class="page-title">@typeName</h2>
                 <div class="text-muted mt-1">Gestion des cartes « @typeName »</div>
-            </div>
-            <div class="col-auto ms-auto d-print-none">
-                <a asp-controller="Carte" asp-action="Creer" asp-route-carteTypeId="@typeId" class="btn-gradient">
-                    <i class="ti ti-plus me-1"></i> Nouvelle carte
-                </a>
             </div>
         </div>
     </div>

@@ -228,6 +228,24 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             return grouped.Select(x => (x.Magasin ?? "-", x.Count)).ToList();
         }
 
+        // Cartes gérées créées par jour sur les N derniers jours (pour la tendance du dashboard).
+        // Mêmes exclusions que les autres agrégats : pas de type NULL, pas d'AMIBRICOMA.
+        public async Task<List<(DateTime Day, int Count)>> CountGroupedByDay(int days, int? magasinId = null)
+        {
+            var start = DateTime.Today.AddDays(-(days - 1));
+            var query = _context.Cliente.Where(c => c.DateCreation >= start
+                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+
+            var grouped = await query
+                .GroupBy(c => c.DateCreation.Date)
+                .Select(g => new { Day = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            return grouped.Select(x => (x.Day, x.Count)).ToList();
+        }
+
         public async Task<List<RefMagasin>> GetAllMagasins()
         {
             return await _context.RefMagasin.OrderBy(m => m.Name).ToListAsync();
@@ -258,6 +276,36 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
         public async Task DeleteRefCarteType(RefCarteType refCarteType)
         {
             _context.RefCarteType.Remove(refCarteType);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<RefCarteTypeParametrage?> GetParametrageByCarteTypeId(int carteTypeId)
+        {
+            return await _context.RefCarteTypeParametrage
+                .FirstOrDefaultAsync(p => p.RefCarteTypeId == carteTypeId);
+        }
+
+        // Upsert : un seul paramétrage par type de carte (contrainte d'unicité en base).
+        public async Task SaveParametrage(RefCarteTypeParametrage parametrage)
+        {
+            var existing = await _context.RefCarteTypeParametrage
+                .FirstOrDefaultAsync(p => p.RefCarteTypeId == parametrage.RefCarteTypeId);
+
+            if (existing == null)
+            {
+                _context.RefCarteTypeParametrage.Add(parametrage);
+            }
+            else
+            {
+                existing.MessageReception = parametrage.MessageReception;
+                // Ne pas écraser l'image existante si aucune nouvelle n'est fournie.
+                if (!string.IsNullOrWhiteSpace(parametrage.ImagePath))
+                    existing.ImagePath = parametrage.ImagePath;
+                existing.BarcodeX = parametrage.BarcodeX;
+                existing.BarcodeY = parametrage.BarcodeY;
+                _context.RefCarteTypeParametrage.Update(existing);
+            }
+
             await _context.SaveChangesAsync();
         }
 

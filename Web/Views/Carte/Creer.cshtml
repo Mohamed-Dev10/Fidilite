@@ -37,7 +37,7 @@
             </div>
         }
 
-        <form asp-controller="Carte" asp-action="Creer" method="post">
+        <form asp-controller="Carte" asp-action="Creer" method="post" novalidate>
             @Html.AntiForgeryToken()
 
             <div class="row g-3">
@@ -72,12 +72,13 @@
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label required">CIN</label>
-                                    <input asp-for="Cin" class="form-control" placeholder="Numéro CIN" maxlength="20" required />
+                                    <input asp-for="Cin" class="form-control" placeholder="8 caractères" maxlength="8" />
                                     <span asp-validation-for="Cin" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label">Email <span class="text-muted small">(optionnel)</span></label>
                                     <input asp-for="Email" type="email" class="form-control" placeholder="email@exemple.com" />
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label required">Date de naissance</label>
@@ -96,6 +97,13 @@
                                     <span asp-validation-for="DateNaissance" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
+                                    <label class="form-label required">Métier</label>
+                                    <select asp-for="RefMetierId" asp-items="ViewBag.Metiers" class="form-select">
+                                        <option value="">-- Sélectionner --</option>
+                                    </select>
+                                    <span asp-validation-for="RefMetierId" class="text-danger small"></span>
+                                </div>
+                                <div class="col-sm-6">
                                     <label class="form-label">Genre</label>
                                     <select asp-for="RefGenreId" asp-items="ViewBag.Genres" class="form-select">
                                         <option value="">-- Sélectionner --</option>
@@ -112,45 +120,6 @@
                                     <input asp-for="Adresse" class="form-control" placeholder="Adresse complète" />
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Informations professionnelles -->
-                    <div class="card mb-3">
-                        <div class="card-header collapse-header" role="button" data-bs-toggle="collapse"
-                             data-bs-target="#proSection" aria-expanded="true" aria-controls="proSection">
-                            <h3 class="card-title d-flex align-items-center gap-2">
-                                <span class="avatar ic-orange" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-briefcase"></i></span>
-                                Informations professionnelles
-                            </h3>
-                            <i class="ti ti-chevron-down collapse-chevron ms-auto"></i>
-                        </div>
-                        <div id="proSection" class="collapse show">
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-sm-6">
-                                    <label class="form-label">Raison sociale</label>
-                                    <input asp-for="RaisonSociale" class="form-control" placeholder="Nom entreprise ou société" />
-                                </div>
-                                <div class="col-sm-6">
-                                    <label class="form-label">Fonction</label>
-                                    <input asp-for="Fonction" class="form-control" placeholder="Poste / fonction" />
-                                </div>
-                                <div class="col-sm-6">
-                                    <label class="form-label required">Métier</label>
-                                    <select asp-for="RefMetierId" asp-items="ViewBag.Metiers" class="form-select" required>
-                                        <option value="">-- Sélectionner --</option>
-                                    </select>
-                                    <span asp-validation-for="RefMetierId" class="text-danger small"></span>
-                                </div>
-                                <div class="col-sm-6">
-                                    <label id="niaLabel" class="form-label">NIA</label>
-                                    <input asp-for="Nia" type="number" class="form-control" placeholder="18 à 20 chiffres (obligatoire pour Artisan)"
-                                           minlength="18" maxlength="20" />
-                                    <span asp-validation-for="Nia" class="text-danger small"></span>
-                                </div>
-                            </div>
-                        </div>
                         </div>
                     </div>
 
@@ -174,6 +143,12 @@
                                     <option value="">-- Sélectionner --</option>
                                 </select>
                                 <span asp-validation-for="RefCarteTypeId" class="text-danger small"></span>
+                            </div>
+                            <!-- NIA : affiché uniquement pour la carte Artisan -->
+                            <div class="mb-3" id="niaBlock" hidden>
+                                <label id="niaLabel" class="form-label required">NIA</label>
+                                <input asp-for="Nia" type="number" class="form-control" placeholder="18 à 20 chiffres (obligatoire pour Artisan)" />
+                                <span asp-validation-for="Nia" class="text-danger small"></span>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label required">Magasin</label>
@@ -215,22 +190,5 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/js/datepicker.js"></script>
-    <script>
-        // NIA obligatoire (18-20 chiffres) uniquement pour la carte Artisan (RefCarteTypeId = 3)
-        (function () {
-            const typeSelect = document.getElementById("RefCarteTypeId");
-            const niaInput = document.getElementById("Nia");
-            const niaLabel = document.getElementById("niaLabel");
-            if (!typeSelect || !niaInput || !niaLabel) return;
-
-            function toggleNia() {
-                const isArtisan = typeSelect.value === "3";
-                niaInput.required = isArtisan;
-                niaLabel.classList.toggle("required", isArtisan);
-            }
-
-            typeSelect.addEventListener("change", toggleNia);
-            toggleNia();
-        })();
-    </script>
+    <script src="~/js/carte-form.js"></script>
 }

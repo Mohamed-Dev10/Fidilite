@@ -1,6 +1,16 @@
+@inject BRICOMA.ECOMMERCE.Business.Interfaces.IClienteBOService ClienteService
 @{
     var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var currentTypeId = ViewContext.HttpContext.Request.Query["typeId"].ToString();
     string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+
+    // Menu dynamique : un item par type de carte géré (AMIBRICOMA exclu).
+    // Un nouveau type paramétré apparaît automatiquement ici.
+    var carteTypesMenu = (await ClienteService.GetAllRefCarteTypes()).Data?
+        .Where(t => t.Id != (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.AMIBRICOMA)
+        .ToList() ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefCarteType>();
+    var typePalette = new[] { "si-blue", "si-orange", "si-teal", "si-pink", "si-cyan", "si-yellow", "si-green", "si-purple" };
 }
 <!DOCTYPE html>
 <html lang="fr">
@@ -68,23 +78,24 @@
 
                         <li class="nav-header">Cartes Fidélité</li>
                         <li class="nav-item">
-                            <a asp-controller="Carte" asp-action="Creer" class="nav-link si-green @Active("Carte")">
+                            <a asp-controller="Carte" asp-action="Creer" class="nav-link si-green @(string.Equals(action, "Creer", StringComparison.OrdinalIgnoreCase) ? "active" : "")">
                                 <i class="nav-icon ti ti-plus"></i>
                                 <p>Nouvelle carte</p>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a asp-controller="M3alem" asp-action="Index" class="nav-link si-blue @Active("M3alem")">
-                                <i class="nav-icon ti ti-id-badge"></i>
-                                <p>Cartes M3alem</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a asp-controller="Artisan" asp-action="Index" class="nav-link si-orange @Active("Artisan")">
-                                <i class="nav-icon ti ti-tool"></i>
-                                <p>Cartes Artisan</p>
-                            </a>
-                        </li>
+                        @for (var i = 0; i < carteTypesMenu.Count; i++)
+                        {
+                            var type = carteTypesMenu[i];
+                            var typeActive = string.Equals(action, "Liste", StringComparison.OrdinalIgnoreCase)
+                                             && currentTypeId == type.Id.ToString();
+                            <li class="nav-item">
+                                <a asp-controller="Carte" asp-action="Liste" asp-route-typeId="@type.Id"
+                                   class="nav-link @typePalette[i % typePalette.Length] @(typeActive ? "active" : "")">
+                                    <i class="nav-icon ti ti-credit-card"></i>
+                                    <p>@type.Name</p>
+                                </a>
+                            </li>
+                        }
 
                         @{
                             var canUsers = User.HasClaim("perm", "admin.users");

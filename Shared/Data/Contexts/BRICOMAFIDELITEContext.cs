@@ -36,6 +36,7 @@ namespace BRICOMA.ECOMMERCE.Data.Contexts
         public virtual DbSet<Profil> Profil { get; set; }
         public virtual DbSet<RefAnniversaireCarte> RefAnniversaireCarte { get; set; }
         public virtual DbSet<RefCarteType> RefCarteType { get; set; }
+        public virtual DbSet<RefCarteTypeParametrage> RefCarteTypeParametrage { get; set; }
         public virtual DbSet<RefClienteStatut> RefClienteStatut { get; set; }
         public virtual DbSet<RefClienteType> RefClienteType { get; set; }
         public virtual DbSet<RefGenre> RefGenre { get; set; }
@@ -366,6 +367,24 @@ namespace BRICOMA.ECOMMERCE.Data.Contexts
                 entity.ToTable("REF_CarteType");
 
                 entity.Property(e => e.Name).IsRequired();
+            });
+
+            modelBuilder.Entity<RefCarteTypeParametrage>(entity =>
+            {
+                entity.ToTable("REF_CarteTypeParametrage");
+
+                entity.HasIndex(e => e.RefCarteTypeId).IsUnique();
+
+                entity.Property(e => e.RefCarteTypeId).HasColumnName("REF_CarteType_Id");
+
+                entity.Property(e => e.MessageReception).HasMaxLength(1000);
+
+                entity.Property(e => e.ImagePath).HasMaxLength(500);
+
+                entity.HasOne(d => d.RefCarteType)
+                    .WithMany()
+                    .HasForeignKey(d => d.RefCarteTypeId)
+                    .HasConstraintName("FK_RCTP_ToREF_CarteType");
             });
 
             modelBuilder.Entity<RefClienteStatut>(entity =>

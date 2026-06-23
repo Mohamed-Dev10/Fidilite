@@ -10,6 +10,6 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         /// (pour Twilio WhatsApp, null tant que PublicBaseUrl n'est pas configurée), ou null si
         /// la génération échoue.
         /// </summary>
-        Task<CardImageResult?> GenerateCardImage(int carteTypeId, string clienteCode, string codeBarre);
+        Task<CardImageResult?> GenerateCardImage(int carteTypeId, string clienteCode, string codeBarre, CardTemplateParametrage? parametrage = null);
     }
 }

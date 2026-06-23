@@ -8,10 +8,14 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
     public class ParametrageController : Controller
     {
         private readonly IClienteBOService _clienteBOService;
+        private readonly IWebHostEnvironment _env;
 
-        public ParametrageController(IClienteBOService clienteBOService)
+        private static readonly string[] ImagesAutorisees = { ".png", ".jpg", ".jpeg" };
+
+        public ParametrageController(IClienteBOService clienteBOService, IWebHostEnvironment env)
         {
             _clienteBOService = clienteBOService;
+            _env = env;
         }
 
         public async Task<IActionResult> Index()
@@ -49,20 +53,64 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var list = await _clienteBOService.GetAllRefCarteTypes();
             var item = list.Data?.FirstOrDefault(r => r.Id == id);
             if (item == null) return NotFound();
+
+            // Paramétrage existant (message, image, position du code-barres) pour pré-remplir la page.
+            ViewBag.Parametrage = (await _clienteBOService.GetParametrage(id)).Data;
             return View(item);
         }
 
         [Authorize(Policy = "parametrage.edit")]
         [HttpPost]
-        public async Task<IActionResult> Edit(int id, string name)
+        public async Task<IActionResult> Edit(int id, string name, string messageReception,
+                                              IFormFile image, int barcodeX = 50, int barcodeY = 50)
         {
+            // 1) Nom du type
             var result = await _clienteBOService.UpdateRefCarteType(id, name);
             if (!result.Data)
             {
                 ViewData["Error"] = result.Message;
-                return View();
+                ViewBag.Parametrage = (await _clienteBOService.GetParametrage(id)).Data;
+                var list = await _clienteBOService.GetAllRefCarteTypes();
+                return View(list.Data?.FirstOrDefault(r => r.Id == id));
             }
-            TempData["Success"] = result.Message;
+
+            // 2) Image-modèle (optionnelle) : on conserve l'ancienne si aucune n'est envoyée.
+            string imagePath = null;
+            if (image != null && image.Length > 0)
+            {
+                var ext = Path.GetExtension(image.FileName).ToLowerInvariant();
+                if (!ImagesAutorisees.Contains(ext))
+                {
+                    ViewData["Error"] = "Format d'image non supporté (PNG ou JPG uniquement).";
+                    ViewBag.Parametrage = (await _clienteBOService.GetParametrage(id)).Data;
+                    var list = await _clienteBOService.GetAllRefCarteTypes();
+                    return View(list.Data?.FirstOrDefault(r => r.Id == id));
+                }
+
+                var dir = Path.Combine(_env.WebRootPath, "media", "types");
+                Directory.CreateDirectory(dir);
+
+                // On supprime les anciennes images de ce type (extension potentiellement différente).
+                foreach (var old in Directory.GetFiles(dir, $"{id}.*"))
+                {
+                    try { System.IO.File.Delete(old); } catch { /* fichier verrouillé : ignoré */ }
+                }
+
+                var fileName = $"{id}{ext}";
+                var fullPath = Path.Combine(dir, fileName);
+                using (var stream = new FileStream(fullPath, FileMode.Create))
+                    await image.CopyToAsync(stream);
+
+                imagePath = $"media/types/{fileName}";
+            }
+
+            // 3) Message + position du code-barres
+            var saved = await _clienteBOService.SaveParametrage(id, messageReception, imagePath, barcodeX, barcodeY);
+            if (!saved.Data)
+                ViewData["Error"] = saved.Message;
+            else
+                TempData["Success"] = "Type de carte et paramétrage enregistrés.";
+
             return RedirectToAction(nameof(Index));
         }
 

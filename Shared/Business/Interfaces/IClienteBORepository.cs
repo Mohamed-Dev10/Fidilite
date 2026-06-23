@@ -23,12 +23,15 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<int> CountCreatedThisMonth(int? magasinId = null);
         Task<int> CountByActif(bool actif, int? magasinId = null);
         Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null);
+        Task<List<(DateTime Day, int Count)>> CountGroupedByDay(int days, int? magasinId = null);
         Task<List<RefMagasin>> GetAllMagasins();
         Task<List<RefCarteType>> GetAllRefCarteTypes();
         Task<RefCarteType?> GetRefCarteTypeById2(int id);
         Task CreateRefCarteType(RefCarteType refCarteType);
         Task UpdateRefCarteType(RefCarteType refCarteType);
         Task DeleteRefCarteType(RefCarteType refCarteType);
+        Task<RefCarteTypeParametrage?> GetParametrageByCarteTypeId(int carteTypeId);
+        Task SaveParametrage(RefCarteTypeParametrage parametrage);
         Task<List<RefGenre>> GetAllGenres();
         Task<List<RefMetier>> GetAllMetiers();
         Task<List<RefVille>> GetAllVilles();

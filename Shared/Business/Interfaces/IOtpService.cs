@@ -17,6 +17,12 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<ClienteModel>> Verify(string token, string code);
 
         /// <summary>
+        /// Régénère un nouveau code pour une demande existante (renvoi OTP) :
+        /// réinitialise les tentatives, prolonge l'expiration et renvoie (GSM, nouveau code).
+        /// </summary>
+        Task<RESTServiceResponse<(string Gsm, string Code)>> Regenerate(string token);
+
+        /// <summary>
         /// Supprime la demande OTP une fois la carte créée.
         /// </summary>
         Task Consume(string token);

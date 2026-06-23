@@ -28,7 +28,6 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             var code = GenerateCode();
 
           
-
             var otp = new OtpVerification
             {
                 Token = token,
@@ -76,6 +75,26 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 return new RESTServiceResponse<ClienteModel>(false, "Données de la demande illisibles.", null);
 
             return new RESTServiceResponse<ClienteModel>(true, "OTP vérifié.", model);
+        }
+
+        public async Task<RESTServiceResponse<(string Gsm, string Code)>> Regenerate(string token)
+        {
+            var otp = await _otpRepository.GetByToken(token);
+            if (otp == null)
+                return new RESTServiceResponse<(string, string)>(false, "Demande introuvable ou expirée.", default);
+
+            if (otp.IsUsed)
+                return new RESTServiceResponse<(string, string)>(false, "Cette demande a déjà été traitée.", default);
+
+            // Nouveau code, compteur de tentatives remis à zéro, expiration prolongée.
+            otp.Code = GenerateCode();
+            otp.Attempts = 0;
+            otp.ExpiresAt = DateTime.Now.AddMinutes(ExpiryMinutes);
+            await _otpRepository.Update(otp);
+
+            _logger.LogInformation("OTP renvoyé - Token: {Token}, GSM: {Gsm}", token, otp.Gsm);
+
+            return new RESTServiceResponse<(string, string)>(true, "Code renvoyé.", (otp.Gsm, otp.Code));
         }
 
         public async Task Consume(string token)

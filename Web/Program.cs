@@ -66,6 +66,7 @@ builder.Services.AddAuthorization(options =>
         .Build();
 });
 
+//pour les services injecté déja 
 builder.Services.AddScoped<IClienteBORepository, ClienteBORepository>();
 builder.Services.AddScoped<IClienteBOService, ClienteBOService>();
 builder.Services.AddScoped<IPermissionBORepository, PermissionBORepository>();

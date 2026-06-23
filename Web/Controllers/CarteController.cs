@@ -64,6 +64,23 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             return View("VerifierOtp");
         }
 
+        // Renvoie un nouveau code OTP (le client ne l'a pas reçu) et réaffiche la saisie OTP
+        [HttpPost]
+        [Authorize(Policy = "carte.create")]
+        public async Task<IActionResult> RenvoyerOtp(string token, string gsm)
+        {
+            var result = await _clienteBOService.ResendOtp(token);
+
+            ViewBag.Token = token;
+            ViewBag.Gsm = gsm;
+            if (result.Success)
+                ViewData["Success"] = result.Message;
+            else
+                ViewData["Error"] = result.Message;
+
+            return View("VerifierOtp");
+        }
+
         // Étape 2 : vérifie l'OTP et crée la carte (FIDELITE + MARKET + WhatsApp)
         [HttpPost]
         [Authorize(Policy = "carte.confirm")]

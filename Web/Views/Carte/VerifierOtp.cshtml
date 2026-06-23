@@ -56,12 +56,48 @@
                     </div>
                 </div>
 
-                <div class="text-center text-muted mt-3">
-                    Code non reçu ?
-                    <a asp-action="Creer">Recommencer</a>
+                <div class="text-center mt-3">
+                    <form asp-action="RenvoyerOtp" method="post" class="d-inline">
+                        <input type="hidden" name="token" value="@token" />
+                        <input type="hidden" name="gsm" value="@gsm" />
+                        <span class="text-muted">Code non reçu ?</span>
+                        <button type="submit" id="resendBtn" class="btn btn-link p-0 align-baseline">
+                            <i class="ti ti-refresh me-1"></i><span id="resendLabel">Renvoyer le code</span>
+                        </button>
+                    </form>
+                    <div class="mt-1">
+                        <a asp-action="Creer" class="text-muted small">Recommencer la saisie</a>
+                    </div>
                 </div>
 
             </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        // Anti-spam : on bloque le renvoi pendant 30 s après l'affichage de la page.
+        (function () {
+            const btn = document.getElementById("resendBtn");
+            const label = document.getElementById("resendLabel");
+            if (!btn || !label) return;
+
+            let remaining = 30;
+            const baseText = "Renvoyer le code";
+            btn.disabled = true;
+
+            const timer = setInterval(function () {
+                remaining -= 1;
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    label.textContent = baseText;
+                } else {
+                    label.textContent = baseText + " (" + remaining + "s)";
+                }
+            }, 1000);
+            label.textContent = baseText + " (" + remaining + "s)";
+        })();
+    </script>
+}

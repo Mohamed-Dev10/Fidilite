@@ -68,6 +68,35 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
+        public async Task<RESTServiceResponse<bool>> ResendOtp(string token)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(token))
+                    return new RESTServiceResponse<bool>(false, "Demande invalide.", false);
+
+                var regen = await _otpService.Regenerate(token);
+                if (!regen.Success)
+                    return new RESTServiceResponse<bool>(false, regen.Message, false);
+
+                var (gsm, code) = regen.Data;
+                var sent = await _whatsAppService.SendMessage(
+                    gsm,
+                    $"BRICOMA : votre nouveau code de vérification est {code}. Il expire dans 10 minutes.");
+
+                if (!sent.Data)
+                    return new RESTServiceResponse<bool>(false, $"Échec de l'envoi du code OTP : {sent.Message}", false);
+
+                _logger.LogInformation("OTP renvoyé - GSM: {Gsm}, Token: {Token}", gsm, token);
+                return new RESTServiceResponse<bool>(true, $"Un nouveau code a été envoyé au {gsm}.", true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur ResendOtp - Token: {Token}", token);
+                return new RESTServiceResponse<bool>(false, ex.Message, false);
+            }
+        }
+
         public async Task<RESTServiceResponse<string>> ConfirmCreate(string token, string otpCode)
         {
             try
@@ -129,12 +158,30 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 var marketClient = await BuildMarketClient(model, typeId, clienteCode, codeBarre);
                 await _marketBORepository.CreateClient(marketClient);
 
-                // 3) Génération de l'image de la carte (template + code-barres) + envoi WhatsApp
-                var carteImage = await _cardImageService.GenerateCardImage(typeId, clienteCode, codeBarre);
+                // 3) Génération de l'image de la carte (template + code-barres) + envoi WhatsApp.
+                // Paramétrage optionnel du type : image-modèle + position du code-barres + message.
+                var parametrage = await _clienteBORepository.GetParametrageByCarteTypeId(typeId);
+
+                CardTemplateParametrage? template = null;
+                if (parametrage != null && !string.IsNullOrWhiteSpace(parametrage.ImagePath))
+                {
+                    template = new CardTemplateParametrage
+                    {
+                        ImagePath = parametrage.ImagePath,
+                        BarcodeXPercent = parametrage.BarcodeX,
+                        BarcodeYPercent = parametrage.BarcodeY
+                    };
+                }
+
+                var carteImage = await _cardImageService.GenerateCardImage(typeId, clienteCode, codeBarre, template);
+
+                // Intro paramétrable (message de réception) ; sinon message par défaut.
+                var intro = !string.IsNullOrWhiteSpace(parametrage?.MessageReception)
+                    ? parametrage!.MessageReception.Trim()
+                    : $"Bonjour {model.Prenom} {model.Nom},\nVotre carte {carteType.Name} est créée.";
 
                 var carteMessage =
-                    $"Bonjour {model.Prenom} {model.Nom},\n" +
-                    $"Votre carte {carteType.Name} est créée.\n" +
+                    $"{intro}\n" +
                     $"Code : {clienteCode}\n" +
                     $"Code-barres : {codeBarre}\n" +
                     $"Présentez-la à chaque passage en caisse BRICOMA.";
@@ -279,9 +326,22 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     return ("03", metier?.Code ?? "09");
                 case CarteType.BRICOMAARTISAN:
                     return ("10", metier?.Code ?? "09");
-                default: // AMIBRICOMA
+                case CarteType.AMIBRICOMA:
                     return ("04", "09");
+                default:
+                    // Nouveau type paramétrable : code_pri unique et stable (Id + 10) pour ne pas
+                    // mélanger ses clients MARKET avec un type existant (codes historiques 01..10).
+                    return (BuildCodePriForNewType(typeId), metier?.Code ?? "09");
             }
+        }
+
+        // code_pri = 2 caractères max → Id 4 donne "14", Id 5 "15", etc. (jamais en collision
+        // avec les codes existants 03/04/10). Garde-fou à 99 pour rester sur 2 caractères.
+        private static string BuildCodePriForNewType(int typeId)
+        {
+            var code = typeId + 10;
+            if (code > 99) code = 99;
+            return code.ToString("D2");
         }
 
         public async Task<RESTServiceResponse<Cliente>> GetById(long id)
@@ -387,6 +447,13 @@ namespace BRICOMA.ECOMMERCE.Business.Services
         {
             if (string.IsNullOrWhiteSpace(model.Cin))
                 return new RESTServiceResponse<bool>(false, "La CIN est obligatoire.", false);
+
+            if (model.Cin.Trim().Length != 8)
+                return new RESTServiceResponse<bool>(false, "La CIN doit contenir exactement 8 caractères.", false);
+
+            if (!string.IsNullOrWhiteSpace(model.Email)
+                && !Regex.IsMatch(model.Email.Trim(), @"^[^\s@]+@[^\s@]+\.[^\s@]+$"))
+                return new RESTServiceResponse<bool>(false, "Le format de l'email est invalide.", false);
 
             if (model.RefMetierId == null || model.RefMetierId <= 0)
                 return new RESTServiceResponse<bool>(false, "Le métier est obligatoire.", false);
@@ -526,6 +593,22 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     });
                 }
 
+                // Tendance des créations sur 30 jours : on complète les jours sans carte avec 0
+                // pour obtenir une courbe continue (sinon les jours vides « sauteraient »).
+                const int jours = 30;
+                var parJour = (await _clienteBORepository.CountGroupedByDay(jours, magasinId))
+                    .ToDictionary(x => x.Day.Date, x => x.Count);
+                var debut = DateTime.Today.AddDays(-(jours - 1));
+                for (int i = 0; i < jours; i++)
+                {
+                    var jour = debut.AddDays(i);
+                    stats.Tendance.Add(new DailyStat
+                    {
+                        Date = jour,
+                        Count = parJour.TryGetValue(jour, out var c) ? c : 0
+                    });
+                }
+
                 // Vue filtrée sur un magasin : on récupère son nom pour l'en-tête.
                 if (magasinId.HasValue)
                 {
@@ -641,6 +724,51 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Erreur DeleteRefCarteType");
+                return new RESTServiceResponse<bool>(false, ex.Message, false);
+            }
+        }
+
+        public async Task<RESTServiceResponse<RefCarteTypeParametrage>> GetParametrage(int carteTypeId)
+        {
+            try
+            {
+                var param = await _clienteBORepository.GetParametrageByCarteTypeId(carteTypeId);
+                return new RESTServiceResponse<RefCarteTypeParametrage>(true, "OK", param);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur GetParametrage - Type: {Id}", carteTypeId);
+                return new RESTServiceResponse<RefCarteTypeParametrage>(false, ex.Message, null);
+            }
+        }
+
+        public async Task<RESTServiceResponse<bool>> SaveParametrage(int carteTypeId, string messageReception, string imagePath, int barcodeX, int barcodeY)
+        {
+            try
+            {
+                var type = await _clienteBORepository.GetRefCarteTypeById2(carteTypeId);
+                if (type == null)
+                    return new RESTServiceResponse<bool>(false, "Type de carte introuvable.", false);
+
+                // Bornage des pourcentages de position (0-100).
+                barcodeX = Math.Clamp(barcodeX, 0, 100);
+                barcodeY = Math.Clamp(barcodeY, 0, 100);
+
+                await _clienteBORepository.SaveParametrage(new RefCarteTypeParametrage
+                {
+                    RefCarteTypeId = carteTypeId,
+                    MessageReception = string.IsNullOrWhiteSpace(messageReception) ? null : messageReception.Trim(),
+                    ImagePath = imagePath,
+                    BarcodeX = barcodeX,
+                    BarcodeY = barcodeY
+                });
+
+                _logger.LogInformation("Paramétrage enregistré pour le type {Id}", carteTypeId);
+                return new RESTServiceResponse<bool>(true, "Paramétrage enregistré.", true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur SaveParametrage - Type: {Id}", carteTypeId);
                 return new RESTServiceResponse<bool>(false, ex.Message, false);
             }
         }

@@ -17,6 +17,11 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         /// génère Code + CodeBarre EAN-13 et envoie la carte par WhatsApp. Une seule action.
         /// </summary>
         Task<RESTServiceResponse<string>> ConfirmCreate(string token, string otpCode);
+
+        /// <summary>
+        /// Renvoie un nouveau code OTP par WhatsApp pour une demande en cours (token existant).
+        /// </summary>
+        Task<RESTServiceResponse<bool>> ResendOtp(string token);
         Task<RESTServiceResponse<PagedResult<Cliente>>> GetList(CarteListFilterModel filter);
         Task<RESTServiceResponse<DashboardStatsModel>> GetDashboardStats(int? magasinId = null);
         Task<RESTServiceResponse<Cliente>> GetById(long id);
@@ -26,6 +31,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<bool>> CreateRefCarteType(string name);
         Task<RESTServiceResponse<bool>> UpdateRefCarteType(int id, string name);
         Task<RESTServiceResponse<bool>> DeleteRefCarteType(int id);
+        Task<RESTServiceResponse<RefCarteTypeParametrage>> GetParametrage(int carteTypeId);
+        Task<RESTServiceResponse<bool>> SaveParametrage(int carteTypeId, string messageReception, string imagePath, int barcodeX, int barcodeY);
         Task<RESTServiceResponse<List<RefGenre>>> GetAllGenres();
         Task<RESTServiceResponse<List<RefMetier>>> GetAllMetiers();
         Task<RESTServiceResponse<List<RefVille>>> GetAllVilles();

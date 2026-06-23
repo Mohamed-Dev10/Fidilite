@@ -1,32 +1,175 @@
 @model BRICOMA.ECOMMERCE.Data.Models.RefCarteType
 @{
-    ViewData["Title"] = "Modifier type de carte";
+    ViewData["Title"] = "Paramétrer le type de carte";
+    var param = ViewBag.Parametrage as BRICOMA.ECOMMERCE.Data.Models.RefCarteTypeParametrage;
+    var imageUrl = param != null && !string.IsNullOrWhiteSpace(param.ImagePath) ? "/" + param.ImagePath : null;
+    var bx = param?.BarcodeX ?? 50;
+    var by = param?.BarcodeY ?? 50;
 }
 
 <div class="page-header mb-3">
     <div class="row align-items-center">
         <div class="col">
-            <h2 class="page-title">Modifier type de carte</h2>
+            <h2 class="page-title">Paramétrer « @Model.Name »</h2>
+            <div class="text-muted mt-1">Nom, message de réception, image-modèle et position du code-barres</div>
+        </div>
+        <div class="col-auto">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                <i class="ti ti-arrow-left me-1"></i> Retour
+            </a>
         </div>
     </div>
 </div>
 
+<form method="post" asp-action="Edit" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@Model.Id" />
+    <input type="hidden" name="barcodeX" id="barcodeX" value="@bx" />
+    <input type="hidden" name="barcodeY" id="barcodeY" value="@by" />
 
-<div class="card" style="max-width:500px">
-    <div class="card-body">
-        <form method="post" asp-action="Edit">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="id" value="@Model.Id" />
-            <div class="mb-3">
-                <label class="form-label">Nom du type <span class="text-danger">*</span></label>
-                <input type="text" name="name" value="@Model.Name" class="form-control" required />
+    <div class="row g-3">
+        <!-- Colonne gauche : champs -->
+        <div class="col-lg-5">
+            <div class="card">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nom du type <span class="text-danger">*</span></label>
+                        <input type="text" name="name" value="@Model.Name" class="form-control" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Message de réception</label>
+                        <textarea name="messageReception" class="form-control" rows="4"
+                                  placeholder="Message de confirmation envoyé au client après création de la carte (laisser vide pour le message par défaut).">@(param?.MessageReception)</textarea>
+                        <div class="form-text">
+                            Le code et le code-barres du client sont ajoutés automatiquement à la suite de ce message.
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Image-modèle de la carte</label>
+                        <input type="file" name="image" id="imageInput" class="form-control" accept=".png,.jpg,.jpeg" />
+                        <div class="form-text">PNG ou JPG. Laissez vide pour conserver l'image actuelle.</div>
+                    </div>
+
+                    <button type="submit" class="btn-gradient">
+                        <i class="ti ti-device-floppy me-1"></i> Enregistrer
+                    </button>
+                </div>
             </div>
-            <div class="d-flex gap-2">
-                <button type="submit" class="btn-gradient">
-                    <i class="ti ti-device-floppy me-1"></i> Enregistrer
-                </button>
-                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">Annuler</a>
+        </div>
+
+        <!-- Colonne droite : aperçu + drag & drop -->
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h3 class="card-title mb-0">Position du code-barres</h3>
+                        <span class="text-muted small">
+                            X : <span id="lblX">@bx</span>% &nbsp;·&nbsp; Y : <span id="lblY">@by</span>%
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-3">
+                        Glissez le code-barres de démonstration à l'endroit voulu sur l'image.
+                        Le vrai code-barres du client sera généré à cette position lors de la création de la carte.
+                    </p>
+
+                    <div id="previewWrap" class="card-preview-wrap">
+                        <div id="previewEmpty" class="card-preview-empty @(imageUrl != null ? "d-none" : "")">
+                            <i class="ti ti-photo"></i>
+                            <span>Aucune image — choisissez un fichier pour activer le positionnement</span>
+                        </div>
+                        <img id="previewImg" src="@imageUrl" class="card-preview-img @(imageUrl == null ? "d-none" : "")" alt="Modèle de carte" />
+                        <div id="fakeBarcode" class="fake-barcode @(imageUrl == null ? "d-none" : "")"
+                             style="left:@(bx)%; top:@(by)%;" title="Glissez-moi">
+                            <div class="fake-barcode-bars"></div>
+                            <div class="fake-barcode-text">0 000000 000000</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
+        </div>
     </div>
-</div>
+</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            const input = document.getElementById("imageInput");
+            const img = document.getElementById("previewImg");
+            const empty = document.getElementById("previewEmpty");
+            const wrap = document.getElementById("previewWrap");
+            const bc = document.getElementById("fakeBarcode");
+            const inX = document.getElementById("barcodeX");
+            const inY = document.getElementById("barcodeY");
+            const lblX = document.getElementById("lblX");
+            const lblY = document.getElementById("lblY");
+
+            // Aperçu de l'image choisie
+            input.addEventListener("change", function () {
+                const file = this.files && this.files[0];
+                if (!file) return;
+                const url = URL.createObjectURL(file);
+                img.src = url;
+                img.classList.remove("d-none");
+                empty.classList.add("d-none");
+                bc.classList.remove("d-none");
+            });
+
+            // Place le code-barres au centre (x,y en %) avec bornage
+            function setPos(xp, yp) {
+                xp = Math.max(0, Math.min(100, xp));
+                yp = Math.max(0, Math.min(100, yp));
+                bc.style.left = xp + "%";
+                bc.style.top = yp + "%";
+                inX.value = Math.round(xp);
+                inY.value = Math.round(yp);
+                lblX.textContent = Math.round(xp);
+                lblY.textContent = Math.round(yp);
+            }
+
+            // Drag & drop (souris + tactile) du code-barres
+            let dragging = false;
+
+            function pointFromEvent(e) {
+                const rect = wrap.getBoundingClientRect();
+                const cx = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+                const cy = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+                return { xp: cx / rect.width * 100, yp: cy / rect.height * 100 };
+            }
+
+            function startDrag(e) {
+                if (bc.classList.contains("d-none")) return;
+                dragging = true;
+                bc.classList.add("dragging");
+                e.preventDefault();
+            }
+            function moveDrag(e) {
+                if (!dragging) return;
+                const p = pointFromEvent(e);
+                setPos(p.xp, p.yp);
+                e.preventDefault();
+            }
+            function endDrag() {
+                dragging = false;
+                bc.classList.remove("dragging");
+            }
+
+            bc.addEventListener("mousedown", startDrag);
+            document.addEventListener("mousemove", moveDrag);
+            document.addEventListener("mouseup", endDrag);
+
+            bc.addEventListener("touchstart", startDrag, { passive: false });
+            document.addEventListener("touchmove", moveDrag, { passive: false });
+            document.addEventListener("touchend", endDrag);
+
+            // Clic direct sur l'image = déplacer le code-barres à cet endroit
+            wrap.addEventListener("click", function (e) {
+                if (bc.classList.contains("d-none") || e.target === bc || bc.contains(e.target)) return;
+                if (e.target !== img) return;
+                const p = pointFromEvent(e);
+                setPos(p.xp, p.yp);
+            });
+        })();
+    </script>
+}

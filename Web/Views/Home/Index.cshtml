@@ -116,53 +116,49 @@
     }
 </div>
 
-<!-- Répartition par magasin (admin : tous les magasins ; responsable : son magasin) -->
+<!-- Tendance des créations sur les 30 derniers jours (scope magasin respecté) -->
 @{
-    var totalMagasin = stats.ParMagasin.Sum(m => m.Count);
-    var topMagasins = stats.ParMagasin.OrderByDescending(m => m.Count).ToList();
-    var maxMagasin = topMagasins.Any() ? topMagasins.Max(m => m.Count) : 0;
+    var tend = stats.Tendance;
+    var maxTend = tend.Any() ? tend.Max(d => d.Count) : 0;
+    var totalTend = tend.Sum(d => d.Count);
 }
 <div class="row row-cards">
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-building-store me-2 text-primary"></i>@(stats.EstGlobal ? "Répartition par magasin" : "Mon magasin")</h3>
+                <h3 class="card-title"><i class="ti ti-chart-bar me-2 text-primary"></i>Tendance des créations <span class="text-muted fw-normal">(30 derniers jours)</span></h3>
                 <div class="card-actions">
-                    <span class="badge bg-primary-lt">@stats.ParMagasin.Count magasin(s)</span>
+                    <span class="badge bg-primary-lt">@totalTend carte(s)</span>
                 </div>
             </div>
-            @if (!stats.ParMagasin.Any())
+            @if (totalTend == 0)
             {
                 <div class="card-body">
                     <div class="empty">
-                        <div class="empty-icon"><i class="ti ti-database-off fs-1"></i></div>
-                        <p class="empty-title">Aucune donnée</p>
-                        <p class="empty-subtitle text-muted">Aucune carte n'est encore rattachée à un magasin.</p>
+                        <div class="empty-icon"><i class="ti ti-chart-bar-off fs-1"></i></div>
+                        <p class="empty-title">Aucune création sur les 30 derniers jours</p>
+                        <p class="empty-subtitle text-muted">Les nouvelles cartes apparaîtront ici au fil des créations.</p>
                     </div>
                 </div>
             }
             else
             {
                 <div class="card-body">
-                    <div class="rank-list">
-                        @{ var rank = 0; }
-                        @foreach (var m in topMagasins)
+                    <div class="trend-chart">
+                        @for (var i = 0; i < tend.Count; i++)
                         {
-                            rank++;
-                            var pct = maxMagasin > 0 ? (int)Math.Round(m.Count * 100.0 / maxMagasin) : 0;
-                            var share = totalMagasin > 0 ? Math.Round(m.Count * 100.0 / totalMagasin, 1) : 0;
-                            var rankClass = rank == 1 ? "is-1" : rank == 2 ? "is-2" : rank == 3 ? "is-3" : "";
-                            <div class="rank-row">
-                                <span class="rank-num @rankClass">@rank</span>
-                                <div class="rank-main">
-                                    <div class="rank-head">
-                                        <span class="rank-name"><i class="ti ti-building-store"></i> @m.Magasin</span>
-                                        <span class="rank-count">@m.Count <small class="text-muted">· @share%</small></span>
-                                    </div>
-                                    <div class="rank-bar">
-                                        <span class="rank-bar-fill @rankClass" style="width:@(pct)%"></span>
-                                    </div>
+                            var d = tend[i];
+                            var h = maxTend > 0 ? (int)Math.Round(d.Count * 100.0 / maxTend) : 0;
+                            var showLabel = i % 5 == 0 || i == tend.Count - 1;
+                            <div class="trend-col" title="@d.Date.ToString("dd/MM/yyyy") : @d.Count carte(s)">
+                                <div class="trend-bar-wrap">
+                                    @if (d.Count > 0)
+                                    {
+                                        <span class="trend-count">@d.Count</span>
+                                    }
+                                    <span class="trend-bar" style="height:@(h)%"></span>
                                 </div>
+                                <span class="trend-label">@(showLabel ? d.Date.ToString("dd/MM") : "")</span>
                             </div>
                         }
                     </div>
@@ -170,11 +166,11 @@
                 <div class="card-footer text-muted">
                     @if (stats.EstGlobal)
                     {
-                        <text>Total : <strong>@totalMagasin</strong> carte(s) réparties sur <strong>@stats.ParMagasin.Count</strong> magasin(s)</text>
+                        <text>Total : <strong>@totalTend</strong> carte(s) créée(s) sur 30 jours (tous magasins)</text>
                     }
                     else
                     {
-                        <text>Total : <strong>@totalMagasin</strong> carte(s) pour <strong>@stats.MagasinNom</strong></text>
+                        <text>Total : <strong>@totalTend</strong> carte(s) créée(s) sur 30 jours — <strong>@stats.MagasinNom</strong></text>
                     }
                 </div>
             }

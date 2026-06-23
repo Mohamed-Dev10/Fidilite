@@ -22,12 +22,32 @@ namespace BRICOMA.ECOMMERCE.Web.Services
             _logger = logger;
         }
 
-        public async Task<CardImageResult?> GenerateCardImage(int carteTypeId, string clienteCode, string codeBarre)
+        public async Task<CardImageResult?> GenerateCardImage(int carteTypeId, string clienteCode, string codeBarre, CardTemplateParametrage? parametrage = null)
         {
             try
             {
-                var (templateFile, x, y) = GetTemplate(carteTypeId);
-                var templatePath = Path.Combine(_env.WebRootPath, "media", templateFile);
+                // Position du code-barres : en pourcentage si un paramétrage existe (déplacement
+                // libre côté UI), sinon en pixels via le modèle codé en dur du type (fallback).
+                string templatePath;
+                bool positionEnPourcentage;
+                int x, y;
+
+                var parametreImage = parametrage?.ImagePath;
+                if (!string.IsNullOrWhiteSpace(parametreImage))
+                {
+                    templatePath = Path.Combine(_env.WebRootPath, parametreImage.Replace('/', Path.DirectorySeparatorChar));
+                    positionEnPourcentage = true;
+                    x = parametrage!.BarcodeXPercent;
+                    y = parametrage.BarcodeYPercent;
+                }
+                else
+                {
+                    var (templateFile, px, py) = GetTemplate(carteTypeId);
+                    templatePath = Path.Combine(_env.WebRootPath, "media", templateFile);
+                    positionEnPourcentage = false;
+                    x = px;
+                    y = py;
+                }
 
                 if (!File.Exists(templatePath))
                 {
@@ -40,7 +60,7 @@ namespace BRICOMA.ECOMMERCE.Web.Services
                 var outputPath = Path.Combine(outputDir, $"{clienteCode}.png");
 
                 // Génération synchrone (System.Drawing) déportée sur le thread pool
-                await Task.Run(() => RenderCard(templatePath, codeBarre, x, y, outputPath));
+                await Task.Run(() => RenderCard(templatePath, codeBarre, x, y, positionEnPourcentage, outputPath));
 
                 _logger.LogInformation("Image carte générée : {Path}", outputPath);
 
@@ -64,7 +84,7 @@ namespace BRICOMA.ECOMMERCE.Web.Services
             }
         }
 
-        private static void RenderCard(string templatePath, string barCode, int x, int y, string outputPath)
+        private static void RenderCard(string templatePath, string barCode, int x, int y, bool positionEnPourcentage, string outputPath)
         {
             var barcodeSettings = new BarcodeSettings
             {
@@ -88,8 +108,24 @@ namespace BRICOMA.ECOMMERCE.Web.Services
             using Image barCodeImage = generator.GenerateImage();
             using Image cardImage = Image.FromFile(templatePath);
 
+            // En mode pourcentage (x,y = position du CENTRE du code-barres en %), on convertit
+            // en pixels selon la taille réelle de l'image-modèle, puis on centre le code-barres.
+            int drawX, drawY;
+            if (positionEnPourcentage)
+            {
+                var centerX = (int)Math.Round(x / 100.0 * cardImage.Width);
+                var centerY = (int)Math.Round(y / 100.0 * cardImage.Height);
+                drawX = centerX - barCodeImage.Width / 2;
+                drawY = centerY - barCodeImage.Height / 2;
+            }
+            else
+            {
+                drawX = x;
+                drawY = y;
+            }
+
             using (var graphics = Graphics.FromImage(cardImage))
-                graphics.DrawImage(barCodeImage, new Rectangle(x, y, barCodeImage.Width, barCodeImage.Height));
+                graphics.DrawImage(barCodeImage, new Rectangle(drawX, drawY, barCodeImage.Width, barCodeImage.Height));
 
             cardImage.Save(outputPath, ImageFormat.Png);
         }

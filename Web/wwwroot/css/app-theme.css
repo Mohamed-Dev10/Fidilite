@@ -798,6 +798,27 @@ a.chip, a.chip:hover { text-decoration: none; }
 @keyframes dpIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
 .dp-head { display: flex; align-items: center; gap: .2rem; margin-bottom: .6rem; }
 .dp-title { flex: 1; text-align: center; font-weight: 700; font-size: .95rem; color: var(--bc-text); }
+.dp-title-btn {
+    border: none; background: transparent; cursor: pointer;
+    border-radius: 8px; padding: .25rem .5rem;
+    display: inline-flex; align-items: center; justify-content: center; gap: .25rem;
+    transition: all .15s ease;
+}
+.dp-title-btn:hover { background: rgba(var(--bc-primary-rgb), .1); color: var(--bc-primary); }
+.dp-title-btn i { font-size: .85rem; }
+.dp-years { grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: .2rem; }
+.dp-year {
+    border: none; background: rgba(var(--bc-primary-rgb), .06);
+    border-radius: 10px; padding: .6rem 0;
+    font-size: .9rem; font-weight: 600; color: var(--bc-text);
+    cursor: pointer; transition: all .12s ease;
+}
+.dp-year:hover:not(:disabled) { background: rgba(var(--bc-primary-rgb), .15); color: var(--bc-primary); }
+.dp-year.is-selected {
+    background: var(--bc-grad); color: #fff;
+    box-shadow: 0 6px 14px rgba(var(--bc-primary-rgb), .35);
+}
+.dp-year:disabled { opacity: .3; cursor: not-allowed; }
 .dp-nav {
     width: 2rem; height: 2rem; flex: 0 0 auto;
     border: none; background: transparent; border-radius: 9px;

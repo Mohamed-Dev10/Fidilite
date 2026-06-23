@@ -479,8 +479,8 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             if (dateNaissance == default || dateNaissance.Year < 1900)
                 return new RESTServiceResponse<bool>(false, "La date de naissance est obligatoire et doit être valide.", false);
 
-            if (dateNaissance.Date > DateTime.Today)
-                return new RESTServiceResponse<bool>(false, "La date de naissance ne peut pas être dans le futur.", false);
+            if (dateNaissance.Date >= DateTime.Today)
+                return new RESTServiceResponse<bool>(false, "La date de naissance doit être antérieure à aujourd'hui.", false);
 
             return null;
         }

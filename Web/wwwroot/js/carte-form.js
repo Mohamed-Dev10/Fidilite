@@ -27,7 +27,15 @@
         switch (el.id) {
             case "Nom":    return val ? "" : "Le nom est obligatoire.";
             case "Prenom": return val ? "" : "Le prénom est obligatoire.";
-            case "Gsm":    return val ? "" : "Le numéro GSM est obligatoire.";
+            case "Gsm": {
+                const digits = val.replace(/\D/g, "");
+                if (!digits) return "Le téléphone est obligatoire.";
+                if (digits.length !== 10)
+                    return "Le téléphone doit contenir exactement 10 chiffres (actuellement " + digits.length + ").";
+                if (!/^0[567]/.test(digits))
+                    return "Le numéro doit commencer par 05, 06 ou 07.";
+                return "";
+            }
             case "Cin":
                 if (!val) return "La CIN est obligatoire.";
                 if (val.length !== 8) return "La CIN doit contenir exactement 8 caractères.";
@@ -35,8 +43,16 @@
             case "Email":
                 if (!val) return ""; // optionnel
                 return emailRegex.test(val) ? "" : "Format d'email invalide (ex : nom@exemple.com).";
-            case "DateNaissance":
-                return val ? "" : "La date de naissance est obligatoire.";
+            case "DateNaissance": {
+                if (!val) return "La date de naissance est obligatoire.";
+                const d = new Date(val);
+                if (isNaN(d.getTime())) return "Date de naissance invalide.";
+                d.setHours(0, 0, 0, 0);
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                if (d.getTime() >= today.getTime())
+                    return "La date de naissance doit être antérieure à aujourd'hui.";
+                return "";
+            }
             case "RefMetierId":
                 return val ? "" : "Le métier est obligatoire.";
             case "RefCarteTypeId":
@@ -79,6 +95,9 @@
         showError(el, validateField(el));
     }
 
+    // Champs validés en continu (message affiché dès la saisie, sans attendre le blur).
+    const liveFields = new Set(["Gsm", "DateNaissance"]);
+
     function register(el) {
         if (!el) return;
         const leaveEvent = el.tagName === "SELECT" ? "change" : "blur";
@@ -87,7 +106,20 @@
             runValidation(el);
         });
         el.addEventListener("input", function () {
-            if (touched.has(el.id)) runValidation(el);
+            // Téléphone : on ne garde que les chiffres pendant la frappe.
+            if (el.id === "Gsm") {
+                const onlyDigits = el.value.replace(/\D/g, "");
+                if (el.value !== onlyDigits) el.value = onlyDigits;
+            }
+            // NIA : 20 chiffres maximum (type=number ignore maxlength → on tronque).
+            if (el.id === "Nia") {
+                const capped = el.value.replace(/\D/g, "").slice(0, 20);
+                if (el.value !== capped) el.value = capped;
+            }
+            if (liveFields.has(el.id) || touched.has(el.id)) {
+                touched.add(el.id);
+                runValidation(el);
+            }
         });
     }
 
@@ -101,7 +133,8 @@
     const dn = document.getElementById("DateNaissance");
     if (dn) {
         dn.addEventListener("change", function () {
-            if (touched.has("DateNaissance")) runValidation(dn);
+            touched.add("DateNaissance");
+            runValidation(dn); // date = champ temps réel
         });
     }
 

@@ -66,8 +66,9 @@
                                     <span asp-validation-for="Prenom" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
-                                    <label class="form-label required">GSM</label>
-                                    <input asp-for="Gsm" class="form-control" placeholder="06XXXXXXXX" maxlength="20" />
+                                    <label class="form-label required">Téléphone</label>
+                                    <input asp-for="Gsm" class="form-control" placeholder="10 chiffres (ex : 0612345678)"
+                                           maxlength="10" inputmode="numeric" autocomplete="tel" />
                                     <span asp-validation-for="Gsm" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
@@ -87,7 +88,7 @@
                                         var dnIso = dnHasValue ? Model!.DateNaissance.ToString("yyyy-MM-dd") : "";
                                         var dnDisp = dnHasValue ? Model!.DateNaissance.ToString("dd/MM/yyyy") : "jj/mm/aaaa";
                                     }
-                                    <div class="dp" data-dp data-max="today">
+                                    <div class="dp" data-dp data-max="today" data-exclude-today>
                                         <input type="hidden" id="DateNaissance" name="DateNaissance" value="@dnIso" />
                                         <button type="button" class="form-control input-date dp-trigger" aria-haspopup="dialog">
                                             <span class="dp-value @(dnHasValue ? "" : "is-placeholder")">@dnDisp</span>

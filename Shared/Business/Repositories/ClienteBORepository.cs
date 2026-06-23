@@ -275,6 +275,13 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
 
         public async Task DeleteRefCarteType(RefCarteType refCarteType)
         {
+            // Le paramétrage référence le type (FK) : on le retire d'abord pour éviter
+            // la violation de contrainte lors de la suppression du type.
+            var parametrage = await _context.RefCarteTypeParametrage
+                .FirstOrDefaultAsync(p => p.RefCarteTypeId == refCarteType.Id);
+            if (parametrage != null)
+                _context.RefCarteTypeParametrage.Remove(parametrage);
+
             _context.RefCarteType.Remove(refCarteType);
             await _context.SaveChangesAsync();
         }

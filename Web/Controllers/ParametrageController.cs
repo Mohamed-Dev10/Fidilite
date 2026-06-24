@@ -7,10 +7,16 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
     [Authorize(Policy = "parametrage.view")]
     public class ParametrageController : Controller
     {
+
         private readonly IClienteBOService _clienteBOService;
         private readonly IWebHostEnvironment _env;
 
         private static readonly string[] ImagesAutorisees = { ".png", ".jpg", ".jpeg" };
+
+        // Dimensions imposées du modèle de carte (px) : identiques aux cartes de référence
+        // (carte-bricomam3alem / artisan / amibricoma) sur lesquelles le code-barres est positionné.
+        public const int CarteLargeur = 2305;
+        public const int CarteHauteur = 1427;
 
         public ParametrageController(IClienteBOService clienteBOService, IWebHostEnvironment env)
         {
@@ -56,6 +62,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
 
             // Paramétrage existant (message, image, position du code-barres) pour pré-remplir la page.
             ViewBag.Parametrage = (await _clienteBOService.GetParametrage(id)).Data;
+            ViewBag.CardWidth = CarteLargeur;
+            ViewBag.CardHeight = CarteHauteur;
             return View(item);
         }
 
@@ -65,15 +73,21 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                                               IFormFile image, int barcodeX = 50, int barcodeY = 50,
                                               int barcodeScale = 100, bool removeImage = false)
         {
+            // Ré-affiche la page Paramétrer avec un message d'erreur (en conservant le contexte).
+            async Task<IActionResult> ViewWithError(string msg)
+            {
+                ViewData["Error"] = msg;
+                ViewBag.Parametrage = (await _clienteBOService.GetParametrage(id)).Data;
+                ViewBag.CardWidth = CarteLargeur;
+                ViewBag.CardHeight = CarteHauteur;
+                var l = await _clienteBOService.GetAllRefCarteTypes();
+                return View(l.Data?.FirstOrDefault(r => r.Id == id));
+            }
+
             // 1) Nom du type
             var result = await _clienteBOService.UpdateRefCarteType(id, name);
             if (!result.Data)
-            {
-                ViewData["Error"] = result.Message;
-                ViewBag.Parametrage = (await _clienteBOService.GetParametrage(id)).Data;
-                var list = await _clienteBOService.GetAllRefCarteTypes();
-                return View(list.Data?.FirstOrDefault(r => r.Id == id));
-            }
+                return await ViewWithError(result.Message);
 
             var dirTypes = Path.Combine(_env.WebRootPath, "media", "types");
 
@@ -85,12 +99,21 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 removeImage = false;
                 var ext = Path.GetExtension(image.FileName).ToLowerInvariant();
                 if (!ImagesAutorisees.Contains(ext))
+                    return await ViewWithError("Format d'image non supporté (PNG ou JPG uniquement).");
+
+                // L'image DOIT avoir exactement les dimensions de la carte, sinon le code-barres
+                // (positionné en %) ne tomberait pas au bon endroit sur la carte générée.
+                int imgW, imgH;
+                using (var probeStream = image.OpenReadStream())
+                using (var probe = System.Drawing.Image.FromStream(probeStream, false, false))
                 {
-                    ViewData["Error"] = "Format d'image non supporté (PNG ou JPG uniquement).";
-                    ViewBag.Parametrage = (await _clienteBOService.GetParametrage(id)).Data;
-                    var list = await _clienteBOService.GetAllRefCarteTypes();
-                    return View(list.Data?.FirstOrDefault(r => r.Id == id));
+                    imgW = probe.Width;
+                    imgH = probe.Height;
                 }
+                if (imgW != CarteLargeur || imgH != CarteHauteur)
+                    return await ViewWithError(
+                        $"L'image doit faire exactement {CarteLargeur} × {CarteHauteur} px (dimensions de la carte). " +
+                        $"Image fournie : {imgW} × {imgH} px.");
 
                 Directory.CreateDirectory(dirTypes);
 

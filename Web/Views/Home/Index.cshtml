@@ -144,23 +144,75 @@
             else
             {
                 <div class="card-body">
-                    <div class="trend-chart">
-                        @for (var i = 0; i < tend.Count; i++)
+                    @{
+                        var ci = System.Globalization.CultureInfo.InvariantCulture;
+                        var n = tend.Count;
+                        // Repère SVG (mis à l'échelle proportionnellement à la largeur du conteneur).
+                        const double W = 1000, H = 260;
+                        const double padL = 14, padR = 14, padT = 28, padB = 34;
+                        double xLeft = padL, xRight = W - padR, yTop = padT, yBot = H - padB;
+                        Func<int, double> X = i => n <= 1 ? xLeft : xLeft + (double)i / (n - 1) * (xRight - xLeft);
+                        Func<int, double> Y = c => maxTend <= 0 ? yBot : yBot - (double)c / maxTend * (yBot - yTop);
+                        string F(double v) => v.ToString("0.##", ci);
+
+                        var pts = new List<string>();
+                        for (var i = 0; i < n; i++) pts.Add($"{F(X(i))},{F(Y(tend[i].Count))}");
+                        var line = pts.Count > 0 ? "M" + string.Join(" L", pts) : "";
+                        var area = pts.Count > 0
+                            ? $"M{F(X(0))},{F(yBot)} L{string.Join(" L", pts)} L{F(X(n - 1))},{F(yBot)} Z"
+                            : "";
+
+                        // Les éléments SVG <text> entrent en conflit avec le tag Razor <text> :
+                        // on les construit en chaîne et on les injecte via @Html.Raw.
+                        var svgDots = new System.Text.StringBuilder();
+                        for (var i = 0; i < n; i++)
                         {
-                            var d = tend[i];
-                            var h = maxTend > 0 ? (int)Math.Round(d.Count * 100.0 / maxTend) : 0;
-                            var showLabel = i % 5 == 0 || i == tend.Count - 1;
-                            <div class="trend-col" title="@d.Date.ToString("dd/MM/yyyy") : @d.Count carte(s)">
-                                <div class="trend-bar-wrap">
-                                    @if (d.Count > 0)
-                                    {
-                                        <span class="trend-count">@d.Count</span>
-                                    }
-                                    <span class="trend-bar" style="height:@(h)%"></span>
-                                </div>
-                                <span class="trend-label">@(showLabel ? d.Date.ToString("dd/MM") : "")</span>
-                            </div>
+                            if (tend[i].Count <= 0) continue;
+                            var cx = F(X(i)); var cy = F(Y(tend[i].Count));
+                            svgDots.Append($"<circle cx=\"{cx}\" cy=\"{cy}\" r=\"4.5\" class=\"trend-dot\" />");
+                            svgDots.Append($"<text x=\"{cx}\" y=\"{F(Y(tend[i].Count) - 12)}\" class=\"trend-dot-label\" text-anchor=\"middle\">{tend[i].Count}</text>");
                         }
+                        var svgAxis = new System.Text.StringBuilder();
+                        for (var i = 0; i < n; i++)
+                        {
+                            if (i % 5 != 0 && i != n - 1) continue;
+                            svgAxis.Append($"<text x=\"{F(X(i))}\" y=\"{F(H - 10)}\" class=\"trend-axis-label\" text-anchor=\"middle\">{tend[i].Date:dd/MM}</text>");
+                        }
+                    }
+                    <div class="trend-area-wrap">
+                        <svg class="trend-area" viewBox="0 0 1000 260" preserveAspectRatio="xMidYMid meet" role="img"
+                             aria-label="Tendance des créations sur 30 jours">
+                            <defs>
+                                <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stop-color="var(--bc-primary)" stop-opacity=".26" />
+                                    <stop offset="100%" stop-color="var(--bc-primary)" stop-opacity="0" />
+                                </linearGradient>
+                                <linearGradient id="trendStroke" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0%" stop-color="var(--bc-primary)" />
+                                    <stop offset="100%" stop-color="var(--bc-primary-2)" />
+                                </linearGradient>
+                            </defs>
+
+                            <!-- Lignes de repère horizontales -->
+                            @for (var g = 0; g <= 2; g++)
+                            {
+                                var gy = yTop + g * (yBot - yTop) / 2.0;
+                                <line x1="@F(xLeft)" y1="@F(gy)" x2="@F(xRight)" y2="@F(gy)" class="trend-grid" />
+                            }
+
+                            @if (!string.IsNullOrEmpty(area))
+                            {
+                                <path d="@area" fill="url(#trendFill)" />
+                                <path d="@line" fill="none" stroke="url(#trendStroke)" stroke-width="3"
+                                      stroke-linejoin="round" stroke-linecap="round" />
+                            }
+
+                            <!-- Points + valeurs sur les jours avec créations -->
+                            @Html.Raw(svgDots.ToString())
+
+                            <!-- Étiquettes de dates (1 sur 5 + la dernière) -->
+                            @Html.Raw(svgAxis.ToString())
+                        </svg>
                     </div>
                 </div>
                 <div class="card-footer text-muted">

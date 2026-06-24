@@ -282,15 +282,15 @@ a.chip, a.chip:hover { text-decoration: none; }
     border-bottom: 1px solid rgba(255,255,255,.06);
     margin-bottom: .6rem;
 }
-.app-sidebar .brand-link { display: flex; align-items: center; gap: .6rem; text-decoration: none; }
-.app-sidebar .brand-text { color: #fff; font-weight: 800; letter-spacing: .14em; font-size: 1.2rem; }
-.app-sidebar .brand-text::before {
-    content: ""; display: inline-block;
-    width: .55rem; height: .55rem; margin-right: .55rem;
-    border-radius: 50%; background: var(--bc-grad);
-    box-shadow: 0 0 0 4px rgba(var(--bc-primary-rgb), .25);
-    vertical-align: middle;
+.app-sidebar .brand-link { display: flex; align-items: center; gap: .6rem; text-decoration: none; width: 100%; justify-content: center; }
+/* Logo BRICOMA sur pastille blanche + halo (sidebar sombre) */
+.app-sidebar .brand-logo-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #fff; border-radius: 12px;
+    padding: 7px 12px;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .2), 0 6px 22px rgba(255, 255, 255, .22);
 }
+.app-sidebar .brand-logo-badge img { height: 34px; width: auto; display: block; }
 
 /* Items */
 .app-sidebar .sidebar-menu .nav-item { margin: .12rem 0; }
@@ -921,12 +921,14 @@ a.chip, a.chip:hover { text-decoration: none; }
 }
 .auth-brand { display: inline-flex; align-items: center; gap: .7rem; position: relative; z-index: 1; }
 .auth-brand-logo {
-    width: 3rem; height: 3rem; border-radius: 14px;
     display: inline-flex; align-items: center; justify-content: center;
-    background: rgba(255, 255, 255, .18); border: 1px solid rgba(255, 255, 255, .25);
-    backdrop-filter: blur(6px); color: #fff;
-    font-size: 1.6rem;
+    width: 56px; height: 56px; flex: 0 0 auto;
+    border-radius: 14px;
+    background: #fff;
+    padding: 7px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
 }
+.auth-brand-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .auth-brand-name { font-size: 1.35rem; font-weight: 800; letter-spacing: .14em; }
 .auth-hero-body { position: relative; z-index: 1; }
 .auth-hero-title { font-size: 2.1rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
@@ -954,7 +956,7 @@ a.chip, a.chip:hover { text-decoration: none; }
     display: none; align-items: center; gap: .6rem; margin-bottom: 1.5rem;
     font-weight: 800; letter-spacing: .12em; color: var(--bc-primary);
 }
-.auth-mobile-brand .auth-brand-logo { background: var(--bc-grad-red); color: #fff; width: 2.6rem; height: 2.6rem; font-size: 1.3rem; }
+.auth-mobile-brand .auth-brand-logo { background: #fff; width: 44px; height: 44px; padding: 5px; }
 .auth-mobile-brand { color: var(--bc-red); }
 @media (max-width: 900px) { .auth-mobile-brand { display: inline-flex; } }
 

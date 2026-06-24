@@ -8,8 +8,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
     {
         Task<RESTServiceResponse<List<Permission>>> GetAllPermissions();
         Task<RESTServiceResponse<List<ApplicationRole>>> GetAllRoles();
-        Task<RESTServiceResponse<bool>> CreateRole(string name, string? description);
-        Task<RESTServiceResponse<bool>> UpdateRole(string id, string name, string? description);
+        Task<RESTServiceResponse<bool>> CreateRole(string name);
+        Task<RESTServiceResponse<bool>> UpdateRole(string id, string name);
         Task<RESTServiceResponse<bool>> DeleteRole(string id);
         Task<RESTServiceResponse<List<int>>> GetRolePermissions(string roleId);
         Task<RESTServiceResponse<bool>> SetRolePermissions(string roleId, List<int> permissionIds);

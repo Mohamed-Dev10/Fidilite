@@ -50,7 +50,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<bool>> CreateRole(string name, string? description)
+        public async Task<RESTServiceResponse<bool>> CreateRole(string name)
         {
             try
             {
@@ -60,8 +60,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 var role = new ApplicationRole
                 {
                     Name = name.Trim(),
-                    NormalizedName = name.Trim().ToUpper(),
-                    Description = description
+                    NormalizedName = name.Trim().ToUpper()
                 };
 
                 await _permissionBORepository.CreateRole(role);
@@ -75,7 +74,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<bool>> UpdateRole(string id, string name, string? description)
+        public async Task<RESTServiceResponse<bool>> UpdateRole(string id, string name)
         {
             try
             {
@@ -85,7 +84,6 @@ namespace BRICOMA.ECOMMERCE.Business.Services
 
                 role.Name = name.Trim();
                 role.NormalizedName = name.Trim().ToUpper();
-                role.Description = description;
 
                 await _permissionBORepository.UpdateRole(role);
                 _logger.LogInformation("Rôle modifié : {Id}", id);

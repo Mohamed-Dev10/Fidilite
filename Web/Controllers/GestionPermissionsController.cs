@@ -56,9 +56,9 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateRole(string name, string? description)
+        public async Task<IActionResult> CreateRole(string name)
         {
-            var result = await _permissionBOService.CreateRole(name, description);
+            var result = await _permissionBOService.CreateRole(name);
             if (result.Data)
                 TempData["Success"] = result.Message;
             else

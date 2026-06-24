@@ -203,10 +203,6 @@
                             <label class="form-label">Nom du rôle <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control" placeholder="Ex: Responsable Casa" required />
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="4" placeholder="Description optionnelle"></textarea>
-                        </div>
                         <button type="submit" class="btn-gradient w-100">
                             <i class="ti ti-plus me-1"></i> Créer le rôle
                         </button>
@@ -224,14 +220,13 @@
                         <thead>
                             <tr>
                                 <th>Nom</th>
-                                <th>Description</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (!roles.Any())
                             {
-                                <tr><td colspan="3" class="text-center text-muted py-4">Aucun rôle créé</td></tr>
+                                <tr><td colspan="2" class="text-center text-muted py-4">Aucun rôle créé</td></tr>
                             }
                             else
                             {
@@ -244,7 +239,6 @@
                                                 <span class="fw-bold">@role.Name</span>
                                             </div>
                                         </td>
-                                        <td class="text-muted">@(string.IsNullOrEmpty(role.Description) ? "-" : role.Description)</td>
                                         <td>
                                             <div class="d-flex gap-2">
                                                 <a href="@Url.Action("AssignerPermissions", new { id = role.Id })" class="btn-soft btn-soft-indigo">

@@ -729,6 +729,23 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
+        // Magasin / profil de l'utilisateur : lus depuis la table Profil (source officielle, 1:1 AspNetUsers).
+        public async Task<int?> GetUserMagasinId(string userId)
+        {
+            var profil = await _clienteBORepository.GetProfilByUserId(userId);
+            return profil?.RefMagasinId;
+        }
+
+        public async Task<Profil?> GetUserProfil(string userId)
+        {
+            return await _clienteBORepository.GetProfilByUserId(userId);
+        }
+
+        public async Task SaveUserProfil(string userId, string? nom, string? prenom, int? refMagasinId)
+        {
+            await _clienteBORepository.UpsertProfil(userId, nom, prenom, refMagasinId);
+        }
+
         public async Task<RESTServiceResponse<RefCarteTypeParametrage>> GetParametrage(int carteTypeId)
         {
             try

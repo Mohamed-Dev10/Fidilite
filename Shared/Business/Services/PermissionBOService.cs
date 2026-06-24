@@ -10,12 +10,14 @@ namespace BRICOMA.ECOMMERCE.Business.Services
     public class PermissionBOService : IPermissionBOService
     {
         private readonly IPermissionBORepository _permissionBORepository;
+        private readonly IClienteBORepository _clienteBORepository;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<PermissionBOService> _logger;
 
-        public PermissionBOService(IPermissionBORepository permissionBORepository, UserManager<ApplicationUser> userManager, ILogger<PermissionBOService> logger)
+        public PermissionBOService(IPermissionBORepository permissionBORepository, IClienteBORepository clienteBORepository, UserManager<ApplicationUser> userManager, ILogger<PermissionBOService> logger)
         {
             _permissionBORepository = permissionBORepository;
+            _clienteBORepository = clienteBORepository;
             _userManager = userManager;
             _logger = logger;
         }
@@ -174,15 +176,15 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 {
                     UserName = model.Email,
                     Email = model.Email,
-                    EmailConfirmed = true,
-                    Nom = model.Nom,
-                    Prenom = model.Prenom,
-                    RefMagasinId = model.RefMagasinId
+                    EmailConfirmed = true
                 };
 
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (!result.Succeeded)
                     return new RESTServiceResponse<bool>(false, string.Join(", ", result.Errors.Select(e => e.Description)), false);
+
+                // Nom / prénom / magasin → table Profil (source officielle, liée 1:1 à l'utilisateur).
+                await _clienteBORepository.UpsertProfil(user.Id, model.Nom, model.Prenom, model.RefMagasinId);
 
                 if (!string.IsNullOrWhiteSpace(model.RoleId))
                 {
@@ -211,9 +213,6 @@ namespace BRICOMA.ECOMMERCE.Business.Services
 
                 user.Email = model.Email;
                 user.UserName = model.Email;
-                user.Nom = model.Nom;
-                user.Prenom = model.Prenom;
-                user.RefMagasinId = model.RefMagasinId;
 
                 if (!string.IsNullOrWhiteSpace(model.NewPassword))
                 {
@@ -222,6 +221,9 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 }
 
                 await _userManager.UpdateAsync(user);
+
+                // Nom / prénom / magasin → table Profil (source officielle).
+                await _clienteBORepository.UpsertProfil(user.Id, model.Nom, model.Prenom, model.RefMagasinId);
 
                 var currentRoles = await _userManager.GetRolesAsync(user);
                 await _userManager.RemoveFromRolesAsync(user, currentRoles);

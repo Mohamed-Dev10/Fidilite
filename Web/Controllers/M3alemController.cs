@@ -26,8 +26,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             // L'admin (SUPER_ADMIN) garde la vue globale et peut filtrer librement.
             if (!User.IsInRole("SUPER_ADMIN"))
             {
-                var currentUser = await _userManager.GetUserAsync(User);
-                magasinId = currentUser?.RefMagasinId ?? -1;
+                var userId = _userManager.GetUserId(User);
+                magasinId = await _clienteBOService.GetUserMagasinId(userId) ?? -1;
             }
 
             var filter = new CarteListFilterModel

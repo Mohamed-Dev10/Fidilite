@@ -5,6 +5,7 @@
     var userWithRoles = ViewBag.Users as List<(BRICOMA.ECOMMERCE.Data.ApplicationUser.ApplicationUser User, string Role)> ?? new();
     var permissions = ViewBag.Permissions as List<BRICOMA.ECOMMERCE.Data.ApplicationUser.Permission> ?? new();
     var magasinNames = ViewBag.MagasinNames as Dictionary<int, string> ?? new();
+    var userMagasins = ViewBag.UserMagasins as Dictionary<string, int?> ?? new();
     var userRolesList = userWithRoles.Select(x => x.Role).Where(r => !string.IsNullOrEmpty(r) && r != "-").Distinct().OrderBy(r => r).ToList();
     var categories = permissions.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
     var palette = new[] { "indigo", "purple", "blue", "orange", "red", "green", "teal", "pink", "cyan", "yellow" };
@@ -102,7 +103,8 @@
                         @foreach (var (user, role) in userWithRoles)
                         {
                             var suspended = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
-                            var magasinNom = user.RefMagasinId.HasValue && magasinNames.TryGetValue(user.RefMagasinId.Value, out var mn) ? mn : null;
+                            var userMagasinId = userMagasins.TryGetValue(user.Id, out var umid) ? umid : null;
+                            var magasinNom = userMagasinId.HasValue && magasinNames.TryGetValue(userMagasinId.Value, out var mn) ? mn : null;
                             var searchData = $"{user.Email} {role} {magasinNom}".ToLowerInvariant();
                             <tr class="data-row" data-search="@searchData" data-statut="@role">
                                 <td>

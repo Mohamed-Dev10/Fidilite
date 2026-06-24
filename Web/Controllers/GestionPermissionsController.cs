@@ -32,11 +32,16 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var usersResult = await _permissionBOService.GetAllUsers();
             var users = usersResult.Data ?? new List<ApplicationUser>();
             var userWithRoles = new List<(ApplicationUser User, string Role)>();
+            var userMagasins = new Dictionary<string, int?>();
             foreach (var user in users)
             {
                 var userRoles = await _userManager.GetRolesAsync(user);
                 userWithRoles.Add((user, userRoles.FirstOrDefault() ?? "-"));
+                // Magasin de l'utilisateur lu depuis Profil (source officielle).
+                var profil = await _clienteBOService.GetUserProfil(user.Id);
+                userMagasins[user.Id] = profil?.RefMagasinId;
             }
+            ViewBag.UserMagasins = userMagasins;
 
             var permsResult = await _permissionBOService.GetAllPermissions();
 
@@ -154,14 +159,16 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var rolesResult = await _permissionBOService.GetAllRoles();
             var userRole = rolesResult.Data?.FirstOrDefault(r => r.Name == roles.FirstOrDefault());
 
+            // Infos profil (nom / prénom / magasin) lues depuis la table Profil (source officielle).
+            var profil = await _clienteBOService.GetUserProfil(user.Id);
             var model = new UpdateUserModel
             {
                 Id = user.Id,
-                Nom = user.Nom ?? string.Empty,
-                Prenom = user.Prenom ?? string.Empty,
+                Nom = profil?.Nom ?? string.Empty,
+                Prenom = profil?.Prenom ?? string.Empty,
                 Email = user.Email ?? string.Empty,
                 RoleId = userRole?.Id ?? string.Empty,
-                RefMagasinId = user.RefMagasinId
+                RefMagasinId = profil?.RefMagasinId
             };
 
             await LoadDropdowns();

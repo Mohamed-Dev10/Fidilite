@@ -31,6 +31,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task UpdateRefCarteType(RefCarteType refCarteType);
         Task DeleteRefCarteType(RefCarteType refCarteType);
         Task<RefCarteTypeParametrage?> GetParametrageByCarteTypeId(int carteTypeId);
+        Task<Profil?> GetProfilByUserId(string userId);
+        Task UpsertProfil(string userId, string? nom, string? prenom, int? refMagasinId);
         Task SaveParametrage(RefCarteTypeParametrage parametrage, bool removeImage = false);
         Task<List<RefGenre>> GetAllGenres();
         Task<List<RefMetier>> GetAllMetiers();

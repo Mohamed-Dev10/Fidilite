@@ -292,6 +292,37 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
                 .FirstOrDefaultAsync(p => p.RefCarteTypeId == carteTypeId);
         }
 
+        // Profil utilisateur (Nom/Prenom/magasin) : source officielle, liée 1:1 à AspNetUsers (Profil.Id = User.Id).
+        public async Task<Profil?> GetProfilByUserId(string userId)
+        {
+            if (string.IsNullOrEmpty(userId)) return null;
+            return await _context.Profil.FirstOrDefaultAsync(p => p.Id == userId);
+        }
+
+        public async Task UpsertProfil(string userId, string? nom, string? prenom, int? refMagasinId)
+        {
+            var existing = await _context.Profil.FirstOrDefaultAsync(p => p.Id == userId);
+            if (existing == null)
+            {
+                _context.Profil.Add(new Profil
+                {
+                    Id = userId,
+                    Nom = nom ?? string.Empty,
+                    Prenom = prenom ?? string.Empty,
+                    RefMagasinId = refMagasinId,
+                    DateCreation = DateTime.Now
+                });
+            }
+            else
+            {
+                existing.Nom = nom ?? string.Empty;
+                existing.Prenom = prenom ?? string.Empty;
+                existing.RefMagasinId = refMagasinId;
+                _context.Profil.Update(existing);
+            }
+            await _context.SaveChangesAsync();
+        }
+
         // Upsert : un seul paramétrage par type de carte (contrainte d'unicité en base).
         // removeImage : si true, l'image est explicitement retirée (ImagePath = null).
         public async Task SaveParametrage(RefCarteTypeParametrage parametrage, bool removeImage = false)

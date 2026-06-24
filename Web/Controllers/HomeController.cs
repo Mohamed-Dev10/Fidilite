@@ -31,15 +31,16 @@ public class HomeController : Controller
             return View(globalResult.Data);
         }
 
-        // Utilisateur magasin : KPI filtrés sur son propre magasin.
-        var user = await _userManager.GetUserAsync(User);
-        if (user?.RefMagasinId == null)
+        // Utilisateur magasin : KPI filtrés sur son propre magasin (lu depuis Profil).
+        var userId = _userManager.GetUserId(User);
+        var magasinId = await _clienteBOService.GetUserMagasinId(userId);
+        if (magasinId == null)
         {
             // Aucun magasin assigné : on affiche un message, pas de données globales.
             return View(new DashboardStatsModel { EstGlobal = false, SansMagasin = true });
         }
 
-        var result = await _clienteBOService.GetDashboardStats(user.RefMagasinId);
+        var result = await _clienteBOService.GetDashboardStats(magasinId);
         return View(result.Data ?? new DashboardStatsModel { EstGlobal = false });
     }
 

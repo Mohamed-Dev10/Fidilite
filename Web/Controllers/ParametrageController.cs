@@ -18,6 +18,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         public const int CarteLargeur = 2305;
         public const int CarteHauteur = 1427;
 
+
         public ParametrageController(IClienteBOService clienteBOService, IWebHostEnvironment env)
         {
             _clienteBOService = clienteBOService;

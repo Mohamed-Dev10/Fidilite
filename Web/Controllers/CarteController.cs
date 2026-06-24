@@ -238,8 +238,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         {
             if (User.IsInRole("SUPER_ADMIN"))
                 return null;
-            var currentUser = await _userManager.GetUserAsync(User);
-            return currentUser?.RefMagasinId;
+            var userId = _userManager.GetUserId(User);
+            return await _clienteBOService.GetUserMagasinId(userId);
         }
     }
 }

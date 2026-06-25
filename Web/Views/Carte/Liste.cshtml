@@ -11,6 +11,11 @@
                 <h2 class="page-title">@typeName</h2>
                 <div class="text-muted mt-1">Gestion des cartes « @typeName »</div>
             </div>
+            <div class="col-auto">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="ti ti-arrow-left me-1"></i> Retour
+                </a>
+            </div>
         </div>
     </div>
 </div>
@@ -57,7 +62,7 @@
                     <thead>
                         <tr>
                             <th>Nom & Prénom</th>
-                            <th>GSM</th>
+                            <th>Téléphone</th>
                             <th>CIN</th>
                             <th>Magasin</th>
                             <th>Statut</th>
@@ -119,9 +124,14 @@
                                     }
                                 </td>
                                 <td class="text-end">
-                                    <a asp-controller="Carte" asp-action="Detail" asp-route-id="@item.Id" class="btn-soft btn-soft-blue" title="Voir détail">
-                                        <i class="ti ti-eye"></i> Voir
-                                    </a>
+                                    <div class="d-flex gap-1 justify-content-end">
+                                        <a asp-controller="Carte" asp-action="Detail" asp-route-id="@item.Id" class="btn-soft btn-soft-blue" title="Voir détail">
+                                            <i class="ti ti-eye"></i> Voir
+                                        </a>
+                                        <a asp-controller="Carte" asp-action="Modifier" asp-route-id="@item.Id" class="btn-soft btn-soft-indigo" title="Modifier">
+                                            <i class="ti ti-edit"></i> Modifier
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         }

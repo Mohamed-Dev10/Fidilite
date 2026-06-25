@@ -21,6 +21,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<int> CountTotal(int? magasinId = null);
         Task<int> CountByCarteType(int carteTypeId, int? magasinId = null);
         Task<int> CountCreatedThisMonth(int? magasinId = null);
+        Task<int> CountCreatedToday(int? magasinId = null);
+        Task<int> CountCreatedInRange(DateTime from, DateTime to, int? magasinId = null);
         Task<int> CountByActif(bool actif, int? magasinId = null);
         Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null);
         Task<List<(DateTime Day, int Count)>> CountGroupedByDay(int days, int? magasinId = null);

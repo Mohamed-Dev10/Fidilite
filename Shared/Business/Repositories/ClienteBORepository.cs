@@ -202,6 +202,26 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             return await query.CountAsync();
         }
 
+        public async Task<int> CountCreatedToday(int? magasinId = null)
+        {
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            var query = _context.Cliente.Where(c => c.DateCreation >= today && c.DateCreation < tomorrow
+                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+            return await query.CountAsync();
+        }
+
+        public async Task<int> CountCreatedInRange(DateTime from, DateTime to, int? magasinId = null)
+        {
+            var query = _context.Cliente.Where(c => c.DateCreation >= from && c.DateCreation < to
+                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+            return await query.CountAsync();
+        }
+
         public async Task<int> CountByActif(bool actif, int? magasinId = null)
         {
             var query = actif

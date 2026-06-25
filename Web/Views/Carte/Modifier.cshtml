@@ -5,11 +5,17 @@
 
 <div class="page-header d-print-none">
     <div class="container-xl">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <h2 class="page-title">Modifier la carte</h2>
-                <div class="text-muted mt-1">@Model.Code</div>
+        <div class="d-flex align-items-center gap-3">
+            <span class="kpi-icon kpi-icon-lg ic-indigo" style="background:var(--bc-grad);color:#fff;">
+                <i class="ti ti-edit"></i>
+            </span>
+            <div>
+                <h2 class="page-title mb-0">Modifier la carte</h2>
+                <div class="text-muted mt-1">Client : @Model.Code</div>
             </div>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary ms-auto">
+                <i class="ti ti-arrow-left me-1"></i> Retour
+            </a>
         </div>
     </div>
 </div>
@@ -17,7 +23,7 @@
 <div class="page-body">
     <div class="container-xl">
 
-        <form asp-controller="Carte" asp-action="Modifier" method="post">
+        <form asp-controller="Carte" asp-action="Modifier" method="post" novalidate>
             @Html.AntiForgeryToken()
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="Code" />
@@ -31,40 +37,61 @@
                     <!-- Informations personnelles -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="ti ti-user me-2 text-primary"></i>Informations personnelles
+                            <h3 class="card-title d-flex align-items-center gap-2">
+                                <span class="avatar ic-indigo" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-user"></i></span>
+                                Informations personnelles
                             </h3>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-sm-6">
                                     <label class="form-label required">Nom</label>
-                                    <input asp-for="Nom" class="form-control" />
+                                    <input asp-for="Nom" class="form-control" placeholder="Nom de famille" />
                                     <span asp-validation-for="Nom" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label required">Prénom</label>
-                                    <input asp-for="Prenom" class="form-control" />
+                                    <input asp-for="Prenom" class="form-control" placeholder="Prénom" />
                                     <span asp-validation-for="Prenom" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
-                                    <label class="form-label required">GSM</label>
-                                    <input asp-for="Gsm" class="form-control" placeholder="06XXXXXXXX" maxlength="20" />
+                                    <label class="form-label required">Téléphone</label>
+                                    <input asp-for="Gsm" class="form-control" placeholder="10 chiffres (ex : 0612345678)"
+                                           maxlength="10" inputmode="numeric" autocomplete="tel" />
                                     <span asp-validation-for="Gsm" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label required">CIN</label>
-                                    <input asp-for="Cin" class="form-control" maxlength="20" required />
+                                    <input asp-for="Cin" class="form-control" placeholder="8 caractères" maxlength="8" />
                                     <span asp-validation-for="Cin" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
-                                    <label class="form-label">Email</label>
-                                    <input asp-for="Email" type="email" class="form-control" />
+                                    <label class="form-label">Email <span class="text-muted small">(optionnel)</span></label>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="email@exemple.com" />
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label required">Date de naissance</label>
-                                    <input asp-for="DateNaissance" type="date" class="form-control" required
-                                           max="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                    @{
+                                        var dnHasValue = Model != null && Model.DateNaissance > DateTime.MinValue;
+                                        var dnIso = dnHasValue ? Model!.DateNaissance.ToString("yyyy-MM-dd") : "";
+                                        var dnDisp = dnHasValue ? Model!.DateNaissance.ToString("dd/MM/yyyy") : "jj/mm/aaaa";
+                                    }
+                                    <div class="dp" data-dp data-max="today" data-exclude-today>
+                                        <input type="hidden" id="DateNaissance" name="DateNaissance" value="@dnIso" />
+                                        <button type="button" class="form-control input-date dp-trigger" aria-haspopup="dialog">
+                                            <span class="dp-value @(dnHasValue ? "" : "is-placeholder")">@dnDisp</span>
+                                        </button>
+                                        <div class="dp-pop" hidden></div>
+                                    </div>
+                                    <span asp-validation-for="DateNaissance" class="text-danger small"></span>
+                                </div>
+                                <div class="col-sm-6">
+                                    <label class="form-label required">Métier</label>
+                                    <select asp-for="RefMetierId" asp-items="ViewBag.Metiers" class="form-select">
+                                        <option value="">-- Sélectionner --</option>
+                                    </select>
+                                    <span asp-validation-for="RefMetierId" class="text-danger small"></span>
                                 </div>
                                 <div class="col-sm-6">
                                     <label class="form-label">Genre</label>
@@ -80,40 +107,7 @@
                                 </div>
                                 <div class="col-12">
                                     <label class="form-label">Adresse</label>
-                                    <input asp-for="Adresse" class="form-control" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Informations professionnelles -->
-                    <div class="card mb-3">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="ti ti-briefcase me-2 text-primary"></i>Informations professionnelles
-                            </h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-sm-6">
-                                    <label class="form-label">Raison sociale</label>
-                                    <input asp-for="RaisonSociale" class="form-control" />
-                                </div>
-                                <div class="col-sm-6">
-                                    <label class="form-label">Fonction</label>
-                                    <input asp-for="Fonction" class="form-control" />
-                                </div>
-                                <div class="col-sm-6">
-                                    <label class="form-label required">Métier</label>
-                                    <select asp-for="RefMetierId" asp-items="ViewBag.Metiers" class="form-select" required>
-                                        <option value="">-- Sélectionner --</option>
-                                    </select>
-                                    <span asp-validation-for="RefMetierId" class="text-danger small"></span>
-                                </div>
-                                <div class="col-sm-6">
-                                    <label id="niaLabel" class="form-label">NIA</label>
-                                    <input asp-for="Nia" type="number" class="form-control" minlength="18" maxlength="20" />
-                                    <span asp-validation-for="Nia" class="text-danger small"></span>
+                                    <input asp-for="Adresse" class="form-control" placeholder="Adresse complète" />
                                 </div>
                             </div>
                         </div>
@@ -124,11 +118,12 @@
                 <!-- Colonne droite -->
                 <div class="col-lg-4">
 
-                    <!-- Identifiants figés -->
+                    <!-- Identifiants (non modifiables) -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="ti ti-barcode me-2 text-primary"></i>Identifiants
+                            <h3 class="card-title d-flex align-items-center gap-2">
+                                <span class="avatar ic-blue" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-barcode"></i></span>
+                                Identifiants
                             </h3>
                         </div>
                         <div class="card-body">
@@ -146,11 +141,12 @@
                         </div>
                     </div>
 
-                    <!-- Type de carte + Magasin -->
+                    <!-- Type de carte + NIA + Magasin -->
                     <div class="card mb-3">
                         <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="ti ti-credit-card me-2 text-primary"></i>Carte fidélité
+                            <h3 class="card-title d-flex align-items-center gap-2">
+                                <span class="avatar ic-teal" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-credit-card"></i></span>
+                                Carte fidélité
                             </h3>
                         </div>
                         <div class="card-body">
@@ -159,19 +155,28 @@
                                 <select asp-for="RefCarteTypeId" asp-items="ViewBag.CarteTypes" class="form-select">
                                     <option value="">-- Sélectionner --</option>
                                 </select>
+                                <span asp-validation-for="RefCarteTypeId" class="text-danger small"></span>
                             </div>
-                            <div class="mb-0">
+                            <!-- NIA : affiché uniquement pour la carte Artisan -->
+                            <div class="mb-3" id="niaBlock" hidden>
+                                <label id="niaLabel" class="form-label required">NIA</label>
+                                <input asp-for="Nia" type="number" class="form-control" placeholder="18 à 20 chiffres (obligatoire pour Artisan)" />
+                                <span asp-validation-for="Nia" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
                                 <label class="form-label required">Magasin</label>
                                 <select asp-for="RefMagasinId" asp-items="ViewBag.Magasins" class="form-select">
                                     <option value="">-- Sélectionner --</option>
                                 </select>
+                                <span asp-validation-for="RefMagasinId" class="text-danger small"></span>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Bouton -->
                     <div class="d-grid">
                         <button type="submit" class="btn-gradient" style="padding:.8rem 1.2rem;font-size:1.05rem;">
-                            <i class="ti ti-device-floppy me-2"></i>Enregistrer
+                            <i class="ti ti-device-floppy me-2"></i>Enregistrer les modifications
                         </button>
                     </div>
 
@@ -184,22 +189,6 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
-        // NIA obligatoire (18-20 chiffres) uniquement pour la carte Artisan (RefCarteTypeId = 3)
-        (function () {
-            const typeSelect = document.getElementById("RefCarteTypeId");
-            const niaInput = document.getElementById("Nia");
-            const niaLabel = document.getElementById("niaLabel");
-            if (!typeSelect || !niaInput || !niaLabel) return;
-
-            function toggleNia() {
-                const isArtisan = typeSelect.value === "3";
-                niaInput.required = isArtisan;
-                niaLabel.classList.toggle("required", isArtisan);
-            }
-
-            typeSelect.addEventListener("change", toggleNia);
-            toggleNia();
-        })();
-    </script>
+    <script src="~/js/datepicker.js"></script>
+    <script src="~/js/carte-form.js"></script>
 }

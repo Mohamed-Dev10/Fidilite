@@ -6,6 +6,10 @@ namespace BRICOMA.ECOMMERCE.Models.Models
         public int CartesCeMois { get; set; }
         public int CartesActives { get; set; }
         public int CartesBloquees { get; set; }
+        public int CartesAujourdhui { get; set; }
+        public int CartesCetteSemaine { get; set; }
+        public int CartesSemainePrecedente { get; set; }
+        public double TauxActivation { get; set; }
         public List<MagasinStat> ParMagasin { get; set; } = new();
 
         // Un KPI par type de carte géré (M3alem, Artisan, et tout type paramétrable ajouté).

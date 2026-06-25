@@ -10,6 +10,7 @@
         default: chipClass = "chip-yellow"; statutIcon = "ti-clock-hour-4"; statutLabel = "Créé"; break;
     }
     var actif = Model.IsActif != false;
+    var isArtisan = Model.RefCarteTypeId == (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.BRICOMAARTISAN;
 }
 
 <div class="page-header d-print-none">
@@ -30,9 +31,9 @@
                     }
                 </div>
             </div>
-            <div class="col-auto ms-auto d-print-none">
-                <a asp-action="Modifier" asp-route-id="@Model.Id" class="btn-gradient">
-                    <i class="ti ti-edit me-1"></i> Modifier
+            <div class="col-auto">
+                <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                    <i class="ti ti-arrow-left me-1"></i> Retour
                 </a>
             </div>
         </div>
@@ -46,44 +47,47 @@
 
             <!-- Infos -->
             <div class="col-lg-7">
+                <!-- Informations personnelles (même ordre que le formulaire Créer) -->
                 <div class="card mb-3">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="ti ti-user me-2 text-primary"></i>Informations personnelles</h3>
+                        <h3 class="card-title d-flex align-items-center gap-2">
+                            <span class="avatar ic-indigo" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-user"></i></span>
+                            Informations personnelles
+                        </h3>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-sm-6"><div class="text-muted small">Nom</div><div class="fw-medium">@Model.Nom</div></div>
                             <div class="col-sm-6"><div class="text-muted small">Prénom</div><div class="fw-medium">@Model.Prenom</div></div>
-                            <div class="col-sm-6"><div class="text-muted small">GSM</div><div class="fw-medium">@Model.Gsm</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Téléphone</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Gsm) ? "-" : Model.Gsm)</div></div>
                             <div class="col-sm-6"><div class="text-muted small">CIN</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Cin) ? "-" : Model.Cin)</div></div>
                             <div class="col-sm-6"><div class="text-muted small">Email</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Email) ? "-" : Model.Email)</div></div>
                             <div class="col-sm-6"><div class="text-muted small">Date de naissance</div><div class="fw-medium">@Model.DateNaissance.ToString("dd/MM/yyyy")</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Métier</div><div class="fw-medium">@(Model.RefMetier?.Name ?? "-")</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Genre</div><div class="fw-medium">@(Model.RefGenre?.Name ?? "-")</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Ville</div><div class="fw-medium">@(Model.RefVille?.Name ?? "-")</div></div>
                             <div class="col-12"><div class="text-muted small">Adresse</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Adresse) ? "-" : Model.Adresse)</div></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="card mb-3">
-                    <div class="card-header">
-                        <h3 class="card-title"><i class="ti ti-briefcase me-2 text-primary"></i>Informations professionnelles</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-sm-6"><div class="text-muted small">Raison sociale</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.RaisonSociale) ? "-" : Model.RaisonSociale)</div></div>
-                            <div class="col-sm-6"><div class="text-muted small">Fonction</div><div class="fw-medium">@(string.IsNullOrEmpty(Model.Fonction) ? "-" : Model.Fonction)</div></div>
-                            <div class="col-sm-6"><div class="text-muted small">Métier</div><div class="fw-medium">@(Model.RefMetier?.Name ?? "-")</div></div>
-                            <div class="col-sm-6"><div class="text-muted small">NIA</div><div class="fw-medium">@(Model.Nia?.ToString() ?? "-")</div></div>
-                        </div>
-                    </div>
-                </div>
-
+                <!-- Carte -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="ti ti-credit-card me-2 text-primary"></i>Carte</h3>
+                        <h3 class="card-title d-flex align-items-center gap-2">
+                            <span class="avatar ic-teal" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-credit-card"></i></span>
+                            Carte fidélité
+                        </h3>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
+                            <div class="col-sm-6"><div class="text-muted small">Type de carte</div><div class="fw-medium">@(Model.RefCarteType?.Name ?? "-")</div></div>
+                            @if (isArtisan)
+                            {
+                                <div class="col-sm-6"><div class="text-muted small">NIA</div><div class="fw-medium">@(Model.Nia?.ToString() ?? "-")</div></div>
+                            }
                             <div class="col-sm-6"><div class="text-muted small">Magasin</div><div class="fw-medium">@(Model.RefMagasin?.Name ?? "-")</div></div>
+                            <div class="col-sm-6"><div class="text-muted small">Code client</div><div class="fw-medium">@Model.Code</div></div>
                             <div class="col-sm-6"><div class="text-muted small">Code-barres</div><div class="fw-medium">@Model.CodeBarre</div></div>
                             <div class="col-sm-6"><div class="text-muted small">Date création</div><div class="fw-medium">@Model.DateCreation.ToString("dd/MM/yyyy HH:mm")</div></div>
                             <div class="col-sm-6"><div class="text-muted small">Date confirmation</div><div class="fw-medium">@(Model.DateConfirmation?.ToString("dd/MM/yyyy HH:mm") ?? "-")</div></div>
@@ -96,7 +100,10 @@
             <div class="col-lg-5">
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title"><i class="ti ti-photo me-2 text-primary"></i>Carte générée</h3>
+                        <h3 class="card-title d-flex align-items-center gap-2">
+                            <span class="avatar ic-blue" style="width:2rem;height:2rem;font-size:.9rem;"><i class="ti ti-photo"></i></span>
+                            Carte générée
+                        </h3>
                     </div>
                     <div class="card-body text-center">
                         <img src="/cartes/@(Model.Code).png" alt="Carte @Model.Code"

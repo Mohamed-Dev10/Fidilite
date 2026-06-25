@@ -41,191 +41,164 @@
     return;
 }
 
-<!-- KPI principaux (panneau teinté) -->
-<div class="kpi-group kpi-group-indigo">
-    <div class="kpi-group-head"><i class="ti ti-chart-pie"></i> Vue d'ensemble</div>
-    <div class="row g-3">
-        <div class="col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-label">Total cartes</div>
-                    <div class="kpi-value">@stats.TotalCartes</div>
-                </div>
-                <span class="kpi-icon ic-indigo"><i class="ti ti-id-badge"></i></span>
+<!-- KPI principaux — Vue d'ensemble (même design animé, couleurs différentes) -->
+<div class="row g-3 mb-2">
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-cyan">
+            <div class="kpi-anim-icon"><i class="ti ti-id-badge"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value" data-count="@stats.TotalCartes">0</div>
+                <div class="kpi-anim-label">Total cartes</div>
             </div>
+            <div class="kpi-anim-wave"></div>
         </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-label">Créées ce mois</div>
-                    <div class="kpi-value">@stats.CartesCeMois</div>
-                </div>
-                <span class="kpi-icon ic-blue"><i class="ti ti-calendar-plus"></i></span>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-orange">
+            <div class="kpi-anim-icon"><i class="ti ti-calendar-plus"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value" data-count="@stats.CartesCeMois">0</div>
+                <div class="kpi-anim-label">Créées ce mois</div>
             </div>
+            <div class="kpi-anim-wave"></div>
         </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-label">Cartes actives</div>
-                    <div class="kpi-value">@stats.CartesActives</div>
-                </div>
-                <span class="kpi-icon ic-green"><i class="ti ti-circle-check"></i></span>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-teal">
+            <div class="kpi-anim-icon"><i class="ti ti-circle-check"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value" data-count="@stats.CartesActives">0</div>
+                <div class="kpi-anim-label">Cartes actives</div>
             </div>
+            <div class="kpi-anim-wave"></div>
         </div>
-        <div class="col-sm-6 col-lg-3">
-            <div class="kpi-card">
-                <div>
-                    <div class="kpi-label">Cartes bloquées</div>
-                    <div class="kpi-value">@stats.CartesBloquees</div>
-                </div>
-                <span class="kpi-icon ic-red"><i class="ti ti-lock"></i></span>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-red">
+            <div class="kpi-anim-icon"><i class="ti ti-lock"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value" data-count="@stats.CartesBloquees">0</div>
+                <div class="kpi-anim-label">Cartes bloquées</div>
             </div>
+            <div class="kpi-anim-wave"></div>
         </div>
     </div>
 </div>
 
-<!-- KPI cliquables par type (générés automatiquement : un par type de carte géré) -->
+<!-- KPI cliquables par type (même design animé, couleurs alternées, lien vers la liste) -->
 @{
-    // Palette icône/couleur attribuée par ordre de type ; un nouveau type reçoit le style suivant.
-    var typePalette = new[]
-    {
-        new { Icon = "ti-id-badge", Color = "ic-blue",   Text = "text-blue" },
-        new { Icon = "ti-tool",     Color = "ic-orange", Text = "text-orange" },
-        new { Icon = "ti-diamond",  Color = "ic-teal",   Text = "text-teal" },
-        new { Icon = "ti-star",     Color = "ic-purple", Text = "text-purple" },
-        new { Icon = "ti-award",    Color = "ic-green",  Text = "text-green" },
-        new { Icon = "ti-crown",    Color = "ic-pink",   Text = "text-pink" },
-    };
+    var typeAnimColors = new[] { "kpi-card-anim-blue", "kpi-card-anim-orange", "kpi-card-anim-teal", "kpi-card-anim-purple", "kpi-card-anim-green", "kpi-card-anim-pink" };
+    var typeAnimIcons = new[] { "ti-id-badge", "ti-tool", "ti-diamond", "ti-star", "ti-award", "ti-crown" };
     var typeIdx = 0;
 }
 <div class="row g-3 mb-2">
     @foreach (var type in stats.ParType)
     {
-        var style = typePalette[typeIdx % typePalette.Length];
+        var color = typeAnimColors[typeIdx % typeAnimColors.Length];
+        var icon = typeAnimIcons[typeIdx % typeAnimIcons.Length];
         typeIdx++;
-        <div class="col-md-6">
-            <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card is-link">
-                <span class="kpi-icon kpi-icon-lg @style.Color me-1"><i class="ti @style.Icon"></i></span>
-                <div class="flex-grow-1">
-                    <div class="kpi-value">@type.Count</div>
-                    <div class="kpi-label mb-0">@type.TypeName</div>
+        <div class="col-sm-6 col-lg-4">
+            <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card-animated @color" style="text-decoration:none;color:#fff;cursor:pointer;">
+                <div class="kpi-anim-icon"><i class="ti @icon"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value" data-count="@type.Count">0</div>
+                    <div class="kpi-anim-label">@type.TypeName</div>
                 </div>
-                <i class="ti ti-chevron-right fs-3 @style.Text"></i>
+                <i class="ti ti-chevron-right" style="font-size:1.5rem;opacity:.6;"></i>
+                <div class="kpi-anim-wave"></div>
             </a>
         </div>
     }
 </div>
 
-<!-- Tendance des créations sur les 30 derniers jours (scope magasin respecté) -->
+<!-- KPI animées : Aujourd'hui / Ce mois / Cette semaine (+ tendance) / Taux d'activation -->
+<div class="mt-5"></div>
 @{
-    var tend = stats.Tendance;
-    var maxTend = tend.Any() ? tend.Max(d => d.Count) : 0;
-    var totalTend = tend.Sum(d => d.Count);
+    var weekDiff = stats.CartesSemainePrecedente > 0
+        ? Math.Round((stats.CartesCetteSemaine - stats.CartesSemainePrecedente) * 100.0 / stats.CartesSemainePrecedente, 1)
+        : (stats.CartesCetteSemaine > 0 ? 100.0 : 0);
+    var weekUp = weekDiff >= 0;
 }
-<div class="row row-cards">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title"><i class="ti ti-chart-bar me-2 text-primary"></i>Tendance des créations <span class="text-muted fw-normal">(30 derniers jours)</span></h3>
-                <div class="card-actions">
-                    <span class="badge bg-primary-lt">@totalTend carte(s)</span>
+<div class="row g-3 mb-2">
+    <!-- Aujourd'hui -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-blue">
+            <div class="kpi-anim-icon"><i class="ti ti-sun"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value" data-count="@stats.CartesAujourdhui">0</div>
+                <div class="kpi-anim-label">Créées aujourd'hui</div>
+            </div>
+            <div class="kpi-anim-wave"></div>
+        </div>
+    </div>
+    <!-- Ce mois -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-indigo">
+            <div class="kpi-anim-icon"><i class="ti ti-calendar-stats"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value" data-count="@stats.CartesCeMois">0</div>
+                <div class="kpi-anim-label">Créées ce mois</div>
+            </div>
+            <div class="kpi-anim-wave"></div>
+        </div>
+    </div>
+    <!-- Cette semaine + badge tendance -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-purple">
+            <div class="kpi-anim-icon"><i class="ti ti-chart-arrows-vertical"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value" data-count="@stats.CartesCetteSemaine">0</div>
+                <div class="kpi-anim-label">
+                    Cette semaine
+                    <span class="kpi-badge @(weekUp ? "kpi-badge-up" : "kpi-badge-down")">
+                        <i class="ti @(weekUp ? "ti-trending-up" : "ti-trending-down")"></i> @(weekDiff > 0 ? "+" : "")@weekDiff%
+                    </span>
                 </div>
             </div>
-            @if (totalTend == 0)
-            {
-                <div class="card-body">
-                    <div class="empty">
-                        <div class="empty-icon"><i class="ti ti-chart-bar-off fs-1"></i></div>
-                        <p class="empty-title">Aucune création sur les 30 derniers jours</p>
-                        <p class="empty-subtitle text-muted">Les nouvelles cartes apparaîtront ici au fil des créations.</p>
-                    </div>
+            <div class="kpi-anim-wave"></div>
+        </div>
+    </div>
+    <!-- Taux d'activation -->
+    <div class="col-sm-6 col-lg-3">
+        <div class="kpi-card-animated kpi-card-anim-green">
+            <div class="kpi-anim-icon"><i class="ti ti-shield-check"></i></div>
+            <div class="kpi-anim-body">
+                <div class="kpi-anim-value kpi-anim-pct" data-count="@((int)stats.TauxActivation)">0</div>
+                <div class="kpi-anim-label">Taux d'activation</div>
+                <div class="kpi-anim-bar">
+                    <div class="kpi-anim-bar-fill" style="--fill:@stats.TauxActivation%"></div>
                 </div>
-            }
-            else
-            {
-                <div class="card-body">
-                    @{
-                        var ci = System.Globalization.CultureInfo.InvariantCulture;
-                        var n = tend.Count;
-                        // Repère SVG (mis à l'échelle proportionnellement à la largeur du conteneur).
-                        const double W = 1000, H = 260;
-                        const double padL = 14, padR = 14, padT = 28, padB = 34;
-                        double xLeft = padL, xRight = W - padR, yTop = padT, yBot = H - padB;
-                        Func<int, double> X = i => n <= 1 ? xLeft : xLeft + (double)i / (n - 1) * (xRight - xLeft);
-                        Func<int, double> Y = c => maxTend <= 0 ? yBot : yBot - (double)c / maxTend * (yBot - yTop);
-                        string F(double v) => v.ToString("0.##", ci);
-
-                        var pts = new List<string>();
-                        for (var i = 0; i < n; i++) pts.Add($"{F(X(i))},{F(Y(tend[i].Count))}");
-                        var line = pts.Count > 0 ? "M" + string.Join(" L", pts) : "";
-                        var area = pts.Count > 0
-                            ? $"M{F(X(0))},{F(yBot)} L{string.Join(" L", pts)} L{F(X(n - 1))},{F(yBot)} Z"
-                            : "";
-
-                        // Les éléments SVG <text> entrent en conflit avec le tag Razor <text> :
-                        // on les construit en chaîne et on les injecte via @Html.Raw.
-                        var svgDots = new System.Text.StringBuilder();
-                        for (var i = 0; i < n; i++)
-                        {
-                            if (tend[i].Count <= 0) continue;
-                            var cx = F(X(i)); var cy = F(Y(tend[i].Count));
-                            svgDots.Append($"<circle cx=\"{cx}\" cy=\"{cy}\" r=\"4.5\" class=\"trend-dot\" />");
-                            svgDots.Append($"<text x=\"{cx}\" y=\"{F(Y(tend[i].Count) - 12)}\" class=\"trend-dot-label\" text-anchor=\"middle\">{tend[i].Count}</text>");
-                        }
-                        var svgAxis = new System.Text.StringBuilder();
-                        for (var i = 0; i < n; i++)
-                        {
-                            if (i % 5 != 0 && i != n - 1) continue;
-                            svgAxis.Append($"<text x=\"{F(X(i))}\" y=\"{F(H - 10)}\" class=\"trend-axis-label\" text-anchor=\"middle\">{tend[i].Date:dd/MM}</text>");
-                        }
-                    }
-                    <div class="trend-area-wrap">
-                        <svg class="trend-area" viewBox="0 0 1000 260" preserveAspectRatio="xMidYMid meet" role="img"
-                             aria-label="Tendance des créations sur 30 jours">
-                            <defs>
-                                <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="0%" stop-color="var(--bc-primary)" stop-opacity=".26" />
-                                    <stop offset="100%" stop-color="var(--bc-primary)" stop-opacity="0" />
-                                </linearGradient>
-                                <linearGradient id="trendStroke" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stop-color="var(--bc-primary)" />
-                                    <stop offset="100%" stop-color="var(--bc-primary-2)" />
-                                </linearGradient>
-                            </defs>
-
-                            <!-- Lignes de repère horizontales -->
-                            @for (var g = 0; g <= 2; g++)
-                            {
-                                var gy = yTop + g * (yBot - yTop) / 2.0;
-                                <line x1="@F(xLeft)" y1="@F(gy)" x2="@F(xRight)" y2="@F(gy)" class="trend-grid" />
-                            }
-
-                            @if (!string.IsNullOrEmpty(area))
-                            {
-                                <path d="@area" fill="url(#trendFill)" />
-                                <path d="@line" fill="none" stroke="url(#trendStroke)" stroke-width="3"
-                                      stroke-linejoin="round" stroke-linecap="round" />
-                            }
-
-                            <!-- Points + valeurs sur les jours avec créations -->
-                            @Html.Raw(svgDots.ToString())
-
-                            <!-- Étiquettes de dates (1 sur 5 + la dernière) -->
-                            @Html.Raw(svgAxis.ToString())
-                        </svg>
-                    </div>
-                </div>
-                <div class="card-footer text-muted">
-                    @if (stats.EstGlobal)
-                    {
-                        <text>Total : <strong>@totalTend</strong> carte(s) créée(s) sur 30 jours (tous magasins)</text>
-                    }
-                    else
-                    {
-                        <text>Total : <strong>@totalTend</strong> carte(s) créée(s) sur 30 jours — <strong>@stats.MagasinNom</strong></text>
-                    }
-                </div>
-            }
+            </div>
+            <div class="kpi-anim-wave"></div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var els = document.querySelectorAll("[data-count]");
+            if (!els.length) return;
+            var obs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (!e.isIntersecting) return;
+                    var el = e.target;
+                    obs.unobserve(el);
+                    var target = parseInt(el.getAttribute("data-count"), 10) || 0;
+                    var isPct = el.classList.contains("kpi-anim-pct");
+                    if (target === 0) { el.textContent = isPct ? "0%" : "0"; return; }
+                    var dur = 1200, start = performance.now();
+                    function tick(now) {
+                        var t = Math.min((now - start) / dur, 1);
+                        t = 1 - Math.pow(1 - t, 3);
+                        var v = Math.round(t * target);
+                        el.textContent = isPct ? v + "%" : v.toLocaleString("fr-FR");
+                        if (t < 1) requestAnimationFrame(tick);
+                    }
+                    requestAnimationFrame(tick);
+                });
+            }, { threshold: 0.3 });
+            els.forEach(function (el) { obs.observe(el); });
+        })();
+    </script>
+}

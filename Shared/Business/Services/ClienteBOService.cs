@@ -181,13 +181,16 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     ? parametrage!.MessageReception.Trim()
                     : $"Bonjour {model.Prenom} {model.Nom},\nVotre carte {carteType.Name} est créée.";
 
+                // Nom du magasin où la carte est créée.
+                var magasinCarte = await _clienteBORepository.GetMagasinById(model.RefMagasinId);
+                var magasinNom = magasinCarte?.Name ?? "BRICOMA";
+
                 var carteMessage =
                     $"{intro}\n" +
-                    $"Code : {clienteCode}\n" +
-                    $"Code-barres : {codeBarre}\n" +
-                    $"Présentez-la à chaque passage en caisse BRICOMA.";
+                    $"Merci de votre confiance.\n" +
+                    $"{magasinNom}";
 
-                // PublicUrl est null tant que l'URL publique n'est pas configurée → on envoie le texte seul
+                // L'image de la carte est envoyée en pièce jointe (PublicUrl).
                 await _whatsAppService.SendMessage(model.Gsm, carteMessage, carteImage?.PublicUrl);
 
                 // 4) Consommer l'OTP
@@ -567,12 +570,25 @@ namespace BRICOMA.ECOMMERCE.Business.Services
         {
             try
             {
+                var totalCartes = await _clienteBORepository.CountTotal(magasinId);
+                var cartesActives = await _clienteBORepository.CountByActif(true, magasinId);
+
+                // Semaine courante (lundi → dimanche) et semaine précédente.
+                var today = DateTime.Today;
+                var mondayThisWeek = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
+                if (today.DayOfWeek == DayOfWeek.Sunday) mondayThisWeek = mondayThisWeek.AddDays(-7);
+                var mondayLastWeek = mondayThisWeek.AddDays(-7);
+
                 var stats = new DashboardStatsModel
                 {
-                    TotalCartes   = await _clienteBORepository.CountTotal(magasinId),
+                    TotalCartes   = totalCartes,
                     CartesCeMois  = await _clienteBORepository.CountCreatedThisMonth(magasinId),
-                    CartesActives = await _clienteBORepository.CountByActif(true, magasinId),
+                    CartesActives = cartesActives,
                     CartesBloquees = await _clienteBORepository.CountByActif(false, magasinId),
+                    CartesAujourdhui = await _clienteBORepository.CountCreatedToday(magasinId),
+                    CartesCetteSemaine = await _clienteBORepository.CountCreatedInRange(mondayThisWeek, today.AddDays(1), magasinId),
+                    CartesSemainePrecedente = await _clienteBORepository.CountCreatedInRange(mondayLastWeek, mondayThisWeek, magasinId),
+                    TauxActivation = totalCartes > 0 ? Math.Round(cartesActives * 100.0 / totalCartes, 1) : 0,
                     ParMagasin = (await _clienteBORepository.CountGroupedByMagasin(magasinId))
                         .Select(x => new MagasinStat { Magasin = x.Magasin, Count = x.Count })
                         .ToList(),

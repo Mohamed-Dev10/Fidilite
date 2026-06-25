@@ -525,6 +525,77 @@ a.chip, a.chip:hover { text-decoration: none; }
 .trend-axis-label { fill: #94a3b8; font-size: 13px; font-weight: 500; }
 
 /* ============================================================
+   KPI CARDS ANIMÉES (dashboard)
+   ============================================================ */
+.kpi-card-animated {
+    position: relative; overflow: hidden;
+    border-radius: 16px; padding: 1.4rem 1.3rem;
+    display: flex; align-items: center; gap: 1rem;
+    color: #fff; min-height: 110px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .12);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.kpi-card-animated:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, .18);
+}
+/* Vague décorative en bas */
+.kpi-anim-wave {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 38px;
+    background: rgba(255, 255, 255, .08);
+    border-radius: 60% 70% 0 0;
+    animation: kpiWave 4s ease-in-out infinite alternate;
+}
+@keyframes kpiWave {
+    0%   { border-radius: 60% 70% 0 0; height: 38px; }
+    100% { border-radius: 45% 55% 0 0; height: 44px; }
+}
+/* Icône ronde */
+.kpi-anim-icon {
+    flex: 0 0 auto; width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 14px; font-size: 1.5rem;
+    background: rgba(255, 255, 255, .2);
+    backdrop-filter: blur(4px);
+}
+/* Corps texte */
+.kpi-anim-body { flex: 1 1 auto; position: relative; z-index: 1; }
+.kpi-anim-value {
+    font-size: 2rem; font-weight: 800; line-height: 1;
+    margin-bottom: .25rem;
+}
+.kpi-anim-label { font-size: .85rem; opacity: .9; font-weight: 500; }
+/* Badge tendance (↑/↓) */
+.kpi-badge {
+    display: inline-flex; align-items: center; gap: .2rem;
+    font-size: .72rem; font-weight: 700; padding: .15rem .45rem;
+    border-radius: 6px; margin-left: .4rem; vertical-align: middle;
+}
+.kpi-badge-up { background: rgba(255, 255, 255, .25); color: #d1fae5; }
+.kpi-badge-down { background: rgba(255, 255, 255, .18); color: #fecaca; }
+/* Barre progression (taux activation) */
+.kpi-anim-bar {
+    margin-top: .5rem; height: 6px; border-radius: 3px;
+    background: rgba(255, 255, 255, .2); overflow: hidden;
+}
+.kpi-anim-bar-fill {
+    height: 100%; border-radius: 3px;
+    background: rgba(255, 255, 255, .75);
+    width: 0; animation: kpiBarFill 1.5s .3s ease forwards;
+}
+@keyframes kpiBarFill { to { width: var(--fill); } }
+/* Couleurs par carte */
+.kpi-card-anim-blue   { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+.kpi-card-anim-indigo { background: linear-gradient(135deg, #6366f1, #4338ca); }
+.kpi-card-anim-purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
+.kpi-card-anim-green  { background: linear-gradient(135deg, #22c55e, #15803d); }
+.kpi-card-anim-cyan   { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+.kpi-card-anim-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
+.kpi-card-anim-teal   { background: linear-gradient(135deg, #14b8a6, #0f766e); }
+.kpi-card-anim-red    { background: linear-gradient(135deg, #ef4444, #b91c1c); }
+.kpi-card-anim-pink   { background: linear-gradient(135deg, #ec4899, #be185d); }
+
+/* ============================================================
    PARAMÉTRAGE TYPE DE CARTE — aperçu image + drag&drop code-barres
    ============================================================ */
 .card-preview-wrap {
@@ -931,13 +1002,14 @@ a.chip, a.chip:hover { text-decoration: none; }
 .auth-brand { display: inline-flex; align-items: center; gap: .7rem; position: relative; z-index: 1; }
 .auth-brand-logo {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 56px; height: 56px; flex: 0 0 auto;
-    border-radius: 14px;
-    background: #fff;
-    padding: 7px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, .18);
 }
-.auth-brand-logo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.auth-brand-logo img {
+    height: 88px; width: auto; display: block;
+    filter:
+        drop-shadow(0 0 1px #fff)
+        drop-shadow(0 0 2px #fff)
+        drop-shadow(0 0 4px rgba(255, 255, 255, .8));
+}
 .auth-brand-name { font-size: 1.35rem; font-weight: 800; letter-spacing: .14em; }
 .auth-hero-body { position: relative; z-index: 1; }
 .auth-hero-title { font-size: 2.1rem; font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
@@ -965,7 +1037,8 @@ a.chip, a.chip:hover { text-decoration: none; }
     display: none; align-items: center; gap: .6rem; margin-bottom: 1.5rem;
     font-weight: 800; letter-spacing: .12em; color: var(--bc-primary);
 }
-.auth-mobile-brand .auth-brand-logo { background: #fff; width: 44px; height: 44px; padding: 5px; }
+.auth-mobile-brand .auth-brand-logo { background: transparent; }
+.auth-mobile-brand .auth-brand-logo img { height: 36px; }
 .auth-mobile-brand { color: var(--bc-red); }
 @media (max-width: 900px) { .auth-mobile-brand { display: inline-flex; } }
 

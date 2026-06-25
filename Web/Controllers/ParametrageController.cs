@@ -1,28 +1,27 @@
 using BRICOMA.ECOMMERCE.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace BRICOMA.ECOMMERCE.Web.Controllers
 {
     [Authorize(Policy = "parametrage.view")]
     public class ParametrageController : Controller
     {
-
         private readonly IClienteBOService _clienteBOService;
         private readonly IWebHostEnvironment _env;
+        private readonly IMemoryCache _cache;
 
         private static readonly string[] ImagesAutorisees = { ".png", ".jpg", ".jpeg" };
 
-        // Dimensions imposées du modèle de carte (px) : identiques aux cartes de référence
-        // (carte-bricomam3alem / artisan / amibricoma) sur lesquelles le code-barres est positionné.
         public const int CarteLargeur = 2305;
         public const int CarteHauteur = 1427;
 
-
-        public ParametrageController(IClienteBOService clienteBOService, IWebHostEnvironment env)
+        public ParametrageController(IClienteBOService clienteBOService, IWebHostEnvironment env, IMemoryCache cache)
         {
             _clienteBOService = clienteBOService;
             _env = env;
+            _cache = cache;
         }
 
         public async Task<IActionResult> Index()
@@ -49,6 +48,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 ViewData["Error"] = result.Message;
                 return View();
             }
+            _cache.Remove("menu_carte_types");
             TempData["Success"] = result.Message;
             return RedirectToAction(nameof(Index));
         }
@@ -147,6 +147,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             else
                 TempData["Success"] = "Type de carte et paramétrage enregistrés.";
 
+            _cache.Remove("menu_carte_types");
             return RedirectToAction(nameof(Index));
         }
 
@@ -155,6 +156,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _clienteBOService.DeleteRefCarteType(id);
+            _cache.Remove("menu_carte_types");
             if (result.Data)
                 TempData["Success"] = result.Message;
             else

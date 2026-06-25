@@ -54,13 +54,20 @@ _Document de suivi destiné au responsable. Mis à jour le 25/06/2026._
 
 ---
 
-## 🔧 En cours de développement
+## ✅ Tâches réalisées récemment (25/06/2026)
 
 | N° | Tâche | Description |
 |---|---|---|
-| 37 | Formulaire « Modifier client » | Aligner le formulaire de modification d'un client sur celui de création : mêmes champs (Téléphone, CIN, NIA, Date de naissance, Email, Métier, etc.) et mêmes validations en temps réel (10 chiffres, 8 caractères, date < aujourd'hui, 20 chiffres max, format email). |
-| 38 | Message WhatsApp après création | Restructurer le message envoyé au client après la création de sa carte : message paramétré du type de carte + « Merci de votre confiance. » + nom du magasin où la carte est créée, avec l'image de la carte en pièce jointe (un seul message WhatsApp). |
-| 39 | Dashboard — Amélioration du KPI tendance | Améliorer le rendu visuel du graphe de tendance des créations sur 30 jours (selon les retours du responsable). |
+| 37 | Formulaire « Modifier client » aligné sur « Créer » | Le formulaire de modification est désormais identique au formulaire de création : mêmes champs (Téléphone 10 chiffres, CIN 8 caractères, NIA 20 max Artisan, Date de naissance < aujourd'hui, Email optionnel, Métier avant Genre), mêmes validations en temps réel. Raison Sociale et Fonction supprimés. Datepicker avec sélection rapide de l'année. |
+| 38 | Page « Détail client » alignée sur le formulaire de création | La page de détail affiche les mêmes champs que le formulaire de création (Téléphone au lieu de GSM, Métier avant Genre, NIA affiché uniquement pour Artisan dans la section Carte, Raison Sociale et Fonction retirés, Genre et Ville ajoutés). |
+| 39 | Bouton « Modifier » dans la liste des cartes | Le bouton « Modifier » a été ajouté dans la colonne Actions du tableau de liste des cartes (à côté du bouton « Voir »). Il a été retiré de la page Détail pour éviter la redondance. |
+| 40 | Bouton « Retour » sur les pages | Un bouton « Retour » a été ajouté sur les pages : Modifier client, Créer carte, Liste des cartes, Détail de la carte, et Nouveau type de carte. |
+| 41 | Label « Téléphone » dans la liste des cartes | Le header de colonne « GSM » a été renommé en « Téléphone » dans le tableau de la liste des cartes (cohérence avec le formulaire). |
+| 42 | Message WhatsApp restructuré | Le message envoyé au client après la création de sa carte a été restructuré : message paramétré du type de carte + « Merci de votre confiance. » + nom du magasin de création. L'image de la carte est envoyée en pièce jointe (nécessite la configuration de l'URL publique au déploiement). Les lignes Code/Code-barres en texte brut ont été supprimées (le code-barres est sur l'image). |
+| 43 | Dashboard — KPI animées « Activité récente » | Le graphe de tendance (30 jours) a été remplacé par 4 cartes KPI animées : Créées aujourd'hui, Créées ce mois, Cette semaine (avec badge tendance ↑/↓ % vs semaine précédente), et Taux d'activation (avec barre de progression). Chaque carte a un dégradé de couleur unique, une animation de comptage (count-up), une vague décorative, et un effet hover. |
+| 44 | Dashboard — KPI « Vue d'ensemble » redessinées | Les 4 KPI existantes (Total cartes, Créées ce mois, Cartes actives, Cartes bloquées) ont été redessinées dans le même style animé que les KPI « Activité récente », chacune avec sa propre couleur (cyan, orange, teal, rouge). |
+| 45 | Dashboard — KPI « Liste des cartes par type » redessinées | Les KPI cliquables par type de carte (M3alem, Artisan, Gold, etc.) ont été redessinées dans le même style animé avec des couleurs alternées, un comptage animé, et une flèche de navigation. Elles restent cliquables et redirigent vers la liste filtrée du type. |
+| 46 | Dashboard — Sections avec fieldset et titres | Chaque section de KPI du dashboard est encadrée dans un fieldset stylé (bordure arrondie, ombre, fond blanc) avec un titre en légende : « Vue d'ensemble », « Liste des cartes par type », « Activité récente ». Espacement entre les sections pour éviter l'effet condensé. |
 
 ---
 
@@ -68,8 +75,8 @@ _Document de suivi destiné au responsable. Mis à jour le 25/06/2026._
 
 | N° | Tâche | Description |
 |---|---|---|
-| 40 | Bloquer / Débloquer une carte | Fonctionnalité permettant de bloquer ou débloquer la carte d'un client. Les champs nécessaires existent déjà en base de données (IsActif, RemarqueDeactivation, etc.). En attente de confirmation des informations nécessaires par le responsable. |
-| 41 | WhatsApp en production | Le mode actuel (sandbox de test Twilio) ne convient pas à la production. Le passage en production nécessite un numéro WhatsApp Business approuvé et des modèles de message validés par Meta. C'est une démarche côté compte Twilio/Meta, indépendante du code applicatif (le code est déjà prêt). |
+| 47 | Bloquer / Débloquer une carte | Fonctionnalité permettant de bloquer ou débloquer la carte d'un client. Les champs nécessaires existent déjà en base de données (IsActif, RemarqueDeactivation, etc.). En attente de confirmation des informations nécessaires par le responsable. |
+| 48 | WhatsApp en production | Le mode actuel (sandbox de test Twilio) ne convient pas à la production. Le passage en production nécessite un numéro WhatsApp Business approuvé et des modèles de message validés par Meta. C'est une démarche côté compte Twilio/Meta, indépendante du code applicatif (le code est déjà prêt). |
 
 ---
 
@@ -77,15 +84,15 @@ _Document de suivi destiné au responsable. Mis à jour le 25/06/2026._
 
 | N° | Élément | Description |
 |---|---|---|
-| 42 | Table REF_CarteTypeParametrage | Nouvelle table créée pour le paramétrage des types de cartes (message de réception, image-modèle, position X/Y du code-barres en %, taille du code-barres en %). Script de création fourni (001). |
-| 43 | Colonne BarcodeScale | Nouvelle colonne ajoutée sur REF_CarteTypeParametrage pour stocker la taille du code-barres en pourcentage (défaut 100%). |
-| 44 | Script 001 — Création table paramétrage | Script SQL idempotent (IF NOT EXISTS) qui crée la table REF_CarteTypeParametrage avec ses colonnes, contraintes et valeurs par défaut. |
-| 45 | Script 002 — Backfill Profil | Script SQL idempotent qui recopie les données nom/prénom/magasin depuis AspNetUsers vers la table Profil pour les utilisateurs existants, afin de ne perdre aucune donnée lors de la bascule. |
-| 46 | Script 003 — Suppression colonnes redondantes | Script SQL guardé (IF EXISTS) qui supprime les colonnes en double : AspNetUsers.Nom/Prenom/RefMagasinId et AspNetRoles.Description/CreatedAt. Safe sur les deux bases (staging et ECOMMERCE). |
-| 47 | Migrations EF livrées | 4 migrations Entity Framework : AddPermissionsAndRoles (tables Permissions + RolePermissions), AddOtpVerification (table OtpVerifications), RenameOtpIsVerifiedToIsUsed, AddUserProfileFields. |
-| 48 | Harmonisation migrations avec base cible | Les migrations et scripts doivent être vérifiés et harmonisés entre l'environnement de travail (staging) et la base cible (BRICOMA.ECOMMERCE) avant la fusion finale du code. |
-| 49 | Bascule vers les bases officielles | Tout le développement et les tests ont été faits sur l'environnement de test (staging SRV-PRP). La bascule vers les bases officielles (SRV-reporting / SRV-REPORTS) reste à finaliser. |
+| 49 | Table REF_CarteTypeParametrage | Nouvelle table créée pour le paramétrage des types de cartes (message de réception, image-modèle, position X/Y du code-barres en %, taille du code-barres en %). Script de création fourni (001). |
+| 50 | Colonne BarcodeScale | Nouvelle colonne ajoutée sur REF_CarteTypeParametrage pour stocker la taille du code-barres en pourcentage (défaut 100%). |
+| 51 | Script 001 — Création table paramétrage | Script SQL idempotent (IF NOT EXISTS) qui crée la table REF_CarteTypeParametrage avec ses colonnes, contraintes et valeurs par défaut. |
+| 52 | Script 002 — Backfill Profil | Script SQL idempotent qui recopie les données nom/prénom/magasin depuis AspNetUsers vers la table Profil pour les utilisateurs existants, afin de ne perdre aucune donnée lors de la bascule. |
+| 53 | Script 003 — Suppression colonnes redondantes | Script SQL guardé (IF EXISTS) qui supprime les colonnes en double : AspNetUsers.Nom/Prenom/RefMagasinId et AspNetRoles.Description/CreatedAt. Safe sur les deux bases (staging et ECOMMERCE). |
+| 54 | Migrations EF livrées | 4 migrations Entity Framework : AddPermissionsAndRoles (tables Permissions + RolePermissions), AddOtpVerification (table OtpVerifications), RenameOtpIsVerifiedToIsUsed, AddUserProfileFields. |
+| 55 | Harmonisation migrations avec base cible | Les migrations et scripts doivent être vérifiés et harmonisés entre l'environnement de travail (staging) et la base cible (BRICOMA.ECOMMERCE) avant la fusion finale du code. |
+| 56 | Bascule vers les bases officielles | Tout le développement et les tests ont été faits sur l'environnement de test (staging SRV-PRP). La bascule vers les bases officielles (SRV-reporting / SRV-REPORTS) reste à finaliser. |
 
 ---
 
-_Statut global : 33 tâches réalisées et testées. 3 en cours de développement. 2 à venir (dont « Bloquer/Débloquer » en attente de vos précisions). 3 sujets en attente de votre validation._
+_Statut global : 46 tâches réalisées et testées. 2 à venir (« Bloquer/Débloquer » en attente de vos précisions + WhatsApp production). 3 sujets en attente de votre validation._

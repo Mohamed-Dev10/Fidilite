@@ -1,6 +1,6 @@
-@model PagedResult<Cliente>
 @{
     var typeName = ViewData["TypeName"] as string ?? "Cartes";
+    var typeId = ViewData["TypeId"];
     ViewData["Title"] = typeName;
 }
 
@@ -23,7 +23,7 @@
 <div class="page-body">
     <div class="container-xl">
 
-        <!-- Filtres temps réel -->
+        <!-- Filtres -->
         <div class="card mb-3">
             <div class="card-body">
                 <div class="row g-2 align-items-center">
@@ -31,7 +31,7 @@
                         <div class="search-pill">
                             <i class="ti ti-search"></i>
                             <input type="text" id="searchInput" class="form-control"
-                                   placeholder="Rechercher nom, prénom, GSM, CIN, magasin..." autocomplete="off" />
+                                   placeholder="Rechercher nom, prénom, téléphone, CIN..." autocomplete="off" />
                         </div>
                     </div>
                     <div class="col-auto">
@@ -54,8 +54,13 @@
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="ti ti-id-badge me-2 text-primary"></i>
-                    Total : <strong id="totalCount">@Model.TotalCount</strong> carte(s)
+                    Total : <strong id="totalCount">0</strong> carte(s)
                 </h3>
+                <div class="card-actions">
+                    <span id="loadingBadge" class="badge bg-primary-lt" style="display:none;">
+                        <i class="ti ti-loader-2 ti-spin"></i> Chargement...
+                    </span>
+                </div>
             </div>
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-hover">
@@ -72,69 +77,12 @@
                         </tr>
                     </thead>
                     <tbody id="listBody">
-                        <tr id="emptyRow" style="display:none;">
+                        <tr id="emptyRow">
                             <td colspan="8" class="text-center text-muted py-5">
-                                <i class="ti ti-database-off fs-1 d-block mb-2"></i>
-                                Aucune carte « @typeName » trouvée
+                                <i class="ti ti-loader-2 ti-spin fs-1 d-block mb-2"></i>
+                                Chargement...
                             </td>
                         </tr>
-                        @foreach (var item in Model.Items)
-                        {
-                            string chipClass, statutIcon, statutLabel;
-                            switch (item.RefClienteStatutId)
-                            {
-                                case 2: chipClass = "chip-green"; statutIcon = "ti-circle-check"; statutLabel = "Confirmé"; break;
-                                case 3: chipClass = "chip-gray"; statutIcon = "ti-lock"; statutLabel = "Clôturé"; break;
-                                default: chipClass = "chip-yellow"; statutIcon = "ti-clock-hour-4"; statutLabel = "Créé"; break;
-                            }
-                            var initials = string.Concat(($"{item.Nom} {item.Prenom}").Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
-                            var searchData = $"{item.Nom} {item.Prenom} {item.Gsm} {item.Cin} {item.Email} {item.RefMagasin?.Name}".ToLowerInvariant();
-                            <tr class="data-row" data-search="@searchData" data-statut="@item.RefClienteStatutId">
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.8rem;">@(string.IsNullOrEmpty(initials) ? "?" : initials)</span>
-                                        <div>
-                                            <div class="fw-bold">@item.Nom @item.Prenom</div>
-                                            @if (!string.IsNullOrEmpty(item.Email))
-                                            {
-                                                <div class="text-muted small">@item.Email</div>
-                                            }
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>@(string.IsNullOrEmpty(item.Gsm) ? "-" : item.Gsm)</td>
-                                <td>@(string.IsNullOrEmpty(item.Cin) ? "-" : item.Cin)</td>
-                                <td>
-                                    @if (item.RefMagasin?.Name != null)
-                                    {
-                                        <span class="chip chip-blue"><i class="ti ti-building-store"></i> @item.RefMagasin.Name</span>
-                                    }
-                                    else { <span class="text-muted">-</span> }
-                                </td>
-                                <td><span class="chip @chipClass"><i class="ti @statutIcon"></i> @statutLabel</span></td>
-                                <td class="text-muted">@item.DateCreation.ToString("dd/MM/yyyy HH:mm")</td>
-                                <td>
-                                    @if (item.IsConfirmed == true)
-                                    {
-                                        <span class="chip chip-green"><i class="ti ti-check"></i> Oui</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="chip chip-yellow"><i class="ti ti-clock"></i> Non</span>
-                                    }
-                                </td>
-                                <td class="text-end">
-                                    <div class="d-flex gap-1 justify-content-end">
-                                        <a asp-controller="Carte" asp-action="Detail" asp-route-id="@item.Id" class="btn-soft btn-soft-blue" title="Voir détail">
-                                            <i class="ti ti-eye"></i> Voir
-                                        </a>
-                                        <a asp-controller="Carte" asp-action="Modifier" asp-route-id="@item.Id" class="btn-soft btn-soft-indigo" title="Modifier">
-                                            <i class="ti ti-edit"></i> Modifier
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
                     </tbody>
                 </table>
             </div>
@@ -148,6 +96,127 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/list-filter.js"></script>
-    <script>bricoListFilter({ perPage: 6, label: "carte(s)" });</script>
+    <script>
+        (function () {
+            var typeId = @typeId;
+            var baseUrl = '@Url.Action("ListeData", "Carte")';
+            var detailUrl = '@Url.Action("Detail", "Carte", new { id = "__ID__" })';
+            var editUrl = '@Url.Action("Modifier", "Carte", new { id = "__ID__" })';
+            var perPage = 6;
+            var currentPage = 1;
+            var debounceTimer = null;
+
+            var searchInput = document.getElementById('searchInput');
+            var statutSelect = document.getElementById('statutFilter');
+            var resetBtn = document.getElementById('resetBtn');
+            var tbody = document.getElementById('listBody');
+            var emptyRow = document.getElementById('emptyRow');
+            var totalCount = document.getElementById('totalCount');
+            var pageInfo = document.getElementById('pageInfo');
+            var pager = document.getElementById('pager');
+            var loading = document.getElementById('loadingBadge');
+
+            function fetchData(page) {
+                currentPage = page || 1;
+                var search = (searchInput.value || '').trim();
+                var statut = statutSelect.value || '';
+
+                var params = '?typeId=' + typeId + '&page=' + currentPage + '&pageSize=' + perPage;
+                if (search) params += '&search=' + encodeURIComponent(search);
+                if (statut) params += '&statutId=' + statut;
+
+                loading.style.display = '';
+                fetch(baseUrl + params)
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        loading.style.display = 'none';
+                        renderRows(data.items);
+                        totalCount.textContent = data.totalCount;
+                        renderPageInfo(data);
+                        renderPager(data.page, data.totalPages);
+                    })
+                    .catch(function () {
+                        loading.style.display = 'none';
+                        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-5">Erreur de chargement</td></tr>';
+                    });
+            }
+
+            function renderRows(items) {
+                if (!items || !items.length) {
+                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-5">' +
+                        '<i class="ti ti-database-off fs-1 d-block mb-2"></i>Aucune carte trouvée</td></tr>';
+                    return;
+                }
+                var html = '';
+                items.forEach(function (c) {
+                    var initials = ((c.nom || '').charAt(0) + (c.prenom || '').charAt(0)).toUpperCase() || '?';
+
+                    var chipClass, statutIcon, statutLabel;
+                    switch (c.statutId) {
+                        case 2: chipClass = 'chip-green'; statutIcon = 'ti-circle-check'; statutLabel = 'Confirmé'; break;
+                        case 3: chipClass = 'chip-gray'; statutIcon = 'ti-lock'; statutLabel = 'Clôturé'; break;
+                        default: chipClass = 'chip-yellow'; statutIcon = 'ti-clock-hour-4'; statutLabel = 'Créé'; break;
+                    }
+
+                    html += '<tr>'
+                        + '<td><div class="d-flex align-items-center gap-2">'
+                        + '<span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.8rem;">' + initials + '</span>'
+                        + '<div><div class="fw-bold">' + (c.nom || '') + ' ' + (c.prenom || '') + '</div>'
+                        + (c.email ? '<div class="text-muted small">' + c.email + '</div>' : '')
+                        + '</div></div></td>'
+                        + '<td>' + (c.gsm || '-') + '</td>'
+                        + '<td>' + (c.cin || '-') + '</td>'
+                        + '<td>' + (c.magasin ? '<span class="chip chip-blue"><i class="ti ti-building-store"></i> ' + c.magasin + '</span>' : '<span class="text-muted">-</span>') + '</td>'
+                        + '<td><span class="chip ' + chipClass + '"><i class="ti ' + statutIcon + '"></i> ' + statutLabel + '</span></td>'
+                        + '<td class="text-muted">' + c.dateCreation + '</td>'
+                        + '<td>' + (c.isConfirmed ? '<span class="chip chip-green"><i class="ti ti-check"></i> Oui</span>' : '<span class="chip chip-yellow"><i class="ti ti-clock"></i> Non</span>') + '</td>'
+                        + '<td class="text-end"><div class="d-flex gap-1 justify-content-end">'
+                        + '<a href="' + detailUrl.replace('__ID__', c.id) + '" class="btn-soft btn-soft-blue" title="Voir"><i class="ti ti-eye"></i> Voir</a>'
+                        + '<a href="' + editUrl.replace('__ID__', c.id) + '" class="btn-soft btn-soft-indigo" title="Modifier"><i class="ti ti-edit"></i> Modifier</a>'
+                        + '</div></td>'
+                        + '</tr>';
+                });
+                tbody.innerHTML = html;
+            }
+
+            function renderPageInfo(data) {
+                if (!data.totalCount) { pageInfo.textContent = ''; return; }
+                var start = (data.page - 1) * data.pageSize + 1;
+                var end = Math.min(data.page * data.pageSize, data.totalCount);
+                pageInfo.textContent = start + ' – ' + end + ' sur ' + data.totalCount + ' carte(s)';
+            }
+
+            function renderPager(page, totalPages) {
+                if (!pager || totalPages <= 1) { if (pager) pager.innerHTML = ''; return; }
+                var html = '';
+                html += '<button class="pg-btn"' + (page <= 1 ? ' disabled' : '') + ' data-pg="' + (page - 1) + '"><i class="ti ti-chevron-left"></i></button>';
+                var from = Math.max(1, page - 2), to = Math.min(totalPages, page + 2);
+                if (from > 1) { html += '<button class="pg-btn" data-pg="1">1</button>'; if (from > 2) html += '<span class="px-1 text-muted">…</span>'; }
+                for (var i = from; i <= to; i++) html += '<button class="pg-btn ' + (i === page ? 'active' : '') + '" data-pg="' + i + '">' + i + '</button>';
+                if (to < totalPages) { if (to < totalPages - 1) html += '<span class="px-1 text-muted">…</span>'; html += '<button class="pg-btn" data-pg="' + totalPages + '">' + totalPages + '</button>'; }
+                html += '<button class="pg-btn"' + (page >= totalPages ? ' disabled' : '') + ' data-pg="' + (page + 1) + '"><i class="ti ti-chevron-right"></i></button>';
+                pager.innerHTML = html;
+                pager.querySelectorAll('.pg-btn').forEach(function (b) {
+                    if (b.disabled) return;
+                    b.addEventListener('click', function () { fetchData(parseInt(b.getAttribute('data-pg'), 10)); });
+                });
+            }
+
+            // Debounce 300ms sur la recherche
+            searchInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () { fetchData(1); }, 300);
+            });
+            statutSelect.addEventListener('change', function () { fetchData(1); });
+            resetBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                searchInput.value = '';
+                statutSelect.value = '';
+                fetchData(1);
+            });
+
+            // Chargement initial
+            fetchData(1);
+        })();
+    </script>
 }

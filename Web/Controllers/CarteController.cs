@@ -106,13 +106,22 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         // Utilisée par les KPI dynamiques du dashboard.
         [HttpGet]
         [Authorize(Policy = "carte.list")]
-        public async Task<IActionResult> Liste(int typeId, string? search, int? statutId, int page = 1)
+        public async Task<IActionResult> Liste(int typeId)
         {
-            // Un responsable de magasin ne voit que les cartes de son magasin.
+            var type = (await _clienteBOService.GetAllRefCarteTypes()).Data?.FirstOrDefault(t => t.Id == typeId);
+            ViewData["TypeId"] = typeId;
+            ViewData["TypeName"] = type?.Name ?? "Cartes";
+            return View();
+        }
+
+        [HttpGet]
+        [Authorize(Policy = "carte.list")]
+        public async Task<IActionResult> ListeData(int typeId, string? search, int? statutId, int page = 1, int pageSize = 10)
+        {
             var scopeMagasinId = await GetScopeMagasinId();
             int? magasinId = scopeMagasinId.HasValue ? scopeMagasinId : null;
             if (!User.IsInRole("SUPER_ADMIN") && !scopeMagasinId.HasValue)
-                magasinId = -1; // responsable sans magasin → liste vide
+                magasinId = -1;
 
             var filter = new CarteListFilterModel
             {
@@ -120,20 +129,33 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 Search = search,
                 StatutId = statutId,
                 MagasinId = magasinId,
-                Page = 1,
-                PageSize = 5000
+                Page = page,
+                PageSize = pageSize
             };
 
             var result = await _clienteBOService.GetList(filter);
-            ViewData["Filter"] = filter;
+            var data = result.Data;
 
-            var type = (await _clienteBOService.GetAllRefCarteTypes()).Data?.FirstOrDefault(t => t.Id == typeId);
-            ViewData["TypeId"] = typeId;
-            ViewData["TypeName"] = type?.Name ?? "Cartes";
-
-            if (!result.Success)
-                ViewData["Error"] = result.Message;
-            return View(result.Data);
+            return Json(new
+            {
+                items = data?.Items?.Select(c => new
+                {
+                    c.Id,
+                    c.Nom,
+                    c.Prenom,
+                    c.Gsm,
+                    Cin = c.Cin ?? "",
+                    Email = c.Email ?? "",
+                    Magasin = c.RefMagasin?.Name ?? "",
+                    StatutId = c.RefClienteStatutId,
+                    IsConfirmed = c.IsConfirmed == true,
+                    DateCreation = c.DateCreation.ToString("dd/MM/yyyy HH:mm")
+                }) ?? Enumerable.Empty<object>(),
+                totalCount = data?.TotalCount ?? 0,
+                page = data?.Page ?? 1,
+                pageSize = data?.PageSize ?? pageSize,
+                totalPages = data?.TotalPages ?? 0
+            });
         }
 
         // Détail d'une carte (infos + image)

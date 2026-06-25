@@ -1,15 +1,20 @@
 @inject BRICOMA.ECOMMERCE.Business.Interfaces.IClienteBOService ClienteService
+@inject Microsoft.Extensions.Caching.Memory.IMemoryCache MemCache
 @{
     var ctrl = ViewContext.RouteData.Values["controller"]?.ToString();
     var action = ViewContext.RouteData.Values["action"]?.ToString();
     var currentTypeId = ViewContext.HttpContext.Request.Query["typeId"].ToString();
     string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 
-    // Menu dynamique : un item par type de carte géré (AMIBRICOMA exclu).
-    // Un nouveau type paramétré apparaît automatiquement ici.
-    var carteTypesMenu = (await ClienteService.GetAllRefCarteTypes()).Data?
-        .Where(t => t.Id != (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.AMIBRICOMA)
-        .ToList() ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefCarteType>();
+    // Menu dynamique : types de carte cachés 15 min (évite une requête SQL à chaque page).
+    var carteTypesMenu = await MemCache.GetOrCreateAsync("menu_carte_types", async entry =>
+    {
+        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+        var result = (await ClienteService.GetAllRefCarteTypes()).Data?
+            .Where(t => t.Id != (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.AMIBRICOMA)
+            .ToList() ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefCarteType>();
+        return result;
+    }) ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefCarteType>();
     var typePalette = new[] { "si-blue", "si-orange", "si-teal", "si-pink", "si-cyan", "si-yellow", "si-green", "si-purple" };
 }
 <!DOCTYPE html>

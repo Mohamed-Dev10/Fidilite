@@ -531,9 +531,9 @@ a.chip, a.chip:hover { text-decoration: none; }
 .kpi-fieldset {
     border: 2px solid rgba(var(--bc-primary-rgb), .35);
     border-radius: 16px;
-    padding: 1.4rem 1.2rem 1.2rem;
-    margin-bottom: 1.8rem;
-    background: rgba(var(--bc-primary-rgb), .03);
+    padding: 1rem 1rem .9rem;
+    margin-bottom: 1.2rem;
+    background: #fff;
     box-shadow: 0 4px 18px rgba(var(--bc-primary-rgb), .1);
 }
 .kpi-legend {
@@ -546,10 +546,10 @@ a.chip, a.chip:hover { text-decoration: none; }
 
 .kpi-card-animated {
     position: relative; overflow: hidden;
-    border-radius: 16px; padding: 1.4rem 1.3rem;
-    display: flex; align-items: center; gap: 1rem;
-    color: #fff; min-height: 110px;
-    box-shadow: 0 8px 28px rgba(0, 0, 0, .12);
+    border-radius: 14px; padding: .9rem 1rem;
+    display: flex; align-items: center; gap: .8rem;
+    color: #fff; min-height: 82px;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, .12);
     transition: transform .2s ease, box-shadow .2s ease;
 }
 .kpi-card-animated:hover {
@@ -558,30 +558,30 @@ a.chip, a.chip:hover { text-decoration: none; }
 }
 /* Vague décorative en bas */
 .kpi-anim-wave {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 38px;
+    position: absolute; bottom: 0; left: 0; right: 0; height: 28px;
     background: rgba(255, 255, 255, .08);
     border-radius: 60% 70% 0 0;
     animation: kpiWave 4s ease-in-out infinite alternate;
 }
 @keyframes kpiWave {
-    0%   { border-radius: 60% 70% 0 0; height: 38px; }
-    100% { border-radius: 45% 55% 0 0; height: 44px; }
+    0%   { border-radius: 60% 70% 0 0; height: 28px; }
+    100% { border-radius: 45% 55% 0 0; height: 34px; }
 }
 /* Icône ronde */
 .kpi-anim-icon {
-    flex: 0 0 auto; width: 52px; height: 52px;
+    flex: 0 0 auto; width: 42px; height: 42px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 14px; font-size: 1.5rem;
+    border-radius: 12px; font-size: 1.25rem;
     background: rgba(255, 255, 255, .2);
     backdrop-filter: blur(4px);
 }
 /* Corps texte */
 .kpi-anim-body { flex: 1 1 auto; position: relative; z-index: 1; }
 .kpi-anim-value {
-    font-size: 2rem; font-weight: 800; line-height: 1;
-    margin-bottom: .25rem;
+    font-size: 1.55rem; font-weight: 800; line-height: 1;
+    margin-bottom: .2rem;
 }
-.kpi-anim-label { font-size: .85rem; opacity: .9; font-weight: 500; }
+.kpi-anim-label { font-size: .78rem; opacity: .9; font-weight: 500; }
 /* Badge tendance (↑/↓) */
 .kpi-badge {
     display: inline-flex; align-items: center; gap: .2rem;

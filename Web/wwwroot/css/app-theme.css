@@ -527,6 +527,23 @@ a.chip, a.chip:hover { text-decoration: none; }
 /* ============================================================
    KPI CARDS ANIMÉES (dashboard)
    ============================================================ */
+/* Fieldset de section KPI */
+.kpi-fieldset {
+    border: 2px solid rgba(var(--bc-primary-rgb), .35);
+    border-radius: 16px;
+    padding: 1.4rem 1.2rem 1.2rem;
+    margin-bottom: 1.8rem;
+    background: rgba(var(--bc-primary-rgb), .03);
+    box-shadow: 0 4px 18px rgba(var(--bc-primary-rgb), .1);
+}
+.kpi-legend {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-size: 1.05rem; font-weight: 700; color: var(--bc-primary-dark);
+    padding: 0 .7rem;
+    float: none; width: auto;
+}
+.kpi-legend i { font-size: 1.15rem; color: var(--bc-primary); }
+
 .kpi-card-animated {
     position: relative; overflow: hidden;
     border-radius: 16px; padding: 1.4rem 1.3rem;

@@ -41,138 +41,142 @@
     return;
 }
 
-<!-- KPI principaux — Vue d'ensemble (même design animé, couleurs différentes) -->
-<div class="row g-3 mb-2">
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-cyan">
-            <div class="kpi-anim-icon"><i class="ti ti-id-badge"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value" data-count="@stats.TotalCartes">0</div>
-                <div class="kpi-anim-label">Total cartes</div>
-            </div>
-            <div class="kpi-anim-wave"></div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-orange">
-            <div class="kpi-anim-icon"><i class="ti ti-calendar-plus"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value" data-count="@stats.CartesCeMois">0</div>
-                <div class="kpi-anim-label">Créées ce mois</div>
-            </div>
-            <div class="kpi-anim-wave"></div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-teal">
-            <div class="kpi-anim-icon"><i class="ti ti-circle-check"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value" data-count="@stats.CartesActives">0</div>
-                <div class="kpi-anim-label">Cartes actives</div>
-            </div>
-            <div class="kpi-anim-wave"></div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-red">
-            <div class="kpi-anim-icon"><i class="ti ti-lock"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value" data-count="@stats.CartesBloquees">0</div>
-                <div class="kpi-anim-label">Cartes bloquées</div>
-            </div>
-            <div class="kpi-anim-wave"></div>
-        </div>
-    </div>
-</div>
-
-<!-- KPI cliquables par type (même design animé, couleurs alternées, lien vers la liste) -->
-@{
-    var typeAnimColors = new[] { "kpi-card-anim-blue", "kpi-card-anim-orange", "kpi-card-anim-teal", "kpi-card-anim-purple", "kpi-card-anim-green", "kpi-card-anim-pink" };
-    var typeAnimIcons = new[] { "ti-id-badge", "ti-tool", "ti-diamond", "ti-star", "ti-award", "ti-crown" };
-    var typeIdx = 0;
-}
-<div class="row g-3 mb-2">
-    @foreach (var type in stats.ParType)
-    {
-        var color = typeAnimColors[typeIdx % typeAnimColors.Length];
-        var icon = typeAnimIcons[typeIdx % typeAnimIcons.Length];
-        typeIdx++;
-        <div class="col-sm-6 col-lg-4">
-            <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card-animated @color" style="text-decoration:none;color:#fff;cursor:pointer;">
-                <div class="kpi-anim-icon"><i class="ti @icon"></i></div>
+<!-- KPI principaux — Vue d'ensemble -->
+<fieldset class="kpi-fieldset">
+    <legend class="kpi-legend"><i class="ti ti-chart-pie"></i> Vue d'ensemble</legend>
+    <div class="row g-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-cyan">
+                <div class="kpi-anim-icon"><i class="ti ti-id-badge"></i></div>
                 <div class="kpi-anim-body">
-                    <div class="kpi-anim-value" data-count="@type.Count">0</div>
-                    <div class="kpi-anim-label">@type.TypeName</div>
+                    <div class="kpi-anim-value" data-count="@stats.TotalCartes">0</div>
+                    <div class="kpi-anim-label">Total cartes</div>
                 </div>
-                <i class="ti ti-chevron-right" style="font-size:1.5rem;opacity:.6;"></i>
                 <div class="kpi-anim-wave"></div>
-            </a>
+            </div>
         </div>
-    }
-</div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-orange">
+                <div class="kpi-anim-icon"><i class="ti ti-calendar-plus"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value" data-count="@stats.CartesCeMois">0</div>
+                    <div class="kpi-anim-label">Créées ce mois</div>
+                </div>
+                <div class="kpi-anim-wave"></div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-teal">
+                <div class="kpi-anim-icon"><i class="ti ti-circle-check"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value" data-count="@stats.CartesActives">0</div>
+                    <div class="kpi-anim-label">Cartes actives</div>
+                </div>
+                <div class="kpi-anim-wave"></div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-red">
+                <div class="kpi-anim-icon"><i class="ti ti-lock"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value" data-count="@stats.CartesBloquees">0</div>
+                    <div class="kpi-anim-label">Cartes bloquées</div>
+                </div>
+                <div class="kpi-anim-wave"></div>
+            </div>
+        </div>
+    </div>
+</fieldset>
 
-<!-- KPI animées : Aujourd'hui / Ce mois / Cette semaine (+ tendance) / Taux d'activation -->
-<div class="mt-5"></div>
+<!-- KPI cliquables par type -->
+<fieldset class="kpi-fieldset">
+    <legend class="kpi-legend"><i class="ti ti-credit-card"></i> Cartes par type</legend>
+    @{
+        var typeAnimColors = new[] { "kpi-card-anim-blue", "kpi-card-anim-orange", "kpi-card-anim-teal", "kpi-card-anim-purple", "kpi-card-anim-green", "kpi-card-anim-pink" };
+        var typeAnimIcons = new[] { "ti-id-badge", "ti-tool", "ti-diamond", "ti-star", "ti-award", "ti-crown" };
+        var typeIdx = 0;
+    }
+    <div class="row g-3">
+        @foreach (var type in stats.ParType)
+        {
+            var color = typeAnimColors[typeIdx % typeAnimColors.Length];
+            var icon = typeAnimIcons[typeIdx % typeAnimIcons.Length];
+            typeIdx++;
+            <div class="col-sm-6 col-lg-4">
+                <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card-animated @color" style="text-decoration:none;color:#fff;cursor:pointer;">
+                    <div class="kpi-anim-icon"><i class="ti @icon"></i></div>
+                    <div class="kpi-anim-body">
+                        <div class="kpi-anim-value" data-count="@type.Count">0</div>
+                        <div class="kpi-anim-label">@type.TypeName</div>
+                    </div>
+                    <i class="ti ti-chevron-right" style="font-size:1.5rem;opacity:.6;"></i>
+                    <div class="kpi-anim-wave"></div>
+                </a>
+            </div>
+        }
+    </div>
+</fieldset>
+
+<!-- KPI animées : Activité récente -->
 @{
     var weekDiff = stats.CartesSemainePrecedente > 0
         ? Math.Round((stats.CartesCetteSemaine - stats.CartesSemainePrecedente) * 100.0 / stats.CartesSemainePrecedente, 1)
         : (stats.CartesCetteSemaine > 0 ? 100.0 : 0);
     var weekUp = weekDiff >= 0;
 }
-<div class="row g-3 mb-2">
-    <!-- Aujourd'hui -->
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-blue">
-            <div class="kpi-anim-icon"><i class="ti ti-sun"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value" data-count="@stats.CartesAujourdhui">0</div>
-                <div class="kpi-anim-label">Créées aujourd'hui</div>
-            </div>
-            <div class="kpi-anim-wave"></div>
-        </div>
-    </div>
-    <!-- Ce mois -->
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-indigo">
-            <div class="kpi-anim-icon"><i class="ti ti-calendar-stats"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value" data-count="@stats.CartesCeMois">0</div>
-                <div class="kpi-anim-label">Créées ce mois</div>
-            </div>
-            <div class="kpi-anim-wave"></div>
-        </div>
-    </div>
-    <!-- Cette semaine + badge tendance -->
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-purple">
-            <div class="kpi-anim-icon"><i class="ti ti-chart-arrows-vertical"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value" data-count="@stats.CartesCetteSemaine">0</div>
-                <div class="kpi-anim-label">
-                    Cette semaine
-                    <span class="kpi-badge @(weekUp ? "kpi-badge-up" : "kpi-badge-down")">
-                        <i class="ti @(weekUp ? "ti-trending-up" : "ti-trending-down")"></i> @(weekDiff > 0 ? "+" : "")@weekDiff%
-                    </span>
+<fieldset class="kpi-fieldset">
+    <legend class="kpi-legend"><i class="ti ti-activity"></i> Activité récente</legend>
+    <div class="row g-3">
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-blue">
+                <div class="kpi-anim-icon"><i class="ti ti-sun"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value" data-count="@stats.CartesAujourdhui">0</div>
+                    <div class="kpi-anim-label">Créées aujourd'hui</div>
                 </div>
+                <div class="kpi-anim-wave"></div>
             </div>
-            <div class="kpi-anim-wave"></div>
         </div>
-    </div>
-    <!-- Taux d'activation -->
-    <div class="col-sm-6 col-lg-3">
-        <div class="kpi-card-animated kpi-card-anim-green">
-            <div class="kpi-anim-icon"><i class="ti ti-shield-check"></i></div>
-            <div class="kpi-anim-body">
-                <div class="kpi-anim-value kpi-anim-pct" data-count="@((int)stats.TauxActivation)">0</div>
-                <div class="kpi-anim-label">Taux d'activation</div>
-                <div class="kpi-anim-bar">
-                    <div class="kpi-anim-bar-fill" style="--fill:@stats.TauxActivation%"></div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-indigo">
+                <div class="kpi-anim-icon"><i class="ti ti-calendar-stats"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value" data-count="@stats.CartesCeMois">0</div>
+                    <div class="kpi-anim-label">Créées ce mois</div>
                 </div>
+                <div class="kpi-anim-wave"></div>
             </div>
-            <div class="kpi-anim-wave"></div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-purple">
+                <div class="kpi-anim-icon"><i class="ti ti-chart-arrows-vertical"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value" data-count="@stats.CartesCetteSemaine">0</div>
+                    <div class="kpi-anim-label">
+                        Cette semaine
+                        <span class="kpi-badge @(weekUp ? "kpi-badge-up" : "kpi-badge-down")">
+                            <i class="ti @(weekUp ? "ti-trending-up" : "ti-trending-down")"></i> @(weekDiff > 0 ? "+" : "")@weekDiff%
+                        </span>
+                    </div>
+                </div>
+                <div class="kpi-anim-wave"></div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            <div class="kpi-card-animated kpi-card-anim-green">
+                <div class="kpi-anim-icon"><i class="ti ti-shield-check"></i></div>
+                <div class="kpi-anim-body">
+                    <div class="kpi-anim-value kpi-anim-pct" data-count="@((int)stats.TauxActivation)">0</div>
+                    <div class="kpi-anim-label">Taux d'activation</div>
+                    <div class="kpi-anim-bar">
+                        <div class="kpi-anim-bar-fill" style="--fill:@stats.TauxActivation%"></div>
+                    </div>
+                </div>
+                <div class="kpi-anim-wave"></div>
+            </div>
         </div>
     </div>
-</div>
+</fieldset>
 
 @section Scripts {
     <script>

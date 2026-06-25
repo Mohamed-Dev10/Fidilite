@@ -269,28 +269,37 @@ a.chip, a.chip:hover { text-decoration: none; }
     background: linear-gradient(180deg, var(--sb-bg-1) 0%, var(--sb-bg-2) 100%) !important;
     border-right: 0 !important;
     box-shadow: 2px 0 16px rgba(16,24,40,.10);
+    display: flex; flex-direction: column;
 }
 .app-sidebar .sidebar-wrapper {
     display: flex; flex-direction: column;
+    flex: 1 1 auto; min-height: 0;
     padding: .6rem .7rem 0;
 }
+/* Le menu défile ; le profil/déconnexion reste épinglé en bas */
+.app-sidebar .sidebar-wrapper > nav { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+.sidebar-profile { flex-shrink: 0; }
 
 /* Marque */
 .app-sidebar .sidebar-brand {
-    display: flex; align-items: center;
-    min-height: 62px; padding: 0 .9rem;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 84px; padding: 12px 0;
     border-bottom: 1px solid rgba(255,255,255,.06);
     margin-bottom: .6rem;
 }
 .app-sidebar .brand-link { display: flex; align-items: center; gap: .6rem; text-decoration: none; width: 100%; justify-content: center; }
-/* Logo BRICOMA sur pastille blanche + halo (sidebar sombre) */
-.app-sidebar .brand-logo-badge {
+/* Réglages EXACTS du projet M3alem (halo large et subtil + logo légèrement éclairci). Logo d'origine intact. */
+.app-sidebar .brand-logo-glow {
     display: inline-flex; align-items: center; justify-content: center;
-    background: #fff; border-radius: 12px;
-    padding: 7px 12px;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, .2), 0 6px 22px rgba(255, 255, 255, .22);
 }
-.app-sidebar .brand-logo-badge img { height: 34px; width: auto; display: block; }
+.app-sidebar .brand-logo-shadow { display: none; }
+.app-sidebar .brand-logo-main {
+    height: 84px; width: auto; object-fit: contain; display: block;
+    filter:
+        drop-shadow(0 0 1px #fff)
+        drop-shadow(0 0 2px #fff)
+        drop-shadow(0 0 4px rgba(255, 255, 255, .8));
+}
 
 /* Items */
 .app-sidebar .sidebar-menu .nav-item { margin: .12rem 0; }

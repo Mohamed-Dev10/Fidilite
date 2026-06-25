@@ -63,7 +63,10 @@
         <aside class="app-sidebar shadow" data-bs-theme="dark">
             <div class="sidebar-brand">
                 <a asp-controller="Home" asp-action="Index" class="brand-link">
-                    <span class="brand-logo-badge"><img src="~/images/bricoma.png" alt="BRICOMA" style="height:34px;width:auto;display:block;" /></span>
+                    <span class="brand-logo-glow">
+                        <img class="brand-logo-shadow" src="~/images/bricoma.png" alt="" aria-hidden="true" />
+                        <img class="brand-logo-main" src="~/images/bricoma.png" alt="BRICOMA" />
+                    </span>
                 </a>
             </div>
             <div class="sidebar-wrapper">

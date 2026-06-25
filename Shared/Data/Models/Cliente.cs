@@ -40,6 +40,7 @@ namespace BRICOMA.ECOMMERCE.Data.Models
         public DateTime? DateDeactivation { get; set; }
         public DateTime? DateConfirmation { get; set; }
         public DateTime DateCreation { get; set; }
+        
 
         public virtual Profil ProfilDeactivationNavigation { get; set; }
         public virtual RefCarteType RefCarteType { get; set; }

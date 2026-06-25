@@ -68,6 +68,9 @@ _Document de suivi destiné au responsable. Mis à jour le 25/06/2026._
 | 44 | Dashboard — KPI « Vue d'ensemble » redessinées | Les 4 KPI existantes (Total cartes, Créées ce mois, Cartes actives, Cartes bloquées) ont été redessinées dans le même style animé que les KPI « Activité récente », chacune avec sa propre couleur (cyan, orange, teal, rouge). |
 | 45 | Dashboard — KPI « Liste des cartes par type » redessinées | Les KPI cliquables par type de carte (M3alem, Artisan, Gold, etc.) ont été redessinées dans le même style animé avec des couleurs alternées, un comptage animé, et une flèche de navigation. Elles restent cliquables et redirigent vers la liste filtrée du type. |
 | 46 | Dashboard — Sections avec fieldset et titres | Chaque section de KPI du dashboard est encadrée dans un fieldset stylé (bordure arrondie, ombre, fond blanc) avec un titre en légende : « Vue d'ensemble », « Liste des cartes par type », « Activité récente ». Espacement entre les sections pour éviter l'effet condensé. |
+| 47 | Pagination serveur AJAX (listes de cartes) | Les listes de cartes utilisent désormais la pagination côté serveur (SQL Skip/Take) avec chargement AJAX. Seules 6 lignes sont chargées par page au lieu de 5000. La recherche utilise un debounce de 300ms. Les filtres et la navigation entre pages se font sans rechargement de la page. Badge « Chargement... » pendant le fetch. |
+| 48 | Cache mémoire pour le menu dynamique | Les types de carte du menu latéral sont cachés en mémoire pendant 15 minutes (IMemoryCache) pour éviter une requête SQL à chaque changement de page. La navigation entre les pages est plus rapide. |
+| 49 | Invalidation du cache à la création/modification/suppression d'un type | Le cache du menu est automatiquement vidé quand on crée, modifie ou supprime un type de carte dans la page Paramétrage. Un nouveau type apparaît immédiatement dans le menu latéral sans attendre l'expiration du cache. |
 
 ---
 
@@ -75,8 +78,8 @@ _Document de suivi destiné au responsable. Mis à jour le 25/06/2026._
 
 | N° | Tâche | Description |
 |---|---|---|
-| 47 | Bloquer / Débloquer une carte | Fonctionnalité permettant de bloquer ou débloquer la carte d'un client. Les champs nécessaires existent déjà en base de données (IsActif, RemarqueDeactivation, etc.). En attente de confirmation des informations nécessaires par le responsable. |
-| 48 | WhatsApp en production | Le mode actuel (sandbox de test Twilio) ne convient pas à la production. Le passage en production nécessite un numéro WhatsApp Business approuvé et des modèles de message validés par Meta. C'est une démarche côté compte Twilio/Meta, indépendante du code applicatif (le code est déjà prêt). |
+| 50 | Bloquer / Débloquer une carte | Fonctionnalité permettant de bloquer ou débloquer la carte d'un client. Les champs nécessaires existent déjà en base de données (IsActif, RemarqueDeactivation, etc.). En attente de confirmation des informations nécessaires par le responsable. |
+| 51 | WhatsApp en production | Le mode actuel (sandbox de test Twilio) ne convient pas à la production. Le passage en production nécessite un numéro WhatsApp Business approuvé et des modèles de message validés par Meta. C'est une démarche côté compte Twilio/Meta, indépendante du code applicatif (le code est déjà prêt). |
 
 ---
 
@@ -84,15 +87,15 @@ _Document de suivi destiné au responsable. Mis à jour le 25/06/2026._
 
 | N° | Élément | Description |
 |---|---|---|
-| 49 | Table REF_CarteTypeParametrage | Nouvelle table créée pour le paramétrage des types de cartes (message de réception, image-modèle, position X/Y du code-barres en %, taille du code-barres en %). Script de création fourni (001). |
-| 50 | Colonne BarcodeScale | Nouvelle colonne ajoutée sur REF_CarteTypeParametrage pour stocker la taille du code-barres en pourcentage (défaut 100%). |
-| 51 | Script 001 — Création table paramétrage | Script SQL idempotent (IF NOT EXISTS) qui crée la table REF_CarteTypeParametrage avec ses colonnes, contraintes et valeurs par défaut. |
-| 52 | Script 002 — Backfill Profil | Script SQL idempotent qui recopie les données nom/prénom/magasin depuis AspNetUsers vers la table Profil pour les utilisateurs existants, afin de ne perdre aucune donnée lors de la bascule. |
-| 53 | Script 003 — Suppression colonnes redondantes | Script SQL guardé (IF EXISTS) qui supprime les colonnes en double : AspNetUsers.Nom/Prenom/RefMagasinId et AspNetRoles.Description/CreatedAt. Safe sur les deux bases (staging et ECOMMERCE). |
-| 54 | Migrations EF livrées | 4 migrations Entity Framework : AddPermissionsAndRoles (tables Permissions + RolePermissions), AddOtpVerification (table OtpVerifications), RenameOtpIsVerifiedToIsUsed, AddUserProfileFields. |
-| 55 | Harmonisation migrations avec base cible | Les migrations et scripts doivent être vérifiés et harmonisés entre l'environnement de travail (staging) et la base cible (BRICOMA.ECOMMERCE) avant la fusion finale du code. |
-| 56 | Bascule vers les bases officielles | Tout le développement et les tests ont été faits sur l'environnement de test (staging SRV-PRP). La bascule vers les bases officielles (SRV-reporting / SRV-REPORTS) reste à finaliser. |
+| 52 | Table REF_CarteTypeParametrage | Nouvelle table créée pour le paramétrage des types de cartes (message de réception, image-modèle, position X/Y du code-barres en %, taille du code-barres en %). Script de création fourni (001). |
+| 53 | Colonne BarcodeScale | Nouvelle colonne ajoutée sur REF_CarteTypeParametrage pour stocker la taille du code-barres en pourcentage (défaut 100%). |
+| 54 | Script 001 — Création table paramétrage | Script SQL idempotent (IF NOT EXISTS) qui crée la table REF_CarteTypeParametrage avec ses colonnes, contraintes et valeurs par défaut. |
+| 55 | Script 002 — Backfill Profil | Script SQL idempotent qui recopie les données nom/prénom/magasin depuis AspNetUsers vers la table Profil pour les utilisateurs existants, afin de ne perdre aucune donnée lors de la bascule. |
+| 56 | Script 003 — Suppression colonnes redondantes | Script SQL guardé (IF EXISTS) qui supprime les colonnes en double : AspNetUsers.Nom/Prenom/RefMagasinId et AspNetRoles.Description/CreatedAt. Safe sur les deux bases (staging et ECOMMERCE). |
+| 57 | Migrations EF livrées | 4 migrations Entity Framework : AddPermissionsAndRoles (tables Permissions + RolePermissions), AddOtpVerification (table OtpVerifications), RenameOtpIsVerifiedToIsUsed, AddUserProfileFields. |
+| 58 | Harmonisation migrations avec base cible | Les migrations et scripts doivent être vérifiés et harmonisés entre l'environnement de travail (staging) et la base cible (BRICOMA.ECOMMERCE) avant la fusion finale du code. |
+| 59 | Bascule vers les bases officielles | Tout le développement et les tests ont été faits sur l'environnement de test (staging SRV-PRP). La bascule vers les bases officielles (SRV-reporting / SRV-REPORTS) reste à finaliser. |
 
 ---
 
-_Statut global : 46 tâches réalisées et testées. 2 à venir (« Bloquer/Débloquer » en attente de vos précisions + WhatsApp production). 3 sujets en attente de votre validation._
+_Statut global : 49 tâches réalisées et testées. 2 à venir (« Bloquer/Débloquer » en attente de vos précisions + WhatsApp production). 3 sujets en attente de votre validation._

@@ -26,6 +26,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<DashboardStatsModel>> GetDashboardStats(int? magasinId = null);
         Task<RESTServiceResponse<Cliente>> GetById(long id);
         Task<RESTServiceResponse<bool>> UpdateCarte(ClienteModel model);
+        Task<RESTServiceResponse<bool>> BloquerCarte(long id, string userId, string? remarque);
+        Task<RESTServiceResponse<bool>> DebloquerCarte(long id);
         Task<RESTServiceResponse<List<RefMagasin>>> GetAllMagasins();
         Task<RESTServiceResponse<List<RefCarteType>>> GetAllRefCarteTypes();
         Task<RESTServiceResponse<bool>> CreateRefCarteType(string name);

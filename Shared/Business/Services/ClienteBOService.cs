@@ -536,6 +536,80 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             return new RESTServiceResponse<bool>(true, "OK", true);
         }
 
+        public async Task<RESTServiceResponse<bool>> BloquerCarte(long id, string userId, string? remarque)
+        {
+            try
+            {
+                var cliente = await _clienteBORepository.GetById(id);
+                if (cliente == null)
+                    return new RESTServiceResponse<bool>(false, "Carte introuvable.", false);
+                if (cliente.IsActif == false)
+                    return new RESTServiceResponse<bool>(false, "Cette carte est déjà bloquée.", false);
+
+                cliente.IsActif = false;
+                cliente.DateDeactivation = DateTime.Now;
+                cliente.ProfilDeactivation = userId;
+                cliente.RemarqueDeactivation = remarque;
+                await _clienteBORepository.Update(cliente);
+
+                if (!string.IsNullOrEmpty(cliente.Code))
+                {
+                    var marketClient = await _marketBORepository.GetByCodeClt(cliente.Code);
+                    if (marketClient != null)
+                    {
+                        marketClient.Bloquer = 1;
+                        marketClient.Actif = false;
+                        await _marketBORepository.UpdateClient(marketClient);
+                    }
+                }
+
+                _logger.LogInformation("Carte bloquée - Id: {Id}, Par: {UserId}", id, userId);
+                return new RESTServiceResponse<bool>(true, "Carte bloquée avec succès.", true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur BloquerCarte - Id: {Id}", id);
+                return new RESTServiceResponse<bool>(false, ex.Message, false);
+            }
+        }
+
+        public async Task<RESTServiceResponse<bool>> DebloquerCarte(long id)
+        {
+            try
+            {
+                var cliente = await _clienteBORepository.GetById(id);
+                if (cliente == null)
+                    return new RESTServiceResponse<bool>(false, "Carte introuvable.", false);
+                if (cliente.IsActif != false)
+                    return new RESTServiceResponse<bool>(false, "Cette carte est déjà active.", false);
+
+                cliente.IsActif = true;
+                cliente.DateDeactivation = null;
+                cliente.ProfilDeactivation = null;
+                cliente.RemarqueDeactivation = null;
+                await _clienteBORepository.Update(cliente);
+
+                if (!string.IsNullOrEmpty(cliente.Code))
+                {
+                    var marketClient = await _marketBORepository.GetByCodeClt(cliente.Code);
+                    if (marketClient != null)
+                    {
+                        marketClient.Bloquer = 0;
+                        marketClient.Actif = true;
+                        await _marketBORepository.UpdateClient(marketClient);
+                    }
+                }
+
+                _logger.LogInformation("Carte débloquée - Id: {Id}", id);
+                return new RESTServiceResponse<bool>(true, "Carte débloquée avec succès.", true);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur DebloquerCarte - Id: {Id}", id);
+                return new RESTServiceResponse<bool>(false, ex.Message, false);
+            }
+        }
+
         public async Task<RESTServiceResponse<PagedResult<Cliente>>> GetList(CarteListFilterModel filter)
         {
             try

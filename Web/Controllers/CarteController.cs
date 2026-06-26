@@ -149,6 +149,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                     Magasin = c.RefMagasin?.Name ?? "",
                     StatutId = c.RefClienteStatutId,
                     IsConfirmed = c.IsConfirmed == true,
+                    IsActif = c.IsActif != false,
                     DateCreation = c.DateCreation.ToString("dd/MM/yyyy HH:mm")
                 }) ?? Enumerable.Empty<object>(),
                 totalCount = data?.TotalCount ?? 0,
@@ -203,6 +204,31 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
 
             TempData["Success"] = result.Message;
             return RedirectToAction(nameof(Detail), new { id = model.Id });
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "carte.lock")]
+        public async Task<IActionResult> Bloquer(long id, string? remarque)
+        {
+            var userId = _userManager.GetUserId(User) ?? "";
+            var result = await _clienteBOService.BloquerCarte(id, userId, remarque);
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
+            return RedirectToAction(nameof(Detail), new { id });
+        }
+
+        [HttpPost]
+        [Authorize(Policy = "carte.lock")]
+        public async Task<IActionResult> Debloquer(long id)
+        {
+            var result = await _clienteBOService.DebloquerCarte(id);
+            if (result.Data)
+                TempData["Success"] = result.Message;
+            else
+                TempData["Error"] = result.Message;
+            return RedirectToAction(nameof(Detail), new { id });
         }
 
         private static ClienteModel ToModel(Cliente c) => new ClienteModel

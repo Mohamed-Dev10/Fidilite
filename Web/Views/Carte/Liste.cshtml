@@ -2,6 +2,7 @@
     var typeName = ViewData["TypeName"] as string ?? "Cartes";
     var typeId = ViewData["TypeId"];
     ViewData["Title"] = typeName;
+    var canLock = User.HasClaim("perm", "carte.lock");
 }
 
 <div class="page-header d-print-none">
@@ -73,7 +74,7 @@
                             <th>Statut</th>
                             <th>Date création</th>
                             <th>Confirmé</th>
-                            <th class="text-end">Actions</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="listBody">
@@ -102,6 +103,10 @@
             var baseUrl = '@Url.Action("ListeData", "Carte")';
             var detailUrl = '@Url.Action("Detail", "Carte", new { id = "__ID__" })';
             var editUrl = '@Url.Action("Modifier", "Carte", new { id = "__ID__" })';
+            var bloquerUrl = '@Url.Action("Bloquer", "Carte")';
+            var debloquerUrl = '@Url.Action("Debloquer", "Carte")';
+            var canLock = @(canLock ? "true" : "false");
+            var antiForgeryToken = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] || '';
             var perPage = 6;
             var currentPage = 1;
             var debounceTimer = null;
@@ -170,13 +175,37 @@
                         + '<td><span class="chip ' + chipClass + '"><i class="ti ' + statutIcon + '"></i> ' + statutLabel + '</span></td>'
                         + '<td class="text-muted">' + c.dateCreation + '</td>'
                         + '<td>' + (c.isConfirmed ? '<span class="chip chip-green"><i class="ti ti-check"></i> Oui</span>' : '<span class="chip chip-yellow"><i class="ti ti-clock"></i> Non</span>') + '</td>'
-                        + '<td class="text-end"><div class="d-flex gap-1 justify-content-end">'
+                        + '<td class="text-center"><div class="d-flex gap-1 align-items-center justify-content-center">'
                         + '<a href="' + detailUrl.replace('__ID__', c.id) + '" class="btn-soft btn-soft-blue" title="Voir"><i class="ti ti-eye"></i> Voir</a>'
                         + '<a href="' + editUrl.replace('__ID__', c.id) + '" class="btn-soft btn-soft-indigo" title="Modifier"><i class="ti ti-edit"></i> Modifier</a>'
+                        + (canLock ? '<button type="button" class="carte-toggle ' + (c.isActif ? 'is-active' : 'is-blocked') + '" data-id="' + c.id + '" data-actif="' + c.isActif + '" title="' + (c.isActif ? 'Bloquer' : 'Débloquer') + '"><span class="carte-toggle-dot"></span></button>' : '')
                         + '</div></td>'
                         + '</tr>';
                 });
                 tbody.innerHTML = html;
+
+                // Toggle bloquer/débloquer avec bricoConfirm
+                if (canLock) {
+                    tbody.querySelectorAll('.carte-toggle').forEach(function (btn) {
+                        btn.addEventListener('click', function () {
+                            var id = btn.getAttribute('data-id');
+                            var isActif = btn.getAttribute('data-actif') === 'true';
+                            bricoConfirm({
+                                message: isActif ? 'Voulez-vous bloquer cette carte ?' : 'Voulez-vous débloquer cette carte ?',
+                                title: isActif ? 'Bloquer la carte' : 'Débloquer la carte',
+                                type: isActif ? 'danger' : 'warning',
+                                confirmText: isActif ? 'Bloquer' : 'Débloquer',
+                                onConfirm: function () {
+                                    var url = isActif ? bloquerUrl + '/' + id : debloquerUrl + '/' + id;
+                                    fetch(url, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'RequestVerificationToken': antiForgeryToken }
+                                    }).then(function () { fetchData(currentPage); });
+                                }
+                            });
+                        });
+                    });
+                }
             }
 
             function renderPageInfo(data) {

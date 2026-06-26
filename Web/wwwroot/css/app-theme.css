@@ -381,6 +381,27 @@ a.chip, a.chip:hover { text-decoration: none; }
     padding: .85rem 1.35rem; font-size: .85rem; color: var(--bc-muted);
 }
 
+/* Toggle Bloquer/Débloquer (styled switch) */
+.carte-toggle {
+    position: relative; display: inline-block;
+    width: 42px; height: 22px;
+    border: none; border-radius: 12px; padding: 0;
+    cursor: pointer; transition: background .25s ease;
+    flex-shrink: 0;
+}
+.carte-toggle.is-active { background: #22c55e; }
+.carte-toggle.is-blocked { background: #ef4444; }
+.carte-toggle-dot {
+    position: absolute; top: 2px;
+    width: 18px; height: 18px;
+    border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
+    transition: left .25s ease;
+}
+.carte-toggle.is-active .carte-toggle-dot { left: 22px; }
+.carte-toggle.is-blocked .carte-toggle-dot { left: 2px; }
+.carte-toggle:hover { opacity: .85; }
+
 /* ============================================================
    TABLES (style M3alem)
    ============================================================ */

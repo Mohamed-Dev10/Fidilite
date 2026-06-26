@@ -57,6 +57,9 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
                 .Include(i => i.RefMagasin)
                 .Include(i => i.RefMetier)
                 .Include(i => i.RefClienteStatut)
+                .Include(i => i.RefGenre)
+                .Include(i => i.RefVille)
+                .Include(i => i.RefCarteType)
                 .FirstOrDefaultAsync(f => f.Id == id);
         }
 

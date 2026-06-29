@@ -21,8 +21,15 @@ namespace BRICOMA.ECOMMERCE.Data.ApplicationUser
             if (principal.Identity?.IsAuthenticated != true)
                 return principal;
 
-            if (principal.HasClaim(c => c.Type == "perm"))
-                return principal;
+            // Pas de cache : on relit TOUJOURS les permissions depuis la DB
+            // pour qu'un changement admin s'applique immédiatement.
+            var existingPerms = principal.Claims.Where(c => c.Type == "perm").ToList();
+            if (existingPerms.Any())
+            {
+                var oldIdentity = principal.Identities.FirstOrDefault(i => i.Claims.Any(c => c.Type == "perm"));
+                if (oldIdentity != null)
+                    foreach (var c in existingPerms) oldIdentity.TryRemoveClaim(c);
+            }
 
             var user = await _userManager.GetUserAsync(principal);
             if (user == null) return principal;
@@ -41,11 +48,11 @@ namespace BRICOMA.ECOMMERCE.Data.ApplicationUser
                 .Distinct()
                 .ToListAsync();
 
-            var identity = new ClaimsIdentity();
+            var newIdentity = new ClaimsIdentity();
             foreach (var perm in permissions)
-                identity.AddClaim(new Claim("perm", perm));
+                newIdentity.AddClaim(new Claim("perm", perm));
 
-            principal.AddIdentity(identity);
+            principal.AddIdentity(newIdentity);
             return principal;
         }
     }

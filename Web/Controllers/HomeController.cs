@@ -49,6 +49,19 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet]
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public IActionResult MyPermissions()
+    {
+        var perms = User.Claims
+            .Where(c => c.Type == "perm")
+            .Select(c => c.Value)
+            .OrderBy(p => p)
+            .ToList();
+        var hash = string.Join(",", perms).GetHashCode().ToString("x8");
+        return Json(new { hash, perms });
+    }
+
     [AllowAnonymous]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()

@@ -177,5 +177,23 @@
     <script src="~/js/app-popup.js"></script>
     <partial name="_Toasts" />
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        (function () {
+            var permHash = null;
+            var url = '@Url.Action("MyPermissions", "Home")';
+            function checkPerms() {
+                fetch(url).then(function (r) { return r.json(); }).then(function (data) {
+                    if (permHash === null) { permHash = data.hash; return; }
+                    if (data.hash !== permHash) {
+                        permHash = data.hash;
+                        location.reload();
+                    }
+                }).catch(function () {});
+            }
+            setInterval(checkPerms, 1000);
+            checkPerms();
+        })();
+    </script>
 </body>
 </html>

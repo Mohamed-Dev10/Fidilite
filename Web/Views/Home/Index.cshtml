@@ -9,19 +9,26 @@
     var displayName = sessionUser.Contains('@') ? sessionUser.Split('@')[0] : sessionUser;
 }
 <div class="page-header d-print-none">
-    <h2 class="page-title">Bonjour, @displayName</h2>
-    @if (stats.SansMagasin)
-    {
-        <div class="page-subtitle text-warning"><i class="ti ti-alert-triangle me-1"></i>Aucun magasin assigné à votre compte</div>
-    }
-    else if (!stats.EstGlobal)
-    {
-        <div class="page-subtitle"><i class="ti ti-building-store me-1"></i>Magasin : <strong>@stats.MagasinNom</strong></div>
-    }
-    else
-    {
-        <div class="page-subtitle">Vue d'ensemble des cartes fidélité</div>
-    }
+    <div class="d-flex align-items-center gap-3">
+        <span class="kpi-icon kpi-icon-lg" style="background:rgba(255,255,255,.18);color:#fff;">
+            <i class="ti ti-layout-dashboard"></i>
+        </span>
+        <div>
+            <h2 class="page-title mb-0">Bonjour, @displayName</h2>
+            @if (stats.SansMagasin)
+            {
+                <div class="text-muted mt-1" style="color:rgba(255,200,100,.9) !important;"><i class="ti ti-alert-triangle me-1"></i>Aucun magasin assigné à votre compte</div>
+            }
+            else if (!stats.EstGlobal)
+            {
+                <div class="text-muted mt-1"><i class="ti ti-building-store me-1"></i>Magasin : <strong style="color:#fff;">@stats.MagasinNom</strong></div>
+            }
+            else
+            {
+                <div class="text-muted mt-1">Vue d'ensemble des cartes fidélité</div>
+            }
+        </div>
+    </div>
 </div>
 
 @if (stats.SansMagasin)

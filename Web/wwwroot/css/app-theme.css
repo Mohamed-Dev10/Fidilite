@@ -42,8 +42,8 @@
     --bc-shadow-lg: 0 10px 30px rgba(16,24,40,.10);
 
     /* ---- Sidebar ---- */
-    --sb-bg-1:   #161e34;
-    --sb-bg-2:   #0f1626;
+    --sb-bg-1:   #1e1b4b;
+    --sb-bg-2:   #1e1b4b;
     --sb-text:   #9aa4c0;
 }
 
@@ -245,9 +245,30 @@ a.chip, a.chip:hover { text-decoration: none; }
 /* ============================================================
    EN-TÊTE DE PAGE
    ============================================================ */
-.page-header { margin-bottom: 1.5rem; }
-.page-title { font-size: 1.55rem; font-weight: 800; line-height: 1.2; margin: 0; letter-spacing: -.01em; }
-.page-pretitle, .page-subtitle { color: var(--bc-muted); font-size: .9rem; margin-top: .15rem; }
+.page-header {
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 50%, #3b82f6 100%);
+    border-radius: 16px;
+    padding: 1.2rem 1.5rem;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, .25);
+}
+.page-header .container-xl { padding: 0; }
+.page-title { font-size: 1.35rem; font-weight: 800; line-height: 1.2; margin: 0; letter-spacing: -.01em; color: #fff; }
+.page-pretitle, .page-subtitle { color: rgba(255, 255, 255, .7); font-size: .88rem; margin-top: .15rem; }
+.page-header .text-muted { color: rgba(255, 255, 255, .7) !important; }
+.page-header .btn-outline-secondary {
+    color: #1e3a8a; border-color: #fff;
+    background: #fff; font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+.page-header .btn-outline-secondary:hover {
+    background: #f0f4ff; border-color: #fff;
+}
+.page-header .chip { border-color: rgba(255, 255, 255, .2); }
+.page-header .kpi-icon, .page-header .kpi-icon-lg {
+    background: rgba(255, 255, 255, .18) !important; color: #fff !important;
+}
 
 /* ============================================================
    HEADER (navbar haut)
@@ -268,7 +289,7 @@ a.chip, a.chip:hover { text-decoration: none; }
 .app-sidebar {
     background: linear-gradient(180deg, var(--sb-bg-1) 0%, var(--sb-bg-2) 100%) !important;
     border-right: 0 !important;
-    box-shadow: 2px 0 16px rgba(16,24,40,.10);
+    box-shadow: 4px 0 24px rgba(30, 27, 75, .35), 1px 0 0 rgba(255, 255, 255, .06);
     display: flex; flex-direction: column;
     width: 340px !important;
 }

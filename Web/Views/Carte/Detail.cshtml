@@ -15,11 +15,14 @@
 
 <div class="page-header d-print-none">
     <div class="container-xl">
-        <div class="row g-2 align-items-center">
-            <div class="col">
-                <h2 class="page-title">@Model.Nom @Model.Prenom</h2>
+        <div class="d-flex align-items-center gap-3">
+            <span class="kpi-icon kpi-icon-lg" style="background:rgba(255,255,255,.18);color:#fff;">
+                <i class="ti ti-user"></i>
+            </span>
+            <div>
+                <h2 class="page-title mb-0">@Model.Nom @Model.Prenom</h2>
                 <div class="text-muted mt-1">
-                    Code : <strong>@Model.Code</strong>
+                    Code : <strong style="color:#fff;">@Model.Code</strong>
                     <span class="chip @chipClass ms-2"><i class="ti @statutIcon"></i> @statutLabel</span>
                     @if (actif)
                     {

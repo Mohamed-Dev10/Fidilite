@@ -1013,14 +1013,15 @@ a.chip, a.chip:hover { text-decoration: none; }
     /* Dégradé bicolore stylé bleu → rouge : on passe par le fuchsia/magenta
        (pont naturel entre bleu et rouge) pour rester vif, sans teinte boueuse. */
     background:
-        radial-gradient(120% 90% at 100% 110%, rgba(226, 0, 26, .55) 0%, rgba(226, 0, 26, 0) 45%),
-        linear-gradient(140deg,
-            #4338ca 0%,
-            #6d28d9 30%,
-            #9333ea 50%,
-            #c026d3 64%,
-            #e11d48 84%,
-            #e2001a 100%);
+        radial-gradient(circle at 90% 95%, rgba(239, 68, 68, .3) 0%, transparent 45%),
+        linear-gradient(145deg,
+            #4f46e5 0%,
+            #6366f1 22%,
+            #7c3aed 42%,
+            #a855f7 58%,
+            #c026d3 72%,
+            #e11d48 88%,
+            #ef4444 100%);
     /* Bordure stylée : liseré clair + ombre interne pour un cadre net */
     border-right: 1px solid rgba(255, 255, 255, .12);
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10),

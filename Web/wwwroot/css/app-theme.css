@@ -1039,6 +1039,42 @@ a.chip, a.chip:hover { text-decoration: none; }
     width: 260px; height: 260px; bottom: -80px; left: -60px;
     background: radial-gradient(circle, rgba(255, 255, 255, .10) 0%, rgba(255, 255, 255, 0) 70%);
 }
+/* Bulles colorées décoratives (coin bas du panneau login) */
+.auth-bubbles {
+    position: absolute; bottom: -20px; left: -10px; right: -10px; height: 55%;
+    pointer-events: none; z-index: 0; overflow: hidden;
+}
+.auth-bubbles span {
+    position: absolute; border-radius: 50%; opacity: .35;
+    animation: bubbleFloat 6s ease-in-out infinite alternate;
+}
+.auth-bubbles span {
+    background: rgba(255, 255, 255, .12);
+    border: 1px solid rgba(255, 255, 255, .18);
+    box-shadow: 0 0 15px rgba(255, 255, 255, .1), inset 0 0 15px rgba(255, 255, 255, .05);
+    backdrop-filter: blur(2px);
+}
+.auth-bubbles span:nth-child(1)  { width: 80px; height: 80px; bottom: 10%; left: 5%;  opacity: .5; animation-delay: 0s; }
+.auth-bubbles span:nth-child(2)  { width: 55px; height: 55px; bottom: 25%; left: 18%; opacity: .4; animation-delay: .5s; }
+.auth-bubbles span:nth-child(3)  { width: 40px; height: 40px; bottom: 5%;  left: 30%; opacity: .45; animation-delay: 1s; }
+.auth-bubbles span:nth-child(4)  { width: 70px; height: 70px; bottom: 18%; left: 42%; opacity: .35; animation-delay: 1.5s; }
+.auth-bubbles span:nth-child(5)  { width: 35px; height: 35px; bottom: 35%; left: 12%; opacity: .5; animation-delay: 2s; }
+.auth-bubbles span:nth-child(6)  { width: 60px; height: 60px; bottom: 8%;  left: 55%; opacity: .4; animation-delay: .8s; }
+.auth-bubbles span:nth-child(7)  { width: 45px; height: 45px; bottom: 30%; left: 60%; opacity: .45; animation-delay: 1.2s; }
+.auth-bubbles span:nth-child(8)  { width: 90px; height: 90px; bottom: 2%;  left: 70%; opacity: .3; animation-delay: 2.5s; }
+.auth-bubbles span:nth-child(9)  { width: 30px; height: 30px; bottom: 40%; left: 35%; opacity: .5; animation-delay: .3s; }
+.auth-bubbles span:nth-child(10) { width: 50px; height: 50px; bottom: 15%; left: 82%; opacity: .4; animation-delay: 1.8s; }
+.auth-bubbles span:nth-child(11) { width: 25px; height: 25px; bottom: 45%; left: 75%; opacity: .55; animation-delay: .6s; }
+.auth-bubbles span:nth-child(12) { width: 65px; height: 65px; bottom: 0%;  left: 90%; opacity: .35; animation-delay: 2.2s; }
+.auth-bubbles span:nth-child(13) { width: 20px; height: 20px; bottom: 50%; left: 50%; opacity: .5; animation-delay: 1.4s; }
+.auth-bubbles span:nth-child(14) { width: 38px; height: 38px; bottom: 22%; left: 25%; opacity: .4; animation-delay: 0.7s; }
+.auth-bubbles span:nth-child(15) { width: 28px; height: 28px; bottom: 38%; left: 88%; opacity: .45; animation-delay: 1.9s; }
+@keyframes bubbleFloat {
+    0%   { transform: translateY(0) scale(1); opacity: .3; }
+    50%  { opacity: .5; }
+    100% { transform: translateY(-18px) scale(1.1); opacity: .35; }
+}
+
 .auth-brand { display: inline-flex; align-items: center; gap: .7rem; position: relative; z-index: 1; }
 .auth-brand-logo {
     display: inline-flex; align-items: center; justify-content: center;

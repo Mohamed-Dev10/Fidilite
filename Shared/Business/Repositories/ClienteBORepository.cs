@@ -186,9 +186,9 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
 
         public async Task<int> CountTotal(int? magasinId = null)
         {
-            // Le back-office ne compte que les cartes typées qu'il gère (M3alem, Artisan, types paramétrables) :
-            // on exclut les cartes sans type (NULL, stock legacy) et les cartes AMIBRICOMA historiques.
-            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            // Le back-office compte toutes les cartes typées (M3alem, Artisan, AMIBRICOMA, types
+            // paramétrables) : on exclut juste les cartes sans type (NULL, stock legacy).
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -207,7 +207,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             var start = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             var end = start.AddMonths(1);
             var query = _context.Cliente.Where(c => c.DateCreation >= start && c.DateCreation < end
-                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+                && c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -218,7 +218,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             var today = DateTime.Today;
             var tomorrow = today.AddDays(1);
             var query = _context.Cliente.Where(c => c.DateCreation >= today && c.DateCreation < tomorrow
-                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+                && c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -227,7 +227,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
         public async Task<int> CountCreatedInRange(DateTime from, DateTime to, int? magasinId = null)
         {
             var query = _context.Cliente.Where(c => c.DateCreation >= from && c.DateCreation < to
-                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+                && c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -238,7 +238,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             var query = actif
                 ? _context.Cliente.Where(c => c.IsActif != false)
                 : _context.Cliente.Where(c => c.IsActif == false);
-            query = query.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            query = query.Where(c => c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
             return await query.CountAsync();
@@ -256,7 +256,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             if (today.DayOfWeek == DayOfWeek.Sunday) mondayThisWeek = mondayThisWeek.AddDays(-7);
             var mondayLastWeek = mondayThisWeek.AddDays(-7);
 
-            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
 
@@ -279,7 +279,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
         // CountByCarteType par type (boucle qui grossit avec chaque nouveau type créé).
         public async Task<Dictionary<int, int>> CountGroupedByCarteType(int? magasinId = null)
         {
-            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
 
@@ -300,7 +300,7 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             var yearStart = new DateTime(today.Year, 1, 1);
             var prevYearStart = yearStart.AddYears(-1);
 
-            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
 
@@ -319,12 +319,11 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
         }
 
         // Cartes gérées créées par jour sur les N derniers jours (pour la tendance du dashboard).
-        // Mêmes exclusions que les autres agrégats : pas de type NULL, pas d'AMIBRICOMA.
         public async Task<List<(DateTime Day, int Count)>> CountGroupedByDay(int days, int? magasinId = null)
         {
             var start = DateTime.Today.AddDays(-(days - 1));
             var query = _context.Cliente.Where(c => c.DateCreation >= start
-                && c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+                && c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
 

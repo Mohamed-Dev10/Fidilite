@@ -7,11 +7,12 @@
     string Active(string c) => string.Equals(ctrl, c, StringComparison.OrdinalIgnoreCase) ? "active" : "";
 
     // Menu dynamique : types de carte cachés 15 min (évite une requête SQL à chaque page).
+    // AMIBRICOMA réintégré sur demande du responsable (liste avec Voir/Modifier/Activer-Désactiver,
+    // même design que les autres types) ; reste exclu de la création et du dashboard (non demandé).
     var carteTypesMenu = await MemCache.GetOrCreateAsync("menu_carte_types", async entry =>
     {
         entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
         var result = (await ClienteService.GetAllRefCarteTypes()).Data?
-            .Where(t => t.Id != (int)BRICOMA.ECOMMERCE.Models.Enum.CarteType.AMIBRICOMA)
             .ToList() ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefCarteType>();
         return result;
     }) ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefCarteType>();

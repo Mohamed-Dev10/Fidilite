@@ -220,11 +220,11 @@
                             <div class="yearbar-name" title="@m.Magasin">@m.Magasin</div>
                             <div class="yearbar-bars">
                                 <div class="yearbar-track-row">
-                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-cur" style="width:@(curPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
+                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-cur" data-width="@(curPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
                                     <span class="yearbar-value">@m.CountCurrentYear</span>
                                 </div>
                                 <div class="yearbar-track-row">
-                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-prev" style="width:@(prevPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
+                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-prev" data-width="@(prevPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
                                     <span class="yearbar-value">@m.CountPreviousYear</span>
                                 </div>
                             </div>
@@ -238,6 +238,22 @@
 
 @section Scripts {
     <script>
+        // Barres "Cartes créées par magasin" : croissance animée en cascade à l'apparition.
+        (function () {
+            var bars = document.querySelectorAll(".yearbar-fill[data-width]");
+            if (!bars.length) return;
+            var obs = new IntersectionObserver(function (entries) {
+                entries.forEach(function (e) {
+                    if (!e.isIntersecting) return;
+                    obs.unobserve(e.target);
+                    e.target.style.width = e.target.getAttribute("data-width");
+                });
+            }, { threshold: 0.15 });
+            bars.forEach(function (bar, i) {
+                bar.style.transitionDelay = Math.min(i * 35, 700) + "ms";
+                obs.observe(bar);
+            });
+        })();
 
         (function () {
             var els = document.querySelectorAll("[data-count]");

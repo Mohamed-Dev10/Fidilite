@@ -716,12 +716,11 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     EstGlobal = !magasinId.HasValue
                 };
 
-                // Un KPI par type de carte géré : on liste TOUS les types (hors AMIBRICOMA) avec leur compteur.
-                // Un nouveau type paramétrable apparaît ainsi automatiquement dans le dashboard, même à 0 carte.
+                // Un KPI par type de carte géré (AMIBRICOMA inclus, demande responsable) : un nouveau
+                // type paramétrable apparaît ainsi automatiquement dans le dashboard, même à 0 carte.
                 // Répartition chargée en UNE SEULE requête groupée (au lieu d'une requête par type).
                 var typeCounts = await _clienteBORepository.CountGroupedByCarteType(magasinId);
                 var types = (await _clienteBORepository.GetAllRefCarteTypes())
-                    .Where(t => t.Id != (int)CarteType.AMIBRICOMA)
                     .OrderBy(t => t.Id);
                 foreach (var t in types)
                 {

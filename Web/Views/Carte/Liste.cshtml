@@ -179,7 +179,10 @@
                         + '<td class="text-center"><div class="d-flex gap-1 align-items-center justify-content-center">'
                         + '<a href="' + detailUrl.replace('__ID__', c.id) + '" class="btn-soft btn-soft-blue" title="Voir"><i class="ti ti-eye"></i> Voir</a>'
                         + '<a href="' + editUrl.replace('__ID__', c.id) + '" class="btn-soft btn-soft-indigo" title="Modifier"><i class="ti ti-edit"></i> Modifier</a>'
-                        + (canLock ? '<button type="button" class="carte-toggle ' + (c.isActif ? 'is-active' : 'is-blocked') + '" data-id="' + c.id + '" data-actif="' + c.isActif + '" title="' + (c.isActif ? 'Bloquer' : 'Débloquer') + '"><span class="carte-toggle-dot"></span></button>' : '')
+                        + (canLock ? '<button type="button" class="carte-toggle ' + (c.isActif ? 'is-active' : 'is-blocked') + '" data-id="' + c.id + '" data-actif="' + c.isActif + '" title="' + (c.isActif ? 'Cliquer pour bloquer' : 'Cliquer pour débloquer') + '">'
+                            + '<span class="carte-toggle-label">' + (c.isActif ? 'Bloquer' : 'Débloquer') + '</span>'
+                            + '<span class="carte-toggle-dot"><i class="ti ' + (c.isActif ? 'ti-lock-open' : 'ti-lock') + '"></i></span>'
+                            + '</button>' : '')
                         + '</div></td>'
                         + '</tr>';
                 });

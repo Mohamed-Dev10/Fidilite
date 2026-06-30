@@ -402,26 +402,46 @@ a.chip, a.chip:hover { text-decoration: none; }
     padding: .85rem 1.35rem; font-size: .85rem; color: var(--bc-muted);
 }
 
-/* Toggle Bloquer/Débloquer (styled switch) */
+/* Toggle Bloquer/Débloquer (switch stylé avec texte intégré) */
 .carte-toggle {
-    position: relative; display: inline-block;
-    width: 42px; height: 22px;
-    border: none; border-radius: 12px; padding: 0;
-    cursor: pointer; transition: background .25s ease;
-    flex-shrink: 0;
+    position: relative; display: inline-flex; align-items: center;
+    width: 104px; height: 26px;
+    border: none; border-radius: 14px; padding: 0; margin: 0;
+    overflow: hidden;
+    cursor: pointer; flex-shrink: 0;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .18), 0 1px 2px rgba(0, 0, 0, .06);
+    transition: background .3s ease, box-shadow .2s ease;
 }
-.carte-toggle.is-active { background: #22c55e; }
-.carte-toggle.is-blocked { background: #ef4444; }
+.carte-toggle.is-active {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+}
+.carte-toggle.is-blocked {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+.carte-toggle-label {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1;
+    display: flex; align-items: center;
+    font-size: .6rem; font-weight: 700; letter-spacing: 0;
+    color: #fff !important; text-transform: uppercase;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.carte-toggle.is-active .carte-toggle-label { justify-content: flex-start; padding-left: 9px; }
+.carte-toggle.is-blocked .carte-toggle-label { justify-content: flex-end; padding-right: 9px; }
 .carte-toggle-dot {
-    position: absolute; top: 2px;
-    width: 18px; height: 18px;
+    position: absolute; top: 3px; z-index: 2;
+    width: 20px; height: 20px;
     border-radius: 50%; background: #fff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, .25);
-    transition: left .25s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .3);
+    transition: left .25s cubic-bezier(.4, 0, .2, 1);
+    display: flex; align-items: center; justify-content: center;
 }
-.carte-toggle.is-active .carte-toggle-dot { left: 22px; }
-.carte-toggle.is-blocked .carte-toggle-dot { left: 2px; }
-.carte-toggle:hover { opacity: .85; }
+.carte-toggle-dot i { font-size: .75rem; }
+.carte-toggle.is-active .carte-toggle-dot { left: 81px; color: #16a34a; }
+.carte-toggle.is-blocked .carte-toggle-dot { left: 3px; color: #dc2626; }
+.carte-toggle:hover { box-shadow: inset 0 1px 3px rgba(0, 0, 0, .18), 0 3px 8px rgba(0, 0, 0, .15); transform: translateY(-1px); }
+.carte-toggle:active { transform: translateY(0); }
 
 /* ============================================================
    TABLES (style M3alem)

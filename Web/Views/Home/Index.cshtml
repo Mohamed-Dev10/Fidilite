@@ -192,6 +192,12 @@
 }
 @if (stats.EstGlobal && stats.ParMagasin.Any())
 {
+    @* Couleur stable par type (même type = même couleur sur toutes les lignes/magasins). *@
+    var typeColorOf = stats.ParType
+        .Select((t, i) => new { t.TypeId, Idx = i % 10 })
+        .ToDictionary(x => x.TypeId, x => x.Idx);
+    int ColorOf(int typeId) => typeColorOf.TryGetValue(typeId, out var idx) ? idx : 9;
+
     <fieldset class="kpi-fieldset">
         <legend class="kpi-legend"><i class="ti ti-chart-bar"></i> Tendances</legend>
         <div class="card card-trend">
@@ -199,14 +205,21 @@
                 <span class="card-trend-icon"><i class="ti ti-chart-bar"></i></span>
                 <div>
                     <h3 class="card-title mb-0">Cartes créées par magasin</h3>
-                    <div class="text-muted small">@curYear vs @prevYear</div>
-                </div>
-                <div class="ms-auto d-flex gap-3">
-                    <span class="d-flex align-items-center gap-1 small text-muted"><span class="yearbar-legend-dot yearbar-legend-cur"></span>@curYear</span>
-                    <span class="d-flex align-items-center gap-1 small text-muted"><span class="yearbar-legend-dot yearbar-legend-prev"></span>@prevYear</span>
+                    <div class="text-muted small">@curYear vs @prevYear (même période, du 1er janvier à aujourd'hui)</div>
                 </div>
             </div>
             <div class="card-body">
+                @if (stats.ParType.Any())
+                {
+                    <div class="yearbar-type-legend mb-3">
+                        @foreach (var t in stats.ParType)
+                        {
+                            <span class="yearbar-type-legend-item">
+                                <span class="yearbar-legend-dot yearbar-seg-@ColorOf(t.TypeId)"></span>@t.TypeName
+                            </span>
+                        }
+                    </div>
+                }
                 <div class="yearbar-list">
                     @{
                         var maxYearVal = stats.ParMagasin.Max(m => Math.Max(m.CountCurrentYear, m.CountPreviousYear));
@@ -214,18 +227,30 @@
                     }
                     @foreach (var m in stats.ParMagasin)
                     {
-                        var curPct = m.CountCurrentYear * 100.0 / maxYearVal;
-                        var prevPct = m.CountPreviousYear * 100.0 / maxYearVal;
                         <div class="yearbar-row">
                             <div class="yearbar-name" title="@m.Magasin">@m.Magasin</div>
                             <div class="yearbar-bars">
                                 <div class="yearbar-track-row">
-                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-cur" data-width="@(curPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
+                                    <div class="yearbar-track yearbar-stacked">
+                                        @foreach (var t in m.ParType.Where(t => t.CountCurrentYear > 0))
+                                        {
+                                            var segPct = t.CountCurrentYear * 100.0 / maxYearVal;
+                                            <span class="yearbar-fill yearbar-seg-@ColorOf(t.TypeId)" data-width="@(segPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="@t.TypeName : @t.CountCurrentYear"></span>
+                                        }
+                                    </div>
                                     <span class="yearbar-value">@m.CountCurrentYear</span>
+                                    <span class="yearbar-year-tag">@curYear</span>
                                 </div>
                                 <div class="yearbar-track-row">
-                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-prev" data-width="@(prevPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
+                                    <div class="yearbar-track yearbar-stacked">
+                                        @foreach (var t in m.ParType.Where(t => t.CountPreviousYear > 0))
+                                        {
+                                            var segPct = t.CountPreviousYear * 100.0 / maxYearVal;
+                                            <span class="yearbar-fill yearbar-seg-@ColorOf(t.TypeId) yearbar-seg-faded" data-width="@(segPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="@t.TypeName : @t.CountPreviousYear"></span>
+                                        }
+                                    </div>
                                     <span class="yearbar-value">@m.CountPreviousYear</span>
+                                    <span class="yearbar-year-tag">@prevYear</span>
                                 </div>
                             </div>
                         </div>

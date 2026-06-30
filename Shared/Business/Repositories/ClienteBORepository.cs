@@ -291,31 +291,36 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             return grouped.Where(x => x.TypeId.HasValue).ToDictionary(x => x.TypeId!.Value, x => x.Count);
         }
 
-        // Cartes créées par magasin, année en cours vs année précédente, en UNE SEULE requête
-        // agrégée (demande responsable : comparaison par magasin sur 2 ans, pas plus, pour
-        // rester lisible).
-        public async Task<List<(string Magasin, int CountCurrentYear, int CountPreviousYear)>> CountGroupedByMagasinYearly(int? magasinId = null)
+        // Cartes créées par magasin ET par type, année en cours vs année précédente, en UNE SEULE
+        // requête agrégée (demande responsable : comparaison par magasin sur 2 ans avec répartition
+        // par type pour colorer les barres empilées).
+        // Comparaison ÉQUITABLE jour-pour-jour (demande responsable) : "année en cours" = du 1er
+        // janvier à aujourd'hui ; "année précédente" = la MÊME période l'an dernier (pas l'année
+        // précédente complète, sinon on compare une année pleine à une année partielle).
+        public async Task<List<(string Magasin, int TypeId, string TypeName, int CountCurrentYear, int CountPreviousYear)>> CountGroupedByMagasinTypeYearly(int? magasinId = null)
         {
             var today = DateTime.Today;
             var yearStart = new DateTime(today.Year, 1, 1);
             var prevYearStart = yearStart.AddYears(-1);
+            var todayLastYear = today.AddYears(-1);
 
             var query = _context.Cliente.Where(c => c.RefCarteTypeId != null);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
 
             var grouped = await query
-                .GroupBy(c => c.RefMagasin.Name)
+                .GroupBy(c => new { Magasin = c.RefMagasin.Name, TypeId = c.RefCarteTypeId, TypeName = c.RefCarteType.Name })
                 .Select(g => new
                 {
-                    Magasin = g.Key,
-                    CountCurrentYear = g.Count(c => c.DateCreation >= yearStart),
-                    CountPreviousYear = g.Count(c => c.DateCreation >= prevYearStart && c.DateCreation < yearStart)
+                    g.Key.Magasin,
+                    g.Key.TypeId,
+                    g.Key.TypeName,
+                    CountCurrentYear = g.Count(c => c.DateCreation >= yearStart && c.DateCreation <= today),
+                    CountPreviousYear = g.Count(c => c.DateCreation >= prevYearStart && c.DateCreation <= todayLastYear)
                 })
-                .OrderByDescending(x => x.CountCurrentYear)
                 .ToListAsync();
 
-            return grouped.Select(x => (x.Magasin ?? "-", x.CountCurrentYear, x.CountPreviousYear)).ToList();
+            return grouped.Select(x => (x.Magasin ?? "-", x.TypeId!.Value, x.TypeName ?? "-", x.CountCurrentYear, x.CountPreviousYear)).ToList();
         }
 
         // Cartes gérées créées par jour sur les N derniers jours (pour la tendance du dashboard).

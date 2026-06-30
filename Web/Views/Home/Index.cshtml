@@ -109,7 +109,7 @@
             var color = typeAnimColors[typeIdx % typeAnimColors.Length];
             var icon = typeAnimIcons[typeIdx % typeAnimIcons.Length];
             typeIdx++;
-            <div class="col-sm-6 col-lg-4">
+            <div class="col-sm-6 col-lg-3">
                 <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card-animated @color" style="text-decoration:none;cursor:pointer;">
                     <div class="kpi-anim-icon"><i class="ti @icon"></i></div>
                     <div class="kpi-anim-body">
@@ -185,8 +185,60 @@
     </div>
 </fieldset>
 
+<!-- Tendances : cartes créées par magasin, année en cours vs année précédente -->
+@{
+    var curYear = DateTime.Today.Year;
+    var prevYear = curYear - 1;
+}
+@if (stats.EstGlobal && stats.ParMagasin.Any())
+{
+    <fieldset class="kpi-fieldset">
+        <legend class="kpi-legend"><i class="ti ti-chart-bar"></i> Tendances</legend>
+        <div class="card card-trend">
+            <div class="card-header card-trend-header">
+                <span class="card-trend-icon"><i class="ti ti-chart-bar"></i></span>
+                <div>
+                    <h3 class="card-title mb-0">Cartes créées par magasin</h3>
+                    <div class="text-muted small">@curYear vs @prevYear</div>
+                </div>
+                <div class="ms-auto d-flex gap-3">
+                    <span class="d-flex align-items-center gap-1 small text-muted"><span class="yearbar-legend-dot yearbar-legend-cur"></span>@curYear</span>
+                    <span class="d-flex align-items-center gap-1 small text-muted"><span class="yearbar-legend-dot yearbar-legend-prev"></span>@prevYear</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="yearbar-list">
+                    @{
+                        var maxYearVal = stats.ParMagasin.Max(m => Math.Max(m.CountCurrentYear, m.CountPreviousYear));
+                        if (maxYearVal < 1) { maxYearVal = 1; }
+                    }
+                    @foreach (var m in stats.ParMagasin)
+                    {
+                        var curPct = m.CountCurrentYear * 100.0 / maxYearVal;
+                        var prevPct = m.CountPreviousYear * 100.0 / maxYearVal;
+                        <div class="yearbar-row">
+                            <div class="yearbar-name" title="@m.Magasin">@m.Magasin</div>
+                            <div class="yearbar-bars">
+                                <div class="yearbar-track-row">
+                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-cur" style="width:@(curPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
+                                    <span class="yearbar-value">@m.CountCurrentYear</span>
+                                </div>
+                                <div class="yearbar-track-row">
+                                    <div class="yearbar-track"><span class="yearbar-fill yearbar-prev" style="width:@(prevPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%"></span></div>
+                                    <span class="yearbar-value">@m.CountPreviousYear</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </fieldset>
+}
+
 @section Scripts {
     <script>
+
         (function () {
             var els = document.querySelectorAll("[data-count]");
             if (!els.length) return;

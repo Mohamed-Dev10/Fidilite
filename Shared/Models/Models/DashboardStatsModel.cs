@@ -29,7 +29,11 @@ namespace BRICOMA.ECOMMERCE.Models.Models
     public class MagasinStat
     {
         public string Magasin { get; set; } = string.Empty;
-        public int Count { get; set; }
+
+        // Comparaison année en cours vs année précédente (demande responsable : pas par ville,
+        // par magasin, et limité à 2 ans pour ne pas surcharger le graphe).
+        public int CountCurrentYear { get; set; }
+        public int CountPreviousYear { get; set; }
     }
 
     public class CarteTypeStat

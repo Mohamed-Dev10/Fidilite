@@ -705,8 +705,13 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     CartesCetteSemaine = counts.CreatedThisWeek,
                     CartesSemainePrecedente = counts.CreatedLastWeek,
                     TauxActivation = totalCartes > 0 ? Math.Round(cartesActives * 100.0 / totalCartes, 1) : 0,
-                    ParMagasin = (await _clienteBORepository.CountGroupedByMagasin(magasinId))
-                        .Select(x => new MagasinStat { Magasin = x.Magasin, Count = x.Count })
+                    ParMagasin = (await _clienteBORepository.CountGroupedByMagasinYearly(magasinId))
+                        .Select(x => new MagasinStat
+                        {
+                            Magasin = x.Magasin,
+                            CountCurrentYear = x.CountCurrentYear,
+                            CountPreviousYear = x.CountPreviousYear
+                        })
                         .ToList(),
                     EstGlobal = !magasinId.HasValue
                 };

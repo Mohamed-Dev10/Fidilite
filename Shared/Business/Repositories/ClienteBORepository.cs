@@ -291,19 +291,31 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             return grouped.Where(x => x.TypeId.HasValue).ToDictionary(x => x.TypeId!.Value, x => x.Count);
         }
 
-        public async Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null)
+        // Cartes créées par magasin, année en cours vs année précédente, en UNE SEULE requête
+        // agrégée (demande responsable : comparaison par magasin sur 2 ans, pas plus, pour
+        // rester lisible).
+        public async Task<List<(string Magasin, int CountCurrentYear, int CountPreviousYear)>> CountGroupedByMagasinYearly(int? magasinId = null)
         {
+            var today = DateTime.Today;
+            var yearStart = new DateTime(today.Year, 1, 1);
+            var prevYearStart = yearStart.AddYears(-1);
+
             var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
             if (magasinId.HasValue)
                 query = query.Where(c => c.RefMagasinId == magasinId.Value);
 
             var grouped = await query
                 .GroupBy(c => c.RefMagasin.Name)
-                .Select(g => new { Magasin = g.Key, Count = g.Count() })
-                .OrderByDescending(x => x.Count)
+                .Select(g => new
+                {
+                    Magasin = g.Key,
+                    CountCurrentYear = g.Count(c => c.DateCreation >= yearStart),
+                    CountPreviousYear = g.Count(c => c.DateCreation >= prevYearStart && c.DateCreation < yearStart)
+                })
+                .OrderByDescending(x => x.CountCurrentYear)
                 .ToListAsync();
 
-            return grouped.Select(x => (x.Magasin ?? "-", x.Count)).ToList();
+            return grouped.Select(x => (x.Magasin ?? "-", x.CountCurrentYear, x.CountPreviousYear)).ToList();
         }
 
         // Cartes gérées créées par jour sur les N derniers jours (pour la tendance du dashboard).

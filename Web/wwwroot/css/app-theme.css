@@ -395,8 +395,9 @@ a.chip, a.chip:hover { text-decoration: none; }
 /* ============================================================
    MAIN / FOOTER
    ============================================================ */
+html, body { background: var(--bc-body); }
 .app-wrapper { background: var(--bc-body) !important; }
-.app-main { background: var(--bc-body); min-height: calc(100vh - 60px); }
+.app-main { background: var(--bc-body); }
 .app-footer {
     background: var(--bc-body) !important; border-top: none;
     padding: .85rem 1.35rem; font-size: .85rem; color: var(--bc-muted);

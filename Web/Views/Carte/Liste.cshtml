@@ -108,7 +108,7 @@
             var debloquerUrl = '@Url.Action("Debloquer", "Carte")';
             var canLock = @(canLock ? "true" : "false");
             var antiForgeryToken = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] || '';
-            var perPage = 6;
+            var perPage = 10;
             var currentPage = 1;
             var debounceTimer = null;
 

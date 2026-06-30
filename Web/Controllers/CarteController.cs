@@ -194,7 +194,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         [Authorize(Policy = "carte.edit")]
         public async Task<IActionResult> Modifier(ClienteModel model)
         {
-            var result = await _clienteBOService.UpdateCarte(model);
+            var userName = User.Identity?.Name ?? _userManager.GetUserId(User) ?? "Inconnu";
+            var result = await _clienteBOService.UpdateCarte(model, userName);
             if (!result.Success)
             {
                 ViewData["Error"] = result.Message;
@@ -223,7 +224,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         [Authorize(Policy = "carte.lock")]
         public async Task<IActionResult> Debloquer(long id)
         {
-            var result = await _clienteBOService.DebloquerCarte(id);
+            var userId = _userManager.GetUserId(User) ?? User.Identity?.Name ?? "Inconnu";
+            var result = await _clienteBOService.DebloquerCarte(id, userId);
             if (result.Data)
                 TempData["Success"] = result.Message;
             else

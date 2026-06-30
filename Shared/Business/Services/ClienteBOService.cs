@@ -196,6 +196,11 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 // 4) Consommer l'OTP
                 await _otpService.Consume(token);
 
+                // 5) Audit
+                await _clienteBORepository.AddAuditLog(
+                    $"{model.Prenom} {model.Nom}", "Création", carteType.Name, clienteCode,
+                    $"{{\"Type\":\"{carteType.Name}\",\"Magasin\":\"{magasinNom}\",\"GSM\":\"{model.Gsm}\"}}");
+
                 _logger.LogInformation("Carte {CarteType} confirmée - Code: {Code}, GSM: {Gsm}", carteType.Name, clienteCode, model.Gsm);
 
                 // Data = chemin local de l'image (pour la voir), même sans envoi WhatsApp
@@ -365,7 +370,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<bool>> UpdateCarte(ClienteModel model)
+        public async Task<RESTServiceResponse<bool>> UpdateCarte(ClienteModel model, string? userName = null)
         {
             try
             {
@@ -388,6 +393,28 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 var validation = await ValidateEdit(model, typeId, carteType.Name);
                 if (!validation.Success)
                     return new RESTServiceResponse<bool>(false, validation.Message, false);
+
+                // --- Capture des différences avant sauvegarde ---
+                var diffs = new System.Text.StringBuilder();
+                diffs.Append("[");
+                void AddDiff(string champ, string? ancien, string? nouveau)
+                {
+                    if (ancien == nouveau) return;
+                    if (diffs.Length > 1) diffs.Append(",");
+                    var a = ancien ?? string.Empty;
+                    var n = nouveau ?? string.Empty;
+                    diffs.Append($"{{\"Champ\":\"{champ}\",\"Ancien\":\"{a}\",\"Nouveau\":\"{n}\"}}");
+                }
+                AddDiff("Nom",           cliente.Nom,                        model.Nom?.Trim());
+                AddDiff("Prénom",        cliente.Prenom,                     model.Prenom?.Trim());
+                AddDiff("GSM",           cliente.Gsm,                        model.Gsm?.Trim());
+                AddDiff("CIN",           cliente.Cin,                        model.Cin);
+                AddDiff("Email",         cliente.Email,                      model.Email);
+                AddDiff("Adresse",       cliente.Adresse,                    model.Adresse);
+                AddDiff("Fonction",      cliente.Fonction,                   model.Fonction);
+                AddDiff("Raison sociale",cliente.RaisonSociale,              model.RaisonSociale);
+                AddDiff("Date naissance",cliente.DateNaissance.ToString("dd/MM/yyyy"), model.DateNaissance.ToString("dd/MM/yyyy"));
+                diffs.Append("]");
 
                 // Code & CodeBarre restent figés (non modifiables)
                 cliente.Nom = model.Nom.Trim();
@@ -434,6 +461,12 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 {
                     _logger.LogWarning("Client MARKET introuvable pour CodeClt {Code} — mise à jour FIDELITE seule.", cliente.Code);
                 }
+
+                // --- Audit diff ---
+                var diffJson = diffs.ToString();
+                if (diffJson != "[]")  // Ne log que s'il y a eu une vraie modification
+                    await _clienteBORepository.AddAuditLog(
+                        userName ?? "Système", "Modification", carteType.Name, cliente.Code, diffJson);
 
                 _logger.LogInformation("Carte modifiée - Id: {Id}, Code: {Code}", cliente.Id, cliente.Code);
                 return new RESTServiceResponse<bool>(true, "Carte modifiée avec succès.", true);
@@ -563,6 +596,12 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     }
                 }
 
+                var carteType = cliente.RefCarteTypeId.HasValue ? await _clienteBORepository.GetRefCarteTypeById(cliente.RefCarteTypeId.Value) : null;
+                string entityTypeName = carteType != null ? carteType.Name : "Carte";
+
+                await _clienteBORepository.AddAuditLog(
+                    userId, "Blocage", entityTypeName, cliente.Code,
+                    $"{{\"Ancien\":\"Active\",\"Nouveau\":\"Bloquée\",\"Motif\":\"{remarque ?? ""}\"}}");
                 _logger.LogInformation("Carte bloquée - Id: {Id}, Par: {UserId}", id, userId);
                 return new RESTServiceResponse<bool>(true, "Carte bloquée avec succès.", true);
             }
@@ -573,7 +612,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<bool>> DebloquerCarte(long id)
+        public async Task<RESTServiceResponse<bool>> DebloquerCarte(long id, string userId)
         {
             try
             {
@@ -600,7 +639,13 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     }
                 }
 
-                _logger.LogInformation("Carte débloquée - Id: {Id}", id);
+                var carteType = cliente.RefCarteTypeId.HasValue ? await _clienteBORepository.GetRefCarteTypeById(cliente.RefCarteTypeId.Value) : null;
+                string entityTypeName = carteType != null ? carteType.Name : "Carte";
+
+                await _clienteBORepository.AddAuditLog(
+                    userId, "Déblocage", entityTypeName, cliente.Code,
+                    "{\"Ancien\":\"Bloquée\",\"Nouveau\":\"Active\"}");
+                _logger.LogInformation("Carte débloquée - Id: {Id}, Par: {UserId}", id, userId);
                 return new RESTServiceResponse<bool>(true, "Carte débloquée avec succès.", true);
             }
             catch (Exception ex)
@@ -779,6 +824,32 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             {
                 _logger.LogError(ex, "Erreur UpdateRefCarteType");
                 return new RESTServiceResponse<bool>(false, ex.Message, false);
+            }
+        }
+
+        public async Task LogAudit(string userName, string operation, string entityType, string? entityCode, string? detail)
+        {
+            await _clienteBORepository.AddAuditLog(userName, operation, entityType, entityCode, detail);
+        }
+
+        public async Task<RESTServiceResponse<PagedResult<AuditLog>>> GetAuditLogs(int page, int pageSize)
+        {
+            try
+            {
+                var items = await _clienteBORepository.GetAuditLogs(page, pageSize);
+                var total = await _clienteBORepository.CountAuditLogs();
+                return new RESTServiceResponse<PagedResult<AuditLog>>(true, "OK", new PagedResult<AuditLog>
+                {
+                    Items = items,
+                    TotalCount = total,
+                    Page = page,
+                    PageSize = pageSize
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur GetAuditLogs");
+                return new RESTServiceResponse<PagedResult<AuditLog>>(false, ex.Message, new PagedResult<AuditLog>());
             }
         }
 

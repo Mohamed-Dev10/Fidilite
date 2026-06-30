@@ -110,13 +110,13 @@
             var icon = typeAnimIcons[typeIdx % typeAnimIcons.Length];
             typeIdx++;
             <div class="col-sm-6 col-lg-4">
-                <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card-animated @color" style="text-decoration:none;color:#fff;cursor:pointer;">
+                <a href="@Url.Action("Liste", "Carte", new { typeId = type.TypeId })" class="kpi-card-animated @color" style="text-decoration:none;cursor:pointer;">
                     <div class="kpi-anim-icon"><i class="ti @icon"></i></div>
                     <div class="kpi-anim-body">
                         <div class="kpi-anim-value" data-count="@type.Count">0</div>
                         <div class="kpi-anim-label">@type.TypeName</div>
                     </div>
-                    <i class="ti ti-chevron-right" style="font-size:1.5rem;opacity:.6;"></i>
+                    <i class="ti ti-chevron-right" style="font-size:1.5rem;color:var(--bc-muted);"></i>
                     <div class="kpi-anim-wave"></div>
                 </a>
             </div>

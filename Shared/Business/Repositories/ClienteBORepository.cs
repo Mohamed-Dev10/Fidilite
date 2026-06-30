@@ -375,6 +375,34 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task AddAuditLog(string userName, string operation, string entityType, string? entityCode, string? detail)
+        {
+            _context.AuditLog.Add(new AuditLog
+            {
+                UserName = userName,
+                Operation = operation,
+                EntityType = entityType,
+                EntityCode = entityCode,
+                Detail = detail,
+                DateOperation = DateTime.Now
+            });
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<AuditLog>> GetAuditLogs(int page, int pageSize)
+        {
+            return await _context.AuditLog
+                .OrderByDescending(a => a.DateOperation)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+        public async Task<int> CountAuditLogs()
+        {
+            return await _context.AuditLog.CountAsync();
+        }
+
         public async Task<List<RefGenre>> GetAllGenres()
         {
             return await _context.RefGenre.OrderBy(g => g.Name).ToListAsync();

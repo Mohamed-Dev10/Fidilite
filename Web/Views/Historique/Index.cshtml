@@ -1,0 +1,213 @@
+@{
+    ViewData["Title"] = "Historique des opérations";
+}
+
+<div class="page-header d-print-none">
+    <div class="container-xl">
+        <div class="d-flex align-items-center gap-3">
+            <span class="kpi-icon kpi-icon-lg" style="background:rgba(255,255,255,.18);color:#fff;">
+                <i class="ti ti-history"></i>
+            </span>
+            <div>
+                <h2 class="page-title mb-0">Historique des opérations</h2>
+                <div class="text-muted mt-1"><span id="totalCount">0</span> opération(s) enregistrée(s)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="page-body">
+    <div class="container-xl">
+        <div class="card">
+            <div class="table-responsive">
+                <table class="table table-vcenter card-table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Opération</th>
+                            <th>Type</th>
+                            <th>Code</th>
+                            <th class="text-center">Détail</th>
+                            <th class="text-center">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listBody">
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="ti ti-loader-2 ti-spin fs-1 d-block mb-2"></i> Chargement...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer d-flex align-items-center">
+                <p class="m-0 text-muted small" id="pageInfo"></p>
+                <div class="pager ms-auto" id="pager"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Modals {
+<style>
+    .modal-backdrop.show {
+        opacity: 0.5 !important;
+    }
+</style>
+<!-- Modal Détail -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 550px;">
+        <div class="modal-content border-0 text-center" style="border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); padding: 2.5rem 1.5rem 2rem;">
+            
+            <div class="mx-auto d-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; background: rgba(37,99,235,0.1); border-radius: 50%; color: #2563eb;">
+                <i class="ti ti-info-circle" style="font-size: 44px;"></i>
+            </div>
+            
+            <h3 class="fw-bold mb-4" style="color: #1e293b; font-size: 1.5rem;">Détail de l'opération</h3>
+            
+            <div class="modal-body p-0 mb-4 text-start" id="detailBody" style="font-size: 0.95rem; color: #475569;"></div>
+            
+            <div>
+                <button type="button" class="btn btn-primary rounded-pill fw-bold" data-bs-dismiss="modal" style="padding: 0.8rem 3rem; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(37,99,235,0.3); transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)';" onmouseout="this.style.transform='scale(1)';">
+                    OK, compris
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var baseUrl = '@Url.Action("Data", "Historique")';
+            var perPage = 10;
+            var currentPage = 1;
+            var tbody = document.getElementById('listBody');
+            var totalCount = document.getElementById('totalCount');
+            var pageInfo = document.getElementById('pageInfo');
+            var pager = document.getElementById('pager');
+
+            var opColors = {
+                'Création': 'chip-green', 'Blocage': 'chip-red', 'Déblocage': 'chip-green',
+                'Modification': 'chip-orange', 'Suppression': 'chip-red'
+            };
+
+            function fetchData(page) {
+                currentPage = page || 1;
+                fetch(baseUrl + '?page=' + currentPage + '&pageSize=' + perPage)
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        totalCount.textContent = data.totalCount;
+                        renderRows(data.items);
+                        renderPageInfo(data);
+                        renderPager(data.page, data.totalPages);
+                    });
+            }
+
+            function formatDate(dateStr) {
+                // dateStr = "dd/MM/yyyy HH:mm"
+                var parts = (dateStr || '').split(' ');
+                var jour = parts[0] || '';
+                var heure = parts[1] || '';
+                return '<div class="d-inline-flex flex-column align-items-center gap-1">'
+                    + '<span class="d-inline-flex align-items-center gap-1" style="background:rgba(99,102,241,.08);color:#4f46e5;padding:.2rem .6rem;border-radius:8px;font-size:.78rem;font-weight:600;">'
+                    + '<i class="ti ti-calendar" style="font-size:.85rem;"></i>' + jour + '</span>'
+                    + '<span class="d-inline-flex align-items-center gap-1 text-muted" style="font-size:.7rem;">'
+                    + '<i class="ti ti-clock" style="font-size:.8rem;"></i>' + heure + '</span>'
+                    + '</div>';
+            }
+
+            function renderRows(items) {
+                if (!items || !items.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5"><i class="ti ti-history-off fs-1 d-block mb-2"></i>Aucune opération</td></tr>';
+                    return;
+                }
+                var html = '';
+                items.forEach(function (a) {
+                    var chipCls = opColors[a.operation] || 'chip-blue';
+                    html += '<tr>'
+                        + '<td class="fw-medium">' + a.userName + '</td>'
+                        + '<td><span class="chip ' + chipCls + '">' + a.operation + '</span></td>'
+                        + '<td>' + a.entityType + '</td>'
+                        + '<td><strong>' + (a.entityCode || '-') + '</strong></td>'
+                        + '<td class="text-center">' + (a.detail ? '<button class="btn btn-sm btn-detail d-inline-flex align-items-center gap-1 px-3 py-1 fw-semibold" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 20px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s ease;" onmouseover="this.style.transform=\'translateY(-2px)\'; this.style.boxShadow=\'0 4px 6px -1px rgba(37,99,235,0.1), 0 2px 4px -1px rgba(37,99,235,0.06)\';" onmouseout="this.style.transform=\'none\'; this.style.boxShadow=\'0 1px 2px rgba(0,0,0,0.05)\';" data-detail=\'' + a.detail.replace(/'/g, "&#39;") + '\'><i class="ti ti-zoom-in"></i> Détail</button>' : '-') + '</td>'
+                        + '<td class="text-center">' + formatDate(a.dateOperation) + '</td>'
+                        + '</tr>';
+                });
+                tbody.innerHTML = html;
+
+                tbody.querySelectorAll('.btn-detail').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        showDetail(btn.getAttribute('data-detail'));
+                    });
+                });
+            }
+
+            function showDetail(jsonStr) {
+                try {
+                    var obj = JSON.parse(jsonStr);
+                    var html = '<div class="table-responsive"><table class="table table-borderless table-striped mb-0" style="border-radius: 12px; overflow: hidden;"><thead><tr>'
+                             + '<th style="background:rgba(37,99,235,.08); border-bottom: none;">Champ</th>'
+                             + '<th style="background:rgba(239,68,68,.08); color:#dc2626; border-bottom: none;">Ancienne valeur</th>'
+                             + '<th style="background:rgba(34,197,94,.08); color:#16a34a; border-bottom: none;">Nouvelle valeur</th>'
+                             + '</tr></thead><tbody>';
+
+                    if (Array.isArray(obj)) {
+                        // Format tableau : [{Champ, Ancien, Nouveau}] — modifications de carte
+                        obj.forEach(function (row) {
+                            html += '<tr>'
+                                  + '<td class="fw-medium">' + row.Champ + '</td>'
+                                  + '<td style="color:#dc2626;">' + (row.Ancien || '-') + '</td>'
+                                  + '<td style="color:#16a34a;">' + (row.Nouveau || '-') + '</td>'
+                                  + '</tr>';
+                        });
+                    } else if (obj.Ancien !== undefined && obj.Nouveau !== undefined) {
+                        // Format {Ancien, Nouveau, Motif?} — blocage / déblocage
+                        html += '<tr><td class="fw-medium">Statut</td>'
+                              + '<td style="color:#dc2626;">' + obj.Ancien + '</td>'
+                              + '<td style="color:#16a34a;">' + obj.Nouveau + '</td></tr>';
+                        if (obj.Motif)
+                            html += '<tr><td class="fw-medium">Motif</td><td colspan="2">' + obj.Motif + '</td></tr>';
+                    } else {
+                        // Format objet générique — création, autres
+                        for (var key in obj) {
+                            html += '<tr><td class="fw-medium">' + key + '</td><td colspan="2">' + obj[key] + '</td></tr>';
+                        }
+                    }
+
+                    html += '</tbody></table></div>';
+                    document.getElementById('detailBody').innerHTML = html;
+                } catch (e) {
+                    document.getElementById('detailBody').innerHTML = '<pre class="mb-0">' + jsonStr + '</pre>';
+                }
+                bootstrap.Modal.getOrCreateInstance(document.getElementById('detailModal')).show();
+            }
+
+            function renderPageInfo(data) {
+                if (!data.totalCount) { pageInfo.textContent = ''; return; }
+                var start = (data.page - 1) * data.pageSize + 1;
+                var end = Math.min(data.page * data.pageSize, data.totalCount);
+                pageInfo.textContent = start + ' – ' + end + ' sur ' + data.totalCount + ' opération(s)';
+            }
+
+            function renderPager(page, totalPages) {
+                if (!pager || totalPages <= 1) { if (pager) pager.innerHTML = ''; return; }
+                var html = '<button class="pg-btn"' + (page <= 1 ? ' disabled' : '') + ' data-pg="' + (page - 1) + '"><i class="ti ti-chevron-left"></i></button>';
+                var from = Math.max(1, page - 2), to = Math.min(totalPages, page + 2);
+                if (from > 1) { html += '<button class="pg-btn" data-pg="1">1</button>'; if (from > 2) html += '<span class="px-1 text-muted">…</span>'; }
+                for (var i = from; i <= to; i++) html += '<button class="pg-btn ' + (i === page ? 'active' : '') + '" data-pg="' + i + '">' + i + '</button>';
+                if (to < totalPages) { if (to < totalPages - 1) html += '<span class="px-1 text-muted">…</span>'; html += '<button class="pg-btn" data-pg="' + totalPages + '">' + totalPages + '</button>'; }
+                html += '<button class="pg-btn"' + (page >= totalPages ? ' disabled' : '') + ' data-pg="' + (page + 1) + '"><i class="ti ti-chevron-right"></i></button>';
+                pager.innerHTML = html;
+                pager.querySelectorAll('.pg-btn').forEach(function (b) {
+                    if (b.disabled) return;
+                    b.addEventListener('click', function () { fetchData(parseInt(b.getAttribute('data-pg'), 10)); });
+                });
+            }
+
+            fetchData(1);
+        })();
+    </script>
+}

@@ -36,6 +36,9 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<Profil?> GetProfilByUserId(string userId);
         Task UpsertProfil(string userId, string? nom, string? prenom, int? refMagasinId);
         Task SaveParametrage(RefCarteTypeParametrage parametrage, bool removeImage = false);
+        Task AddAuditLog(string userName, string operation, string entityType, string? entityCode, string? detail);
+        Task<List<AuditLog>> GetAuditLogs(int page, int pageSize);
+        Task<int> CountAuditLogs();
         Task<List<RefGenre>> GetAllGenres();
         Task<List<RefMetier>> GetAllMetiers();
         Task<List<RefVille>> GetAllVilles();

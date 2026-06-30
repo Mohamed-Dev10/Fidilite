@@ -37,6 +37,7 @@ namespace BRICOMA.ECOMMERCE.Data.Contexts
         public virtual DbSet<RefAnniversaireCarte> RefAnniversaireCarte { get; set; }
         public virtual DbSet<RefCarteType> RefCarteType { get; set; }
         public virtual DbSet<RefCarteTypeParametrage> RefCarteTypeParametrage { get; set; }
+        public virtual DbSet<AuditLog> AuditLog { get; set; }
         public virtual DbSet<RefClienteStatut> RefClienteStatut { get; set; }
         public virtual DbSet<RefClienteType> RefClienteType { get; set; }
         public virtual DbSet<RefGenre> RefGenre { get; set; }

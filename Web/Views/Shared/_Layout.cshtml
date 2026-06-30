@@ -105,6 +105,14 @@
                             </li>
                         }
 
+                        <li class="nav-header">Suivi</li>
+                        <li class="nav-item">
+                            <a asp-controller="Historique" asp-action="Index" class="nav-link si-pink @Active("Historique")">
+                                <i class="nav-icon ti ti-history"></i>
+                                <p>Historique</p>
+                            </a>
+                        </li>
+
                         @{
                             var canUsers = User.HasClaim("perm", "admin.users");
                             var canParam = User.HasClaim("perm", "parametrage.view");
@@ -176,6 +184,8 @@
     <script src="~/lib/adminlte/js/adminlte.min.js"></script>
     <script src="~/js/app-popup.js"></script>
     <partial name="_Toasts" />
+    
+    @await RenderSectionAsync("Modals", required: false)
     @await RenderSectionAsync("Scripts", required: false)
 
     <script>

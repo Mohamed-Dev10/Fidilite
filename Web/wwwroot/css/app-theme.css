@@ -170,9 +170,9 @@ a.chip, a.chip:hover { text-decoration: none; }
    ============================================================ */
 .card {
     background: var(--bc-card);
-    border: 1px solid var(--bc-border);
+    border: 1.5px solid rgba(37, 99, 235, .2);
     border-radius: var(--bc-radius);
-    box-shadow: var(--bc-shadow);
+    box-shadow: 0 2px 12px rgba(37, 99, 235, .08), 0 1px 3px rgba(0, 0, 0, .04);
 }
 .card-header {
     background: transparent;
@@ -590,71 +590,66 @@ a.chip, a.chip:hover { text-decoration: none; }
 
 .kpi-card-animated {
     position: relative; overflow: hidden;
-    border-radius: 14px; padding: .9rem 1rem;
-    display: flex; align-items: center; gap: .8rem;
-    color: #fff; min-height: 82px;
-    box-shadow: 0 6px 22px rgba(0, 0, 0, .12);
+    border-radius: 14px; padding: 1.1rem 1.2rem .9rem;
+    display: flex; align-items: center; gap: 1rem;
+    color: var(--bc-text); min-height: 88px;
+    background: #fff;
+    border: 1.5px solid transparent;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .1), 0 1px 3px rgba(0, 0, 0, .06);
     transition: transform .2s ease, box-shadow .2s ease;
 }
 .kpi-card-animated:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, .18);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
 }
-/* Vague décorative en bas */
+/* Ligne colorée en bas */
 .kpi-anim-wave {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 28px;
-    background: rgba(255, 255, 255, .08);
-    border-radius: 60% 70% 0 0;
-    animation: kpiWave 4s ease-in-out infinite alternate;
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3.5px;
+    border-radius: 0; animation: none;
 }
-@keyframes kpiWave {
-    0%   { border-radius: 60% 70% 0 0; height: 28px; }
-    100% { border-radius: 45% 55% 0 0; height: 34px; }
-}
-/* Icône ronde */
+/* Icône ronde colorée */
 .kpi-anim-icon {
-    flex: 0 0 auto; width: 42px; height: 42px;
+    flex: 0 0 auto; width: 50px; height: 50px;
     display: flex; align-items: center; justify-content: center;
-    border-radius: 12px; font-size: 1.25rem;
-    background: rgba(255, 255, 255, .2);
-    backdrop-filter: blur(4px);
+    border-radius: 50%; font-size: 1.3rem;
+    color: #fff;
 }
 /* Corps texte */
 .kpi-anim-body { flex: 1 1 auto; position: relative; z-index: 1; }
 .kpi-anim-value {
-    font-size: 1.55rem; font-weight: 800; line-height: 1;
-    margin-bottom: .2rem;
+    font-size: 1.7rem; font-weight: 800; line-height: 1;
+    margin-bottom: .25rem; color: var(--bc-text);
 }
-.kpi-anim-label { font-size: .78rem; opacity: .9; font-weight: 500; }
+.kpi-anim-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--bc-muted); }
 /* Badge tendance (↑/↓) */
 .kpi-badge {
     display: inline-flex; align-items: center; gap: .2rem;
     font-size: .72rem; font-weight: 700; padding: .15rem .45rem;
     border-radius: 6px; margin-left: .4rem; vertical-align: middle;
 }
-.kpi-badge-up { background: rgba(255, 255, 255, .25); color: #d1fae5; }
-.kpi-badge-down { background: rgba(255, 255, 255, .18); color: #fecaca; }
+.kpi-badge-up { background: rgba(34, 197, 94, .12); color: #15803d; }
+.kpi-badge-down { background: rgba(239, 68, 68, .12); color: #b91c1c; }
 /* Barre progression (taux activation) */
 .kpi-anim-bar {
     margin-top: .5rem; height: 6px; border-radius: 3px;
-    background: rgba(255, 255, 255, .2); overflow: hidden;
+    background: rgba(0, 0, 0, .08); overflow: hidden;
 }
 .kpi-anim-bar-fill {
     height: 100%; border-radius: 3px;
-    background: rgba(255, 255, 255, .75);
+    background: #22c55e;
     width: 0; animation: kpiBarFill 1.5s .3s ease forwards;
 }
 @keyframes kpiBarFill { to { width: var(--fill); } }
 /* Couleurs par carte */
-.kpi-card-anim-blue   { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
-.kpi-card-anim-indigo { background: linear-gradient(135deg, #6366f1, #4338ca); }
-.kpi-card-anim-purple { background: linear-gradient(135deg, #8b5cf6, #6d28d9); }
-.kpi-card-anim-green  { background: linear-gradient(135deg, #22c55e, #15803d); }
-.kpi-card-anim-cyan   { background: linear-gradient(135deg, #06b6d4, #0e7490); }
-.kpi-card-anim-orange { background: linear-gradient(135deg, #f97316, #c2410c); }
-.kpi-card-anim-teal   { background: linear-gradient(135deg, #14b8a6, #0f766e); }
-.kpi-card-anim-red    { background: linear-gradient(135deg, #ef4444, #b91c1c); }
-.kpi-card-anim-pink   { background: linear-gradient(135deg, #ec4899, #be185d); }
+.kpi-card-anim-blue   { border-color: #3b82f6; } .kpi-card-anim-blue   .kpi-anim-icon { background: #3b82f6; } .kpi-card-anim-blue   .kpi-anim-wave { background: #3b82f6; }
+.kpi-card-anim-indigo { border-color: #6366f1; } .kpi-card-anim-indigo .kpi-anim-icon { background: #6366f1; } .kpi-card-anim-indigo .kpi-anim-wave { background: #6366f1; }
+.kpi-card-anim-purple { border-color: #8b5cf6; } .kpi-card-anim-purple .kpi-anim-icon { background: #8b5cf6; } .kpi-card-anim-purple .kpi-anim-wave { background: #8b5cf6; }
+.kpi-card-anim-green  { border-color: #22c55e; } .kpi-card-anim-green  .kpi-anim-icon { background: #22c55e; } .kpi-card-anim-green  .kpi-anim-wave { background: #22c55e; }
+.kpi-card-anim-cyan   { border-color: #06b6d4; } .kpi-card-anim-cyan   .kpi-anim-icon { background: #06b6d4; } .kpi-card-anim-cyan   .kpi-anim-wave { background: #06b6d4; }
+.kpi-card-anim-orange { border-color: #f97316; } .kpi-card-anim-orange .kpi-anim-icon { background: #f97316; } .kpi-card-anim-orange .kpi-anim-wave { background: #f97316; }
+.kpi-card-anim-teal   { border-color: #14b8a6; } .kpi-card-anim-teal   .kpi-anim-icon { background: #14b8a6; } .kpi-card-anim-teal   .kpi-anim-wave { background: #14b8a6; }
+.kpi-card-anim-red    { border-color: #ef4444; } .kpi-card-anim-red    .kpi-anim-icon { background: #ef4444; } .kpi-card-anim-red    .kpi-anim-wave { background: #ef4444; }
+.kpi-card-anim-pink   { border-color: #ec4899; } .kpi-card-anim-pink   .kpi-anim-icon { background: #ec4899; } .kpi-card-anim-pink   .kpi-anim-wave { background: #ec4899; }
 
 /* ============================================================
    PARAMÉTRAGE TYPE DE CARTE — aperçu image + drag&drop code-barres

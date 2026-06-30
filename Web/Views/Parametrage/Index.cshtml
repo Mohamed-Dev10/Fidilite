@@ -21,10 +21,9 @@
 
 <div class="card">
     <div class="table-responsive">
-        <table class="table table-vcenter table-hover card-table">
+        <table class="table table-vcenter table-hover card-table styled-table">
             <thead>
                 <tr>
-                    <th>#</th>
                     <th>Nom</th>
                     <th>Actions</th>
                 </tr>
@@ -32,14 +31,13 @@
             <tbody>
                 @if (Model == null || !Model.Any())
                 {
-                    <tr><td colspan="3" class="text-center text-muted py-4">Aucun type de carte</td></tr>
+                    <tr><td colspan="2" class="text-center text-muted py-4">Aucun type de carte</td></tr>
                 }
                 else
                 {
                     foreach (var item in Model)
                     {
                         <tr>
-                            <td class="text-muted">@item.Id</td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="avatar ic-teal" style="width:2.2rem;height:2.2rem;font-size:1rem;"><i class="ti ti-credit-card"></i></span>

@@ -97,7 +97,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<string>> ConfirmCreate(string token, string otpCode)
+        public async Task<RESTServiceResponse<string>> ConfirmCreate(string token, string otpCode, string? userName = null)
         {
             try
             {
@@ -198,7 +198,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
 
                 // 5) Audit
                 await _clienteBORepository.AddAuditLog(
-                    $"{model.Prenom} {model.Nom}", "Création", carteType.Name, clienteCode,
+                    userName ?? $"{model.Prenom} {model.Nom}", "Création", carteType.Name, clienteCode,
                     $"{{\"Type\":\"{carteType.Name}\",\"Magasin\":\"{magasinNom}\",\"GSM\":\"{model.Gsm}\"}}");
 
                 _logger.LogInformation("Carte {CarteType} confirmée - Code: {Code}, GSM: {Gsm}", carteType.Name, clienteCode, model.Gsm);
@@ -569,7 +569,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             return new RESTServiceResponse<bool>(true, "OK", true);
         }
 
-        public async Task<RESTServiceResponse<bool>> BloquerCarte(long id, string userId, string? remarque)
+        public async Task<RESTServiceResponse<bool>> BloquerCarte(long id, string userId, string? remarque, string? userName = null)
         {
             try
             {
@@ -600,7 +600,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 string entityTypeName = carteType != null ? carteType.Name : "Carte";
 
                 await _clienteBORepository.AddAuditLog(
-                    userId, "Blocage", entityTypeName, cliente.Code,
+                    userName ?? userId, "Désactivation", entityTypeName, cliente.Code,
                     $"{{\"Ancien\":\"Active\",\"Nouveau\":\"Bloquée\",\"Motif\":\"{remarque ?? ""}\"}}");
                 _logger.LogInformation("Carte bloquée - Id: {Id}, Par: {UserId}", id, userId);
                 return new RESTServiceResponse<bool>(true, "Carte bloquée avec succès.", true);
@@ -612,7 +612,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
-        public async Task<RESTServiceResponse<bool>> DebloquerCarte(long id, string userId)
+        public async Task<RESTServiceResponse<bool>> DebloquerCarte(long id, string userId, string? userName = null)
         {
             try
             {
@@ -643,7 +643,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                 string entityTypeName = carteType != null ? carteType.Name : "Carte";
 
                 await _clienteBORepository.AddAuditLog(
-                    userId, "Déblocage", entityTypeName, cliente.Code,
+                    userName ?? userId, "Activation", entityTypeName, cliente.Code,
                     "{\"Ancien\":\"Bloquée\",\"Nouveau\":\"Active\"}");
                 _logger.LogInformation("Carte débloquée - Id: {Id}, Par: {UserId}", id, userId);
                 return new RESTServiceResponse<bool>(true, "Carte débloquée avec succès.", true);

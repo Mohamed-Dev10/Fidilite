@@ -16,7 +16,7 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         /// Étape 2 : vérifie l'OTP puis crée la carte dans FIDELITE + MARKET (statut Confirmée),
         /// génère Code + CodeBarre EAN-13 et envoie la carte par WhatsApp. Une seule action.
         /// </summary>
-        Task<RESTServiceResponse<string>> ConfirmCreate(string token, string otpCode);
+        Task<RESTServiceResponse<string>> ConfirmCreate(string token, string otpCode, string? userName = null);
 
         /// <summary>
         /// Renvoie un nouveau code OTP par WhatsApp pour une demande en cours (token existant).
@@ -26,8 +26,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<DashboardStatsModel>> GetDashboardStats(int? magasinId = null);
         Task<RESTServiceResponse<Cliente>> GetById(long id);
         Task<RESTServiceResponse<bool>> UpdateCarte(ClienteModel model, string? userName = null);
-        Task<RESTServiceResponse<bool>> BloquerCarte(long id, string userId, string? remarque);
-        Task<RESTServiceResponse<bool>> DebloquerCarte(long id, string userId);
+        Task<RESTServiceResponse<bool>> BloquerCarte(long id, string userId, string? remarque, string? userName = null);
+        Task<RESTServiceResponse<bool>> DebloquerCarte(long id, string userId, string? userName = null);
         Task LogAudit(string userName, string operation, string entityType, string? entityCode, string? detail);
         Task<RESTServiceResponse<PagedResult<AuditLog>>> GetAuditLogs(int page, int pageSize);
         Task<RESTServiceResponse<List<RefMagasin>>> GetAllMagasins();

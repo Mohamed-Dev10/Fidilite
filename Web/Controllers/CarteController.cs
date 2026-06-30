@@ -86,7 +86,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         [Authorize(Policy = "carte.confirm")]
         public async Task<IActionResult> VerifierOtp(string token, string otpCode, string gsm)
         {
-            var result = await _clienteBOService.ConfirmCreate(token, otpCode);
+            var result = await _clienteBOService.ConfirmCreate(token, otpCode, User.Identity?.Name);
             if (!result.Success)
             {
                 ViewBag.Token = token;
@@ -212,7 +212,8 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         public async Task<IActionResult> Bloquer(long id, string? remarque)
         {
             var userId = _userManager.GetUserId(User) ?? "";
-            var result = await _clienteBOService.BloquerCarte(id, userId, remarque);
+            var userName = User.Identity?.Name ?? userId;
+            var result = await _clienteBOService.BloquerCarte(id, userId, remarque, userName);
             if (result.Data)
                 TempData["Success"] = result.Message;
             else
@@ -224,8 +225,9 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         [Authorize(Policy = "carte.lock")]
         public async Task<IActionResult> Debloquer(long id)
         {
-            var userId = _userManager.GetUserId(User) ?? User.Identity?.Name ?? "Inconnu";
-            var result = await _clienteBOService.DebloquerCarte(id, userId);
+            var userId = _userManager.GetUserId(User) ?? "";
+            var userName = User.Identity?.Name ?? userId;
+            var result = await _clienteBOService.DebloquerCarte(id, userId, userName);
             if (result.Data)
                 TempData["Success"] = result.Message;
             else

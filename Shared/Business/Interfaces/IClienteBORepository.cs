@@ -24,6 +24,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<int> CountCreatedToday(int? magasinId = null);
         Task<int> CountCreatedInRange(DateTime from, DateTime to, int? magasinId = null);
         Task<int> CountByActif(bool actif, int? magasinId = null);
+        Task<(int Total, int Actives, int CreatedToday, int CreatedThisMonth, int CreatedThisWeek, int CreatedLastWeek)> GetDashboardCounts(int? magasinId = null);
+        Task<Dictionary<int, int>> CountGroupedByCarteType(int? magasinId = null);
         Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null);
         Task<List<(DateTime Day, int Count)>> CountGroupedByDay(int days, int? magasinId = null);
         Task<List<RefMagasin>> GetAllMagasins();
@@ -34,6 +36,7 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task DeleteRefCarteType(RefCarteType refCarteType);
         Task<RefCarteTypeParametrage?> GetParametrageByCarteTypeId(int carteTypeId);
         Task<Profil?> GetProfilByUserId(string userId);
+        Task<List<Profil>> GetProfilsByUserIds(List<string> userIds);
         Task UpsertProfil(string userId, string? nom, string? prenom, int? refMagasinId);
         Task SaveParametrage(RefCarteTypeParametrage parametrage, bool removeImage = false);
         Task AddAuditLog(string userName, string operation, string entityType, string? entityCode, string? detail);

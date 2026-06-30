@@ -14,6 +14,9 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<List<int>>> GetRolePermissions(string roleId);
         Task<RESTServiceResponse<bool>> SetRolePermissions(string roleId, List<int> permissionIds);
         Task<RESTServiceResponse<List<ApplicationUser>>> GetAllUsers();
+        Task<RESTServiceResponse<List<ApplicationUser>>> GetUsersPage(int page, int pageSize, string? search, string? roleFilter);
+        Task<int> CountUsers(string? search, string? roleFilter);
+        Task<Dictionary<string, string>> GetRolesForUsers(List<string> userIds);
         Task<RESTServiceResponse<bool>> CreateUser(CreateUserModel model);
         Task<RESTServiceResponse<bool>> UpdateUser(UpdateUserModel model);
         Task<RESTServiceResponse<bool>> DeleteUser(string id);

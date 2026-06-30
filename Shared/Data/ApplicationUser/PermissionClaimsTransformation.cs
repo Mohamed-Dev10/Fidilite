@@ -31,20 +31,17 @@ namespace BRICOMA.ECOMMERCE.Data.ApplicationUser
                     foreach (var c in existingPerms) oldIdentity.TryRemoveClaim(c);
             }
 
-            var user = await _userManager.GetUserAsync(principal);
-            if (user == null) return principal;
+            // Id lu directement depuis le claim (aucun aller-retour DB), puis UNE SEULE requête
+            // jointe (UserRoles → Roles → RolePermissions) au lieu de 3 requêtes séparées.
+            // Cette transformation s'exécute sur CHAQUE requête authentifiée (login compris),
+            // donc chaque round-trip économisé compte.
+            var userId = _userManager.GetUserId(principal);
+            if (string.IsNullOrEmpty(userId)) return principal;
 
-            var roles = await _userManager.GetRolesAsync(user);
-            if (!roles.Any()) return principal;
-
-            var roleIds = await _context.Roles
-                .Where(r => roles.Contains(r.Name!))
-                .Select(r => r.Id)
-                .ToListAsync();
-
-            var permissions = await _context.RolePermissions
-                .Where(rp => roleIds.Contains(rp.RoleId))
-                .Select(rp => rp.Permission!.Code)
+            var permissions = await _context.UserRoles
+                .Where(ur => ur.UserId == userId)
+                .Join(_context.Roles, ur => ur.RoleId, r => r.Id, (ur, r) => r.Id)
+                .Join(_context.RolePermissions, roleId => roleId, rp => rp.RoleId, (roleId, rp) => rp.Permission!.Code)
                 .Distinct()
                 .ToListAsync();
 

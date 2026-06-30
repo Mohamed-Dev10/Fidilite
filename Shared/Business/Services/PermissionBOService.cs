@@ -163,6 +163,30 @@ namespace BRICOMA.ECOMMERCE.Business.Services
             }
         }
 
+        public async Task<RESTServiceResponse<List<ApplicationUser>>> GetUsersPage(int page, int pageSize, string? search, string? roleFilter)
+        {
+            try
+            {
+                var list = await _permissionBORepository.GetUsersPage(page, pageSize, search, roleFilter);
+                return new RESTServiceResponse<List<ApplicationUser>>(true, "OK", list);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erreur GetUsersPage");
+                return new RESTServiceResponse<List<ApplicationUser>>(false, ex.Message, new List<ApplicationUser>());
+            }
+        }
+
+        public async Task<int> CountUsers(string? search, string? roleFilter)
+        {
+            return await _permissionBORepository.CountUsers(search, roleFilter);
+        }
+
+        public async Task<Dictionary<string, string>> GetRolesForUsers(List<string> userIds)
+        {
+            return await _permissionBORepository.GetRolesForUsers(userIds);
+        }
+
         public async Task<RESTServiceResponse<bool>> CreateUser(CreateUserModel model)
         {
             try

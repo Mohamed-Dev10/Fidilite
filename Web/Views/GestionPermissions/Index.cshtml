@@ -2,11 +2,8 @@
 @{
     ViewData["Title"] = "Gestion de permissions";
     var roles = Model ?? new();
-    var userWithRoles = ViewBag.Users as List<(BRICOMA.ECOMMERCE.Data.ApplicationUser.ApplicationUser User, string Role)> ?? new();
     var permissions = ViewBag.Permissions as List<BRICOMA.ECOMMERCE.Data.ApplicationUser.Permission> ?? new();
-    var magasinNames = ViewBag.MagasinNames as Dictionary<int, string> ?? new();
-    var userMagasins = ViewBag.UserMagasins as Dictionary<string, int?> ?? new();
-    var userRolesList = userWithRoles.Select(x => x.Role).Where(r => !string.IsNullOrEmpty(r) && r != "-").Distinct().OrderBy(r => r).ToList();
+    var usersCount = ViewBag.UsersCount is int uc ? uc : 0;
     var categories = permissions.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
     var palette = new[] { "indigo", "purple", "blue", "orange", "red", "green", "teal", "pink", "cyan", "yellow" };
     var canUsers = User.HasClaim("perm", "admin.users");
@@ -31,7 +28,7 @@
         <div class="col-md-4">
             <button type="button" class="stat-tab stat-tab-indigo active" data-tab-target="#tab-users">
                 <span class="stat-ic ic-indigo"><i class="ti ti-users"></i></span>
-                <span><span class="stat-num">@userWithRoles.Count</span><span class="stat-lbl d-block">Utilisateurs</span></span>
+                <span><span class="stat-num">@usersCount</span><span class="stat-lbl d-block">Utilisateurs</span></span>
             </button>
         </div>
     }
@@ -72,9 +69,9 @@
                     <div class="col-auto">
                         <select id="statutFilter" class="form-select" style="border-radius:12px;">
                             <option value="">Tous les rôles</option>
-                            @foreach (var r in userRolesList)
+                            @foreach (var r in roles)
                             {
-                                <option value="@r">@r</option>
+                                <option value="@r.Name">@r.Name</option>
                             }
                         </select>
                     </div>
@@ -85,6 +82,7 @@
                     </div>
                 </div>
             </div>
+            @Html.AntiForgeryToken()
             <div class="table-responsive">
                 <table class="table table-vcenter card-table table-hover">
                     <thead>
@@ -97,95 +95,16 @@
                         </tr>
                     </thead>
                     <tbody id="listBody">
-                        <tr id="emptyRow" style="display:none;">
+                        <tr>
                             <td colspan="5" class="text-center text-muted py-5">
-                                <i class="ti ti-user-off fs-1 d-block mb-2"></i>
-                                Aucun utilisateur trouvé
+                                <i class="ti ti-loader-2 ti-spin fs-1 d-block mb-2"></i> Chargement...
                             </td>
                         </tr>
-                        @foreach (var (user, role) in userWithRoles)
-                        {
-                            var suspended = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow;
-                            var userMagasinId = userMagasins.TryGetValue(user.Id, out var umid) ? umid : null;
-                            var magasinNom = userMagasinId.HasValue && magasinNames.TryGetValue(userMagasinId.Value, out var mn) ? mn : null;
-                            var searchData = $"{user.Email} {role} {magasinNom}".ToLowerInvariant();
-                            <tr class="data-row" data-search="@searchData" data-statut="@role">
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.85rem;"><i class="ti ti-user"></i></span>
-                                        <span class="fw-medium">@user.Email</span>
-                                    </div>
-                                </td>
-                                <td>
-                                    @if (!string.IsNullOrEmpty(magasinNom))
-                                    {
-                                        <span class="chip chip-blue"><i class="ti ti-building-store"></i> @magasinNom</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="text-muted">-</span>
-                                    }
-                                </td>
-                                <td>
-                                    <span class="chip chip-indigo"><i class="ti ti-shield-lock"></i> @role</span>
-                                </td>
-                                <td>
-                                    @if (suspended)
-                                    {
-                                        <span class="chip chip-red"><i class="ti ti-ban"></i> Suspendu</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="chip chip-green"><i class="ti ti-circle-check"></i> Actif</span>
-                                    }
-                                </td>
-                                <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a href="@Url.Action("EditUser", new { id = user.Id })" class="btn-soft btn-soft-indigo">
-                                            <i class="ti ti-edit"></i> Modifier
-                                        </a>
-                                        @* Bouton Suspendre/Activer désactivé pour l'instant — décommenter pour le réactiver
-                                        <form method="post" asp-action="ToggleUserSuspension" class="d-inline"
-                                              data-confirm="@(suspended ? "Réactiver ce compte ?" : "Suspendre ce compte ? L'utilisateur sera déconnecté.")"
-                                              data-confirm-title="@(suspended ? "Réactiver le compte ?" : "Suspendre le compte ?")"
-                                              data-confirm-ok="@(suspended ? "Réactiver" : "Suspendre")"
-                                              data-confirm-type="@(suspended ? "success" : "warning")">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@user.Id" />
-                                            @if (suspended)
-                                            {
-                                                <button type="submit" class="btn-soft btn-soft-green" title="Réactiver le compte">
-                                                    <i class="ti ti-player-play"></i> Activer
-                                                </button>
-                                            }
-                                            else
-                                            {
-                                                <button type="submit" class="btn-soft btn-soft-orange" title="Suspendre le compte">
-                                                    <i class="ti ti-ban"></i> Suspendre
-                                                </button>
-                                            }
-                                        </form>
-                                        *@
-                                        <form method="post" asp-action="DeleteUser" class="d-inline"
-                                              data-confirm="Voulez-vous vraiment supprimer définitivement le compte « @user.Email » ? Cette action est irréversible."
-                                              data-confirm-title="Supprimer cet utilisateur ?"
-                                              data-confirm-ok="Supprimer">
-                                            @Html.AntiForgeryToken()
-                                            <input type="hidden" name="id" value="@user.Id" />
-                                            <button type="submit" class="btn-soft btn-soft-red" title="Supprimer">
-                                                <i class="ti ti-trash"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
                     </tbody>
                 </table>
             </div>
             <div class="card-footer d-flex align-items-center">
                 <p class="m-0 text-muted small" id="pageInfo"></p>
-                <span class="d-none" id="totalCount">@userWithRoles.Count</span>
                 <div class="pager ms-auto" id="pager"></div>
             </div>
         </div>
@@ -306,7 +225,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/list-filter.js"></script>
     <script>
         (function () {
             var KEY = 'gpActiveTab';
@@ -331,6 +249,118 @@
                 activate(saved);
             }
         })();
-        bricoListFilter({ perPage: 7, label: "utilisateur(s)" });
+
+        // Liste des utilisateurs : pagination AJAX côté serveur (reste rapide même avec
+        // des dizaines de milliers de comptes — voir bug perf signalé sur cette page).
+        // (no-op si l'onglet Utilisateurs n'est pas rendu, ex. permission admin.users absente)
+        (function () {
+            var tbodyCheck = document.getElementById('listBody');
+            if (!tbodyCheck) return;
+
+            var baseUrl = '@Url.Action("UsersData")';
+            var editUrl = '@Url.Action("EditUser", new { id = "__ID__" })';
+            var deleteUrl = '@Url.Action("DeleteUser")';
+            var antiForgeryToken = '@Html.AntiForgeryToken()'.match(/value="([^"]+)"/)?.[1] || '';
+            var perPage = 10;
+            var currentPage = 1;
+            var debounceTimer = null;
+
+            var searchInput = document.getElementById('searchInput');
+            var roleSelect = document.getElementById('statutFilter');
+            var resetBtn = document.getElementById('resetBtn');
+            var tbody = document.getElementById('listBody');
+            var pageInfo = document.getElementById('pageInfo');
+            var pager = document.getElementById('pager');
+
+            function fetchUsers(page) {
+                currentPage = page || 1;
+                var search = (searchInput.value || '').trim();
+                var role = roleSelect.value || '';
+
+                var params = '?page=' + currentPage + '&pageSize=' + perPage;
+                if (search) params += '&search=' + encodeURIComponent(search);
+                if (role) params += '&role=' + encodeURIComponent(role);
+
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5"><i class="ti ti-loader-2 ti-spin fs-1 d-block mb-2"></i> Chargement...</td></tr>';
+                fetch(baseUrl + params)
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        renderUserRows(data.items);
+                        renderPageInfo(data);
+                        renderPager(data.page, data.totalPages);
+                    })
+                    .catch(function () {
+                        tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger py-5">Erreur de chargement</td></tr>';
+                    });
+            }
+
+            function renderUserRows(items) {
+                if (!items || !items.length) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">' +
+                        '<i class="ti ti-user-off fs-1 d-block mb-2"></i>Aucun utilisateur trouvé</td></tr>';
+                    return;
+                }
+                var html = '';
+                items.forEach(function (u) {
+                    html += '<tr>'
+                        + '<td><div class="d-flex align-items-center gap-2">'
+                        + '<span class="avatar ic-indigo" style="width:2.2rem;height:2.2rem;font-size:.85rem;"><i class="ti ti-user"></i></span>'
+                        + '<span class="fw-medium">' + (u.email || '') + '</span>'
+                        + '</div></td>'
+                        + '<td>' + (u.magasin ? '<span class="chip chip-blue"><i class="ti ti-building-store"></i> ' + u.magasin + '</span>' : '<span class="text-muted">-</span>') + '</td>'
+                        + '<td><span class="chip chip-indigo"><i class="ti ti-shield-lock"></i> ' + (u.role || '-') + '</span></td>'
+                        + '<td>' + (u.suspended ? '<span class="chip chip-red"><i class="ti ti-ban"></i> Suspendu</span>' : '<span class="chip chip-green"><i class="ti ti-circle-check"></i> Actif</span>') + '</td>'
+                        + '<td class="text-end"><div class="d-flex justify-content-end gap-2">'
+                        + '<a href="' + editUrl.replace('__ID__', u.id) + '" class="btn-soft btn-soft-indigo"><i class="ti ti-edit"></i> Modifier</a>'
+                        + '<form method="post" action="' + deleteUrl + '" class="d-inline"'
+                        + ' data-confirm="Voulez-vous vraiment supprimer définitivement le compte « ' + (u.email || '') + ' » ? Cette action est irréversible."'
+                        + ' data-confirm-title="Supprimer cet utilisateur ?" data-confirm-ok="Supprimer">'
+                        + '<input type="hidden" name="__RequestVerificationToken" value="' + antiForgeryToken + '" />'
+                        + '<input type="hidden" name="id" value="' + u.id + '" />'
+                        + '<button type="submit" class="btn-soft btn-soft-red" title="Supprimer"><i class="ti ti-trash"></i></button>'
+                        + '</form>'
+                        + '</div></td>'
+                        + '</tr>';
+                });
+                tbody.innerHTML = html;
+            }
+
+            function renderPageInfo(data) {
+                if (!data.totalCount) { pageInfo.textContent = ''; return; }
+                var start = (data.page - 1) * data.pageSize + 1;
+                var end = Math.min(data.page * data.pageSize, data.totalCount);
+                pageInfo.textContent = start + ' – ' + end + ' sur ' + data.totalCount + ' utilisateur(s)';
+            }
+
+            function renderPager(page, totalPages) {
+                if (!pager || totalPages <= 1) { if (pager) pager.innerHTML = ''; return; }
+                var html = '';
+                html += '<button class="pg-btn"' + (page <= 1 ? ' disabled' : '') + ' data-pg="' + (page - 1) + '"><i class="ti ti-chevron-left"></i></button>';
+                var from = Math.max(1, page - 2), to = Math.min(totalPages, page + 2);
+                if (from > 1) { html += '<button class="pg-btn" data-pg="1">1</button>'; if (from > 2) html += '<span class="px-1 text-muted">…</span>'; }
+                for (var i = from; i <= to; i++) html += '<button class="pg-btn ' + (i === page ? 'active' : '') + '" data-pg="' + i + '">' + i + '</button>';
+                if (to < totalPages) { if (to < totalPages - 1) html += '<span class="px-1 text-muted">…</span>'; html += '<button class="pg-btn" data-pg="' + totalPages + '">' + totalPages + '</button>'; }
+                html += '<button class="pg-btn"' + (page >= totalPages ? ' disabled' : '') + ' data-pg="' + (page + 1) + '"><i class="ti ti-chevron-right"></i></button>';
+                pager.innerHTML = html;
+                pager.querySelectorAll('.pg-btn').forEach(function (b) {
+                    if (b.disabled) return;
+                    b.addEventListener('click', function () { fetchUsers(parseInt(b.getAttribute('data-pg'), 10)); });
+                });
+            }
+
+            searchInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () { fetchUsers(1); }, 300);
+            });
+            roleSelect.addEventListener('change', function () { fetchUsers(1); });
+            resetBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                searchInput.value = '';
+                roleSelect.value = '';
+                fetchUsers(1);
+            });
+
+            fetchUsers(1);
+        })();
     </script>
 }

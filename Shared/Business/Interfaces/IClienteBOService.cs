@@ -36,6 +36,7 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<RESTServiceResponse<bool>> UpdateRefCarteType(int id, string name);
         Task<RESTServiceResponse<bool>> DeleteRefCarteType(int id);
         Task<int?> GetUserMagasinId(string userId);
+        Task<Dictionary<string, int?>> GetUserMagasinsByIds(List<string> userIds);
         Task<Profil?> GetUserProfil(string userId);
         Task SaveUserProfil(string userId, string? nom, string? prenom, int? refMagasinId);
         Task<RESTServiceResponse<RefCarteTypeParametrage>> GetParametrage(int carteTypeId);

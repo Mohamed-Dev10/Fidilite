@@ -29,30 +29,51 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
             var rolesResult = await _permissionBOService.GetAllRoles();
             var roles = rolesResult.Data ?? new List<ApplicationRole>();
 
-            var usersResult = await _permissionBOService.GetAllUsers();
-            var users = usersResult.Data ?? new List<ApplicationUser>();
-            var userWithRoles = new List<(ApplicationUser User, string Role)>();
-            var userMagasins = new Dictionary<string, int?>();
-            foreach (var user in users)
-            {
-                var userRoles = await _userManager.GetRolesAsync(user);
-                userWithRoles.Add((user, userRoles.FirstOrDefault() ?? "-"));
-                // Magasin de l'utilisateur lu depuis Profil (source officielle).
-                var profil = await _clienteBOService.GetUserProfil(user.Id);
-                userMagasins[user.Id] = profil?.RefMagasinId;
-            }
-            ViewBag.UserMagasins = userMagasins;
-
             var permsResult = await _permissionBOService.GetAllPermissions();
 
-            // Table de correspondance Id magasin → nom, pour afficher le magasin de chaque utilisateur.
-            var magasinsResult = await _clienteBOService.GetAllMagasins();
-            ViewBag.MagasinNames = (magasinsResult.Data ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefMagasin>())
-                .ToDictionary(m => m.Id, m => m.Name);
+            // Compteur pour le badge de l'onglet (sans charger la liste).
+            ViewBag.UsersCount = await _permissionBOService.CountUsers(null, null);
 
-            ViewBag.Users = userWithRoles;
             ViewBag.Permissions = permsResult.Data ?? new List<Permission>();
             return View(roles);
+        }
+
+        // Liste des utilisateurs paginée côté serveur (SQL Skip/Take) + rôles/magasins chargés
+        // en lot (2 requêtes au lieu d'une par utilisateur) : reste rapide même à des dizaines
+        // de milliers de comptes.
+        [Authorize(Policy = "admin.users")]
+        [HttpGet]
+        public async Task<IActionResult> UsersData(string? search, string? role, int page = 1, int pageSize = 10)
+        {
+            var usersResult = await _permissionBOService.GetUsersPage(page, pageSize, search, role);
+            var users = usersResult.Data ?? new List<ApplicationUser>();
+            var total = await _permissionBOService.CountUsers(search, role);
+
+            var userIds = users.Select(u => u.Id).ToList();
+            var rolesMap = await _permissionBOService.GetRolesForUsers(userIds);
+            var magasinsMap = await _clienteBOService.GetUserMagasinsByIds(userIds);
+
+            var magasinsResult = await _clienteBOService.GetAllMagasins();
+            var magasinNames = (magasinsResult.Data ?? new List<BRICOMA.ECOMMERCE.Data.Models.RefMagasin>())
+                .ToDictionary(m => m.Id, m => m.Name);
+
+            var items = users.Select(u => new
+            {
+                u.Id,
+                u.Email,
+                Role = rolesMap.TryGetValue(u.Id, out var r) ? r : "-",
+                Magasin = magasinsMap.TryGetValue(u.Id, out var mid) && mid.HasValue && magasinNames.TryGetValue(mid.Value, out var mn) ? mn : null,
+                Suspended = u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow
+            });
+
+            return Json(new
+            {
+                items,
+                totalCount = total,
+                page,
+                pageSize,
+                totalPages = (int)Math.Ceiling(total / (double)pageSize)
+            });
         }
 
         [HttpPost]

@@ -689,24 +689,21 @@ namespace BRICOMA.ECOMMERCE.Business.Services
         {
             try
             {
-                var totalCartes = await _clienteBORepository.CountTotal(magasinId);
-                var cartesActives = await _clienteBORepository.CountByActif(true, magasinId);
-
-                // Semaine courante (lundi → dimanche) et semaine précédente.
-                var today = DateTime.Today;
-                var mondayThisWeek = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
-                if (today.DayOfWeek == DayOfWeek.Sunday) mondayThisWeek = mondayThisWeek.AddDays(-7);
-                var mondayLastWeek = mondayThisWeek.AddDays(-7);
+                // Tous les compteurs (total, actives, aujourd'hui, ce mois, cette semaine, semaine
+                // précédente) en UNE SEULE requête agrégée au lieu de 6 requêtes séparées.
+                var counts = await _clienteBORepository.GetDashboardCounts(magasinId);
+                var totalCartes = counts.Total;
+                var cartesActives = counts.Actives;
 
                 var stats = new DashboardStatsModel
                 {
                     TotalCartes   = totalCartes,
-                    CartesCeMois  = await _clienteBORepository.CountCreatedThisMonth(magasinId),
+                    CartesCeMois  = counts.CreatedThisMonth,
                     CartesActives = cartesActives,
-                    CartesBloquees = await _clienteBORepository.CountByActif(false, magasinId),
-                    CartesAujourdhui = await _clienteBORepository.CountCreatedToday(magasinId),
-                    CartesCetteSemaine = await _clienteBORepository.CountCreatedInRange(mondayThisWeek, today.AddDays(1), magasinId),
-                    CartesSemainePrecedente = await _clienteBORepository.CountCreatedInRange(mondayLastWeek, mondayThisWeek, magasinId),
+                    CartesBloquees = totalCartes - cartesActives,
+                    CartesAujourdhui = counts.CreatedToday,
+                    CartesCetteSemaine = counts.CreatedThisWeek,
+                    CartesSemainePrecedente = counts.CreatedLastWeek,
                     TauxActivation = totalCartes > 0 ? Math.Round(cartesActives * 100.0 / totalCartes, 1) : 0,
                     ParMagasin = (await _clienteBORepository.CountGroupedByMagasin(magasinId))
                         .Select(x => new MagasinStat { Magasin = x.Magasin, Count = x.Count })
@@ -716,6 +713,8 @@ namespace BRICOMA.ECOMMERCE.Business.Services
 
                 // Un KPI par type de carte géré : on liste TOUS les types (hors AMIBRICOMA) avec leur compteur.
                 // Un nouveau type paramétrable apparaît ainsi automatiquement dans le dashboard, même à 0 carte.
+                // Répartition chargée en UNE SEULE requête groupée (au lieu d'une requête par type).
+                var typeCounts = await _clienteBORepository.CountGroupedByCarteType(magasinId);
                 var types = (await _clienteBORepository.GetAllRefCarteTypes())
                     .Where(t => t.Id != (int)CarteType.AMIBRICOMA)
                     .OrderBy(t => t.Id);
@@ -725,7 +724,7 @@ namespace BRICOMA.ECOMMERCE.Business.Services
                     {
                         TypeId = t.Id,
                         TypeName = t.Name,
-                        Count = await _clienteBORepository.CountByCarteType(t.Id, magasinId)
+                        Count = typeCounts.TryGetValue(t.Id, out var c) ? c : 0
                     });
                 }
 
@@ -895,6 +894,12 @@ namespace BRICOMA.ECOMMERCE.Business.Services
         {
             var profil = await _clienteBORepository.GetProfilByUserId(userId);
             return profil?.RefMagasinId;
+        }
+
+        public async Task<Dictionary<string, int?>> GetUserMagasinsByIds(List<string> userIds)
+        {
+            var profils = await _clienteBORepository.GetProfilsByUserIds(userIds);
+            return profils.ToDictionary(p => p.Id, p => p.RefMagasinId);
         }
 
         public async Task<Profil?> GetUserProfil(string userId)

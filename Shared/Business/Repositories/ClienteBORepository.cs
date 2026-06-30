@@ -51,6 +51,14 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             return cliente;
         }
 
+        //public async Task<Cliente> GetByIdUser(long id)
+        //{
+
+        //    return await _context.Cliente
+        //        .Include(i => i.RaisonSociale);
+        //    .Include(i => i.)
+        //}
+
         public async Task<Cliente?> GetById(long id)
         {
             return await _context.Cliente
@@ -236,6 +244,53 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
             return await query.CountAsync();
         }
 
+        // Tous les compteurs du dashboard en UNE SEULE requête agrégée (COUNT conditionnels)
+        // au lieu de 6 requêtes séparées exécutées en série.
+        public async Task<(int Total, int Actives, int CreatedToday, int CreatedThisMonth, int CreatedThisWeek, int CreatedLastWeek)> GetDashboardCounts(int? magasinId = null)
+        {
+            var today = DateTime.Today;
+            var tomorrow = today.AddDays(1);
+            var monthStart = new DateTime(today.Year, today.Month, 1);
+            var monthEnd = monthStart.AddMonths(1);
+            var mondayThisWeek = today.AddDays(-(int)today.DayOfWeek + (int)DayOfWeek.Monday);
+            if (today.DayOfWeek == DayOfWeek.Sunday) mondayThisWeek = mondayThisWeek.AddDays(-7);
+            var mondayLastWeek = mondayThisWeek.AddDays(-7);
+
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+
+            var agg = await query.GroupBy(c => 1).Select(g => new
+            {
+                Total = g.Count(),
+                Actives = g.Count(c => c.IsActif != false),
+                CreatedToday = g.Count(c => c.DateCreation >= today && c.DateCreation < tomorrow),
+                CreatedThisMonth = g.Count(c => c.DateCreation >= monthStart && c.DateCreation < monthEnd),
+                CreatedThisWeek = g.Count(c => c.DateCreation >= mondayThisWeek && c.DateCreation < tomorrow),
+                CreatedLastWeek = g.Count(c => c.DateCreation >= mondayLastWeek && c.DateCreation < mondayThisWeek)
+            }).FirstOrDefaultAsync();
+
+            return agg == null
+                ? (0, 0, 0, 0, 0, 0)
+                : (agg.Total, agg.Actives, agg.CreatedToday, agg.CreatedThisMonth, agg.CreatedThisWeek, agg.CreatedLastWeek);
+        }
+
+        // Répartition par type de carte en UNE SEULE requête groupée, au lieu d'une requête
+        // CountByCarteType par type (boucle qui grossit avec chaque nouveau type créé).
+        public async Task<Dictionary<int, int>> CountGroupedByCarteType(int? magasinId = null)
+        {
+            var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
+            if (magasinId.HasValue)
+                query = query.Where(c => c.RefMagasinId == magasinId.Value);
+
+            var grouped = await query
+                .GroupBy(c => c.RefCarteTypeId)
+                .Select(g => new { TypeId = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            return grouped.Where(x => x.TypeId.HasValue).ToDictionary(x => x.TypeId!.Value, x => x.Count);
+        }
+
         public async Task<List<(string Magasin, int Count)>> CountGroupedByMagasin(int? magasinId = null)
         {
             var query = _context.Cliente.Where(c => c.RefCarteTypeId != null && c.RefCarteTypeId != (int)CarteType.AMIBRICOMA);
@@ -320,6 +375,13 @@ namespace BRICOMA.ECOMMERCE.Business.Repositories
         {
             if (string.IsNullOrEmpty(userId)) return null;
             return await _context.Profil.FirstOrDefaultAsync(p => p.Id == userId);
+        }
+
+        // Charge les profils de plusieurs users EN UNE SEULE requête (au lieu d'un appel par user).
+        public async Task<List<Profil>> GetProfilsByUserIds(List<string> userIds)
+        {
+            if (userIds == null || userIds.Count == 0) return new List<Profil>();
+            return await _context.Profil.Where(p => userIds.Contains(p.Id)).ToListAsync();
         }
 
         public async Task UpsertProfil(string userId, string? nom, string? prenom, int? refMagasinId)

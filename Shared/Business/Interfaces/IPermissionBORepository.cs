@@ -13,5 +13,8 @@ namespace BRICOMA.ECOMMERCE.Business.Interfaces
         Task<List<RolePermission>> GetRolePermissions(string roleId);
         Task SetRolePermissions(string roleId, List<int> permissionIds);
         Task<List<ApplicationUser>> GetAllUsers();
+        Task<List<ApplicationUser>> GetUsersPage(int page, int pageSize, string? search, string? roleFilter);
+        Task<int> CountUsers(string? search, string? roleFilter);
+        Task<Dictionary<string, string>> GetRolesForUsers(List<string> userIds);
     }
 }

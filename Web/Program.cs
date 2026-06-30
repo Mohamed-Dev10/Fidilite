@@ -84,6 +84,17 @@ builder.Services.AddScoped<ICardImageService, CardImageService>();
 
 var app = builder.Build();
 
+// Pré-chauffe les DbContext (compilation du modèle EF + 1re connexion SQL vers le serveur
+// distant) au démarrage de l'app, plutôt qu'au 1er login d'un utilisateur (sinon ce coût
+// — jusqu'à plusieurs secondes — est payé par la première personne qui se connecte).
+using (var warmupScope = app.Services.CreateScope())
+{
+    var sp = warmupScope.ServiceProvider;
+    await sp.GetRequiredService<ApplicationDbContext>().Database.CanConnectAsync();
+    await sp.GetRequiredService<BRICOMAFIDELITEContext>().Database.CanConnectAsync();
+    await sp.GetRequiredService<BRICOMAMARKETContext>().Database.CanConnectAsync();
+}
+
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {

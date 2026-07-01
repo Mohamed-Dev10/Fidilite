@@ -208,7 +208,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "carte.lock")]
+        [Authorize(Policy = "carte.desactiver")]
         public async Task<IActionResult> Bloquer(long id, string? remarque)
         {
             var userId = _userManager.GetUserId(User) ?? "";
@@ -222,7 +222,7 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "carte.lock")]
+        [Authorize(Policy = "carte.activer")]
         public async Task<IActionResult> Debloquer(long id)
         {
             var userId = _userManager.GetUserId(User) ?? "";

@@ -222,13 +222,6 @@ namespace BRICOMA.ECOMMERCE.Data.Migrations
                         },
                         new
                         {
-                            Id = 5,
-                            Category = "Cartes",
-                            Code = "carte.lock",
-                            Label = "Bloquer / Débloquer"
-                        },
-                        new
-                        {
                             Id = 6,
                             Category = "Paramétrage",
                             Code = "parametrage.view",
@@ -254,6 +247,20 @@ namespace BRICOMA.ECOMMERCE.Data.Migrations
                             Category = "Administration",
                             Code = "admin.roles",
                             Label = "Gérer rôles et permissions"
+                        },
+                        new
+                        {
+                            Id = 10,
+                            Category = "Cartes",
+                            Code = "carte.activer",
+                            Label = "Activer une carte"
+                        },
+                        new
+                        {
+                            Id = 11,
+                            Category = "Cartes",
+                            Code = "carte.desactiver",
+                            Label = "Désactiver une carte"
                         });
                 });
 

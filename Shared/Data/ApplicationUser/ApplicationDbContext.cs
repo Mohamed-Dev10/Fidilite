@@ -43,8 +43,9 @@ namespace BRICOMA.ECOMMERCE.Data.ApplicationUser
                 new Permission { Id = 1, Code = "carte.create",  Label = "Créer une carte",       Category = "Cartes" },
                 new Permission { Id = 2, Code = "carte.list",    Label = "Voir la liste",           Category = "Cartes" },
                 new Permission { Id = 3, Code = "carte.confirm", Label = "Confirmer OTP",           Category = "Cartes" },
-                new Permission { Id = 4, Code = "carte.edit",    Label = "Modifier une carte",      Category = "Cartes" },
-                new Permission { Id = 5, Code = "carte.lock",    Label = "Bloquer / Débloquer",     Category = "Cartes" },
+                new Permission { Id = 4,  Code = "carte.edit",       Label = "Modifier une carte",         Category = "Cartes" },
+                new Permission { Id = 10, Code = "carte.activer",   Label = "Activer une carte",          Category = "Cartes" },
+                new Permission { Id = 11, Code = "carte.desactiver", Label = "Désactiver une carte",       Category = "Cartes" },
                 // Paramétrage
                 new Permission { Id = 6, Code = "parametrage.view", Label = "Voir paramétrage",    Category = "Paramétrage" },
                 new Permission { Id = 7, Code = "parametrage.edit", Label = "Modifier paramétrage", Category = "Paramétrage" },

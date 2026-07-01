@@ -46,5 +46,6 @@ namespace BRICOMA.ECOMMERCE.Web.Controllers
                 ViewData["Error"] = result.Message;
             return View(result.Data);
         }
+
     }
 }

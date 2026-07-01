@@ -1205,12 +1205,80 @@ html, body { background: var(--bc-body); }
 }
 .auth-foot { position: relative; z-index: 1; font-size: .82rem; opacity: .7; }
 
-/* Panneau formulaire (droite) */
+/* Panneau formulaire (droite) — image couvre tout, fond blanc */
 .auth-form-side {
-    display: flex; align-items: center; justify-content: center;
-    padding: 2.5rem 1.5rem; background: var(--bc-body);
+    padding: 0;
+    background: #fff;
+    position: relative;
+    overflow: hidden;
 }
-.auth-card { width: 100%; max-width: 410px; }
+
+.auth-carte-wrap {
+    position: absolute;
+    inset: 0;
+    user-select: none;
+}
+.auth-carte-img {
+    width: 100%; height: 100%;
+    object-fit: contain;
+    object-position: center center;
+    display: block;
+    pointer-events: none;
+}
+
+/* Formulaire dans la zone vide centre de la carte — sous le logo, au-dessus du code-barres */
+.auth-carte-form {
+    position: absolute;
+    left: 34%;
+    top: 46%;
+    width: 34%;
+    display: flex; flex-direction: column; gap: 10px;
+}
+
+/* Champ input */
+.auth-carte-field { position: relative; }
+.auth-carte-field .ti {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: rgba(80,80,160,.7); font-size: .9rem; pointer-events: none;
+}
+.auth-carte-field input {
+    width: 100%; height: 32px;
+    padding: 0 10px 0 30px;
+    background: rgba(255,255,255,.9);
+    border: 1.5px solid rgba(255,255,255,.85);
+    border-radius: 8px;
+    color: #1a1a2e; font-size: .82rem;
+    outline: none; transition: border-color .15s, background .15s;
+}
+.auth-carte-field input::placeholder { color: rgba(100,100,160,.55); }
+.auth-carte-field input:focus {
+    background: #fff;
+    border-color: rgba(99,102,241,.7);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.2);
+}
+
+/* Bouton Se connecter */
+.auth-carte-btn {
+    height: 32px; width: 90%; align-self: center;
+    background: linear-gradient(135deg, #e2001a, #b5001a);
+    border: none; border-radius: 8px;
+    color: #fff; font-size: .82rem; font-weight: 700;
+    cursor: pointer; letter-spacing: .02em;
+    box-shadow: 0 4px 14px rgba(226,0,26,.5);
+    transition: opacity .2s;
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+}
+.auth-carte-btn:hover { opacity: .88; }
+
+/* Erreur compacte */
+.auth-carte-err { font-size: .68rem; color: rgba(255,180,180,.95); display: block; }
+.auth-carte-alert {
+    position: absolute; left: 34%; top: 39%; width: 34%;
+    background: rgba(200,0,0,.25); border: 1px solid rgba(255,100,100,.4);
+    border-radius: 7px; padding: 5px 9px;
+    color: #fff; font-size: .7rem;
+}
+
 .auth-card-head { margin-bottom: 1.75rem; }
 .auth-card-head h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: .35rem; }
 .auth-card-head p { color: var(--bc-muted); margin: 0; }

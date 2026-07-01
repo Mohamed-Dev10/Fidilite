@@ -12,7 +12,7 @@
         </div>
 
         <div class="auth-hero-body">
-            <h2 class="auth-hero-title">Back Office Client</h2>
+            <h2 class="auth-hero-title">Back Office Clients</h2>
             <p class="auth-hero-sub">Gérez vos cartes de fidélité, vos magasins et vos clients depuis un espace unique et sécurisé.</p>
             <ul class="auth-features">
                 <li><i class="ti ti-id-badge"></i> Création et suivi des cartes en temps réel</li>
@@ -29,46 +29,35 @@
         </div>
     </aside>
 
-    <!-- Panneau formulaire -->
+    <!-- Panneau formulaire — image carte + champs superposés -->
     <main class="auth-form-side">
-        <div class="auth-card">
-            <div class="auth-mobile-brand">
-                <span class="auth-brand-logo"><img src="~/images/bricoma.png" alt="BRICOMA" style="width:100%;height:100%;object-fit:contain;display:block;" /></span> BRICOMA
-            </div>
-
-            <div class="auth-card-head">
-                <h1>Bienvenue</h1>
-                <p>Connectez-vous à votre espace back-office.</p>
-            </div>
+        <div class="auth-carte-wrap">
+            <img src="~/images/carte-form.png" class="auth-carte-img" alt="" draggable="false" />
 
             @if (!ViewData.ModelState.IsValid)
             {
-                <div class="alert-modern alert-modern-danger" role="alert">
-                    <span class="am-ic"><i class="ti ti-alert-triangle"></i></span>
-                    <div class="am-body">@Html.ValidationSummary(false)</div>
+                <div class="auth-carte-alert">
+                    <i class="ti ti-alert-triangle"></i>
+                    @Html.ValidationSummary(false)
                 </div>
             }
 
-            <form method="post" asp-action="Login" asp-controller="Account">
+            <form class="auth-carte-form" method="post" asp-action="Login" asp-controller="Account">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
 
-                <div class="auth-field">
-                    <label class="form-label">Email</label>
+                <div class="auth-carte-field">
                     <i class="ti ti-mail"></i>
-                    <input type="email" asp-for="Email" class="form-control" placeholder="votre@email.com" autocomplete="email" />
-                    <span asp-validation-for="Email" class="text-danger small"></span>
+                    <input type="email" asp-for="Email" placeholder="Email" autocomplete="email" />
+                    <span asp-validation-for="Email" class="auth-carte-err"></span>
                 </div>
-
-                <div class="auth-field">
-                    <label class="form-label">Mot de passe</label>
+                <div class="auth-carte-field">
                     <i class="ti ti-lock"></i>
-                    <input type="password" asp-for="Password" class="form-control" placeholder="••••••••" autocomplete="current-password" />
-                    <span asp-validation-for="Password" class="text-danger small"></span>
+                    <input type="password" asp-for="Password" placeholder="Mot de passe" autocomplete="current-password" />
+                    <span asp-validation-for="Password" class="auth-carte-err"></span>
                 </div>
-
-                <button type="submit" class="btn-gradient w-100 mt-2">
-                    <i class="ti ti-login me-1"></i> Se connecter
+                <button type="submit" class="auth-carte-btn">
+                    <i class="ti ti-login"></i> Se connecter
                 </button>
             </form>
         </div>

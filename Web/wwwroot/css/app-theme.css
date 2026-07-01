@@ -1229,9 +1229,9 @@ html, body { background: var(--bc-body); }
 /* Formulaire dans la zone vide centre de la carte — sous le logo, au-dessus du code-barres */
 .auth-carte-form {
     position: absolute;
-    left: 34%;
-    top: 46%;
-    width: 34%;
+    left: 22%;
+    top: 50%;
+    width: 38%;
     display: flex; flex-direction: column; gap: 10px;
 }
 
@@ -1273,7 +1273,7 @@ html, body { background: var(--bc-body); }
 /* Erreur compacte */
 .auth-carte-err { font-size: .68rem; color: rgba(255,180,180,.95); display: block; }
 .auth-carte-alert {
-    position: absolute; left: 34%; top: 39%; width: 34%;
+    position: absolute; left: 22%; top: 43%; width: 38%;
     background: rgba(200,0,0,.25); border: 1px solid rgba(255,100,100,.4);
     border-radius: 7px; padding: 5px 9px;
     color: #fff; font-size: .7rem;

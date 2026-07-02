@@ -1205,134 +1205,12 @@ html, body { background: var(--bc-body); }
 }
 .auth-foot { position: relative; z-index: 1; font-size: .82rem; opacity: .7; }
 
-/* Panneau formulaire (droite) — image couvre tout, fond blanc */
+/* Panneau formulaire (droite) */
 .auth-form-side {
-    padding: 0;
-    background: #fff;
-    position: relative;
-    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    padding: 2.5rem 1.5rem; background: var(--bc-body);
 }
-
-.auth-carte-wrap {
-    position: absolute;
-    inset: 0;
-    user-select: none;
-}
-.auth-carte-img {
-    width: 100%; height: 100%;
-    object-fit: contain;
-    object-position: center center;
-    display: block;
-    pointer-events: none;
-}
-
-/* Tagline coin supérieur droit de la carte — à l'intérieur */
-.auth-carte-tagline {
-    position: absolute;
-    left: 44%;
-    top: 32%;
-    display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
-    text-align: left;
-    pointer-events: none;
-    max-width: 22%;
-}
-.auth-carte-tagline span {
-    display: block;
-    color: rgba(255,255,255,.88);
-    font-size: clamp(.5rem, 1vw, .72rem);
-    font-weight: 700;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    line-height: 1.6;
-    white-space: nowrap;
-    text-shadow:
-        0 1px 0 rgba(255,255,255,.3),
-        0 2px 8px rgba(60,20,180,.5),
-        0 4px 18px rgba(80,40,200,.35);
-}
-.auth-carte-tagline span:first-child {
-    font-size: clamp(.6rem, 1.2vw, .9rem);
-    font-weight: 900;
-    color: #fff;
-    letter-spacing: .14em;
-    text-shadow:
-        0 1px 0 rgba(255,255,255,.5),
-        0 2px 10px rgba(40,10,160,.6),
-        0 6px 24px rgba(80,40,220,.45),
-        0 0 32px rgba(160,120,255,.3);
-}
-
-/* Formulaire dans la zone vide centre de la carte — sous le logo, au-dessus du code-barres */
-.auth-carte-form {
-    position: absolute;
-    left: 22%;
-    top: 50%;
-    width: 38%;
-    display: flex; flex-direction: column; gap: 10px;
-}
-
-/* Champ input — glassmorphism sur la carte */
-.auth-carte-field { position: relative; }
-.auth-carte-field .ti {
-    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
-    color: #4a5af7; font-size: 1rem; pointer-events: none;
-    z-index: 2;
-}
-.auth-carte-field input {
-    width: 100%; height: 44px;
-    padding: 0 14px 0 40px;
-    background: rgba(255,255,255,.95);
-    border: 2px solid rgba(120,80,255,.35);
-    border-radius: 16px;
-    color: #1e1560; font-size: .88rem; font-weight: 600;
-    outline: none;
-    box-shadow:
-        0 0 0 4px rgba(100,70,240,.12),
-        0 6px 20px rgba(80,50,200,.2),
-        inset 0 1px 3px rgba(255,255,255,.9),
-        inset 0 -1px 2px rgba(100,80,220,.08);
-    transition: border-color .22s, box-shadow .22s, background .22s;
-}
-.auth-carte-field input::placeholder {
-    color: rgba(100,80,200,.45);
-    font-weight: 400;
-    font-style: italic;
-}
-.auth-carte-field input:focus {
-    background: #fff;
-    border-color: rgba(100,70,255,.7);
-    box-shadow:
-        0 0 0 4px rgba(100,70,240,.22),
-        0 8px 28px rgba(80,50,200,.28),
-        inset 0 1px 3px rgba(255,255,255,1);
-}
-
-/* Bouton Se connecter */
-.auth-carte-btn {
-    height: 42px; width: 100%; align-self: center;
-    background: linear-gradient(135deg, #e2001a 0%, #ff2640 50%, #b5001a 100%);
-    border: none; border-radius: 12px;
-    color: #fff; font-size: .9rem; font-weight: 700;
-    cursor: pointer; letter-spacing: .04em;
-    box-shadow: 0 6px 20px rgba(226,0,26,.55), inset 0 1px 0 rgba(255,255,255,.2);
-    transition: transform .15s, box-shadow .15s, opacity .15s;
-    display: flex; align-items: center; justify-content: center; gap: 7px;
-}
-.auth-carte-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 28px rgba(226,0,26,.65), inset 0 1px 0 rgba(255,255,255,.25);
-}
-.auth-carte-btn:active { transform: translateY(0); opacity: .92; }
-
-/* Erreur compacte */
-.auth-carte-err { font-size: .68rem; color: rgba(255,180,180,.95); display: block; }
-.auth-carte-alert {
-    position: absolute; left: 22%; top: 43%; width: 38%;
-    background: rgba(200,0,0,.25); border: 1px solid rgba(255,100,100,.4);
-    border-radius: 7px; padding: 5px 9px;
-    color: #fff; font-size: .7rem;
-}
-
+.auth-card { width: 100%; max-width: 410px; }
 .auth-card-head { margin-bottom: 1.75rem; }
 .auth-card-head h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: .35rem; }
 .auth-card-head p { color: var(--bc-muted); margin: 0; }
@@ -1344,6 +1222,16 @@ html, body { background: var(--bc-body); }
 .auth-mobile-brand .auth-brand-logo img { height: 36px; }
 .auth-mobile-brand { color: var(--bc-red); }
 @media (max-width: 900px) { .auth-mobile-brand { display: inline-flex; } }
+
+/* Sur l'écran de connexion, le CTA reprend le rouge de marque BRICOMA */
+.auth-form-side .btn-gradient { background: var(--bc-grad-red); box-shadow: 0 8px 20px -8px rgba(226, 0, 26, .55); }
+.auth-form-side .btn-gradient:hover { box-shadow: 0 12px 26px -8px rgba(226, 0, 26, .65); }
+.auth-field { position: relative; margin-bottom: 1.1rem; }
+.auth-field > .ti {
+    position: absolute; left: 1rem; top: 2.45rem;
+    color: var(--bc-muted); font-size: 1.15rem; pointer-events: none;
+}
+.auth-field .form-control { padding-left: 2.7rem; height: 3rem; border-radius: 12px; }
 
 /* Sur l'écran de connexion, le CTA reprend le rouge de marque BRICOMA */
 .auth-form-side .btn-gradient { background: var(--bc-grad-red); box-shadow: 0 8px 20px -8px rgba(226, 0, 26, .55); }

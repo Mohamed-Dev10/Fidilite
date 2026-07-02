@@ -363,4 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Notes personnelles développeur (ne pas pousser)
-NOTES.md
+NOTES.mdappsettings.Development.json
+appsettings.*.json

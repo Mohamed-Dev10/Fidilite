@@ -86,9 +86,16 @@ body {
     --bs-btn-hover-border-color: var(--bc-primary);
     --bs-btn-active-bg: var(--bc-primary);
 }
+.form-control, .form-select {
+    border: 1.5px solid #d1d5db;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+    transition: border-color .2s, box-shadow .2s;
+}
 .form-control:focus, .form-select:focus {
-    border-color: rgba(var(--bc-primary-rgb), .5);
-    box-shadow: 0 0 0 .25rem rgba(var(--bc-primary-rgb), .15);
+    border-color: rgba(var(--bc-primary-rgb), .7);
+    box-shadow: 0 0 0 3px rgba(var(--bc-primary-rgb), .15), 0 2px 6px rgba(0,0,0,.10);
+    outline: none;
 }
 
 /* ============================================================
@@ -599,7 +606,29 @@ html, body { background: var(--bc-body); }
 .yearbar-type-legend-item {
     display: inline-flex; align-items: center; gap: .4rem;
     font-size: .76rem; font-weight: 600; color: var(--bc-muted);
+    cursor: pointer;
+    padding: .2rem .5rem;
+    border-radius: 6px;
+    transition: opacity .2s, background .2s, color .2s;
+    user-select: none;
 }
+.yearbar-type-legend-item:hover { background: rgba(0,0,0,.05); color: var(--bc-text); }
+.yearbar-type-legend-item.ybl-active {
+    background: rgba(0,0,0,.07);
+    color: var(--bc-text);
+    font-weight: 700;
+    outline: 2px solid currentColor;
+    outline-offset: 1px;
+}
+.yearbar-type-legend-item.ybl-faded { opacity: .3; }
+.yearbar-legend-reset {
+    display: inline-flex; align-items: center; gap: .3rem;
+    font-size: .74rem; font-weight: 600; color: #e2001a;
+    cursor: pointer; padding: .2rem .5rem; border-radius: 6px;
+    border: 1px solid #e2001a; transition: background .15s;
+}
+.yearbar-legend-reset:hover { background: rgba(226,0,26,.08); }
+.yearbar-fill { transition: width .55s cubic-bezier(.4,0,.2,1), opacity .3s; }
 .yearbar-list {
     display: flex; flex-direction: column; gap: .9rem;
     max-height: 560px; overflow-y: auto; padding-right: .35rem;

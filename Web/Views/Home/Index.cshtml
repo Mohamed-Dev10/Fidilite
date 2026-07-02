@@ -205,28 +205,35 @@
                 <span class="card-trend-icon"><i class="ti ti-chart-bar"></i></span>
                 <div>
                     <h3 class="card-title mb-0">Cartes créées par magasin</h3>
-                    <div class="text-muted small">@curYear vs @prevYear (même période, du 1er janvier à aujourd'hui)</div>
                 </div>
             </div>
             <div class="card-body">
                 @if (stats.ParType.Any())
                 {
-                    <div class="yearbar-type-legend mb-3">
+                    <div class="yearbar-type-legend mb-3" id="yearbarsLegend">
                         @foreach (var t in stats.ParType)
                         {
-                            <span class="yearbar-type-legend-item">
+                            <span class="yearbar-type-legend-item" data-type-idx="@ColorOf(t.TypeId)" title="Cliquer pour filtrer">
                                 <span class="yearbar-legend-dot yearbar-seg-@ColorOf(t.TypeId)"></span>@t.TypeName
                             </span>
                         }
+                        <span class="yearbar-legend-reset" id="yearbarsReset" hidden title="Tout afficher">
+                            <i class="ti ti-x"></i> Tout afficher
+                        </span>
                     </div>
                 }
-                <div class="yearbar-list">
+                <div class="yearbar-list" id="yearbarsList">
                     @{
                         var maxYearVal = stats.ParMagasin.Max(m => Math.Max(m.CountCurrentYear, m.CountPreviousYear));
                         if (maxYearVal < 1) { maxYearVal = 1; }
                     }
                     @foreach (var m in stats.ParMagasin)
                     {
+                        var byTypeCur  = System.Text.Json.JsonSerializer.Serialize(
+                            m.ParType.ToDictionary(t => ColorOf(t.TypeId).ToString(), t => t.CountCurrentYear));
+                        var byTypePrev = System.Text.Json.JsonSerializer.Serialize(
+                            m.ParType.ToDictionary(t => ColorOf(t.TypeId).ToString(), t => t.CountPreviousYear));
+
                         <div class="yearbar-row">
                             <div class="yearbar-name" title="@m.Magasin">@m.Magasin</div>
                             <div class="yearbar-bars">
@@ -235,10 +242,10 @@
                                         @foreach (var t in m.ParType.Where(t => t.CountCurrentYear > 0))
                                         {
                                             var segPct = t.CountCurrentYear * 100.0 / maxYearVal;
-                                            <span class="yearbar-fill yearbar-seg-@ColorOf(t.TypeId)" data-width="@(segPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="@t.TypeName : @t.CountCurrentYear"></span>
+                                            <span class="yearbar-fill yearbar-seg-@ColorOf(t.TypeId)" data-type-idx="@ColorOf(t.TypeId)" data-width="@(segPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="@t.TypeName : @t.CountCurrentYear"></span>
                                         }
                                     </div>
-                                    <span class="yearbar-value">@m.CountCurrentYear</span>
+                                    <span class="yearbar-value" data-total="@m.CountCurrentYear" data-by-type='@byTypeCur'>@m.CountCurrentYear</span>
                                     <span class="yearbar-year-tag">@curYear</span>
                                 </div>
                                 <div class="yearbar-track-row">
@@ -246,10 +253,10 @@
                                         @foreach (var t in m.ParType.Where(t => t.CountPreviousYear > 0))
                                         {
                                             var segPct = t.CountPreviousYear * 100.0 / maxYearVal;
-                                            <span class="yearbar-fill yearbar-seg-@ColorOf(t.TypeId) yearbar-seg-faded" data-width="@(segPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="@t.TypeName : @t.CountPreviousYear"></span>
+                                            <span class="yearbar-fill yearbar-seg-@ColorOf(t.TypeId) yearbar-seg-faded" data-type-idx="@ColorOf(t.TypeId)" data-width="@(segPct.ToString(System.Globalization.CultureInfo.InvariantCulture))%" title="@t.TypeName : @t.CountPreviousYear"></span>
                                         }
                                     </div>
-                                    <span class="yearbar-value">@m.CountPreviousYear</span>
+                                    <span class="yearbar-value" data-total="@m.CountPreviousYear" data-by-type='@byTypePrev'>@m.CountPreviousYear</span>
                                     <span class="yearbar-year-tag">@prevYear</span>
                                 </div>
                             </div>
@@ -278,6 +285,63 @@
                 bar.style.transitionDelay = Math.min(i * 35, 700) + "ms";
                 obs.observe(bar);
             });
+        })();
+
+        // Filtrage par clic sur la légende
+        (function () {
+            var legendItems = document.querySelectorAll(".yearbar-type-legend-item[data-type-idx]");
+            var resetBtn    = document.getElementById("yearbarsReset");
+            if (!legendItems.length) return;
+            var active = null;
+
+            function applyFilter(idx) {
+                // légende
+                legendItems.forEach(function (li) {
+                    li.classList.toggle("ybl-active", li.getAttribute("data-type-idx") === idx);
+                    li.classList.toggle("ybl-faded",  li.getAttribute("data-type-idx") !== idx);
+                });
+                // segments
+                document.querySelectorAll(".yearbar-fill[data-type-idx]").forEach(function (s) {
+                    if (s.getAttribute("data-type-idx") === idx) {
+                        s.classList.remove("ybl-seg-hidden");
+                        s.style.width = s.getAttribute("data-width");
+                    } else {
+                        s.classList.add("ybl-seg-hidden");
+                        s.style.width = "0";
+                    }
+                });
+                // valeurs
+                document.querySelectorAll(".yearbar-value[data-by-type]").forEach(function (v) {
+                    var map = JSON.parse(v.getAttribute("data-by-type") || "{}");
+                    v.textContent = (map[idx] || 0).toLocaleString("fr-FR");
+                });
+                if (resetBtn) resetBtn.hidden = false;
+            }
+
+            function resetFilter() {
+                active = null;
+                legendItems.forEach(function (li) {
+                    li.classList.remove("ybl-active", "ybl-faded");
+                });
+                document.querySelectorAll(".yearbar-fill[data-type-idx]").forEach(function (s) {
+                    s.classList.remove("ybl-seg-hidden");
+                    s.style.width = s.getAttribute("data-width");
+                });
+                document.querySelectorAll(".yearbar-value[data-total]").forEach(function (v) {
+                    v.textContent = parseInt(v.getAttribute("data-total"), 10).toLocaleString("fr-FR");
+                });
+                if (resetBtn) resetBtn.hidden = true;
+            }
+
+            legendItems.forEach(function (li) {
+                li.addEventListener("click", function () {
+                    var idx = li.getAttribute("data-type-idx");
+                    if (active === idx) { resetFilter(); return; }
+                    active = idx;
+                    applyFilter(idx);
+                });
+            });
+            if (resetBtn) resetBtn.addEventListener("click", resetFilter);
         })();
 
         (function () {

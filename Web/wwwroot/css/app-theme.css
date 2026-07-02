@@ -661,8 +661,11 @@ html, body { background: var(--bc-body); }
 .yearbar-track.yearbar-stacked .yearbar-fill:first-of-type { border-radius: 7px 0 0 7px; }
 .yearbar-track.yearbar-stacked .yearbar-fill:last-of-type { border-radius: 0 7px 7px 0; }
 .yearbar-track.yearbar-stacked .yearbar-fill:only-of-type { border-radius: 7px; }
-/* Année précédente : même couleur de type, légèrement estompée pour la distinguer */
-.yearbar-seg-faded { opacity: .55; }
+/* Année précédente (N-1) : couleur neutre grise, distincte des couleurs N */
+.yearbar-seg-faded {
+    background: #b8c4ce !important;
+    opacity: 1;
+}
 .yearbar-value {
     flex: 0 0 auto; min-width: 1.8rem; text-align: right;
     font-size: .7rem; font-weight: 700; color: var(--bc-muted);
@@ -673,16 +676,16 @@ html, body { background: var(--bc-body); }
 }
 
 /* Palette de couleurs par type (10 couleurs, cycle si plus de 10 types) */
-.yearbar-seg-0 { background: #1d4ed8; } /* bleu royal */
-.yearbar-seg-1 { background: #ea580c; } /* orange vif */
-.yearbar-seg-2 { background: #15803d; } /* vert forêt */
-.yearbar-seg-3 { background: #be123c; } /* cramoisi */
-.yearbar-seg-4 { background: #a16207; } /* or foncé */
-.yearbar-seg-5 { background: #7c3aed; } /* violet */
-.yearbar-seg-6 { background: #0e7490; } /* bleu pétrole */
-.yearbar-seg-7 { background: #b45309; } /* ambre */
-.yearbar-seg-8 { background: #4d7c0f; } /* vert olive */
-.yearbar-seg-9 { background: #475569; } /* ardoise */
+.yearbar-seg-0 { background: #5b7fa0; } /* bleu acier doux */
+.yearbar-seg-1 { background: #ca9c0f; } /* jaune doré */
+.yearbar-seg-2 { background: #15803d; } /* vert forêt — validé */
+.yearbar-seg-3 { background: #7c6fb5; } /* mauve ardoise */
+.yearbar-seg-4 { background: #8a7250; } /* sable chaud */
+.yearbar-seg-5 { background: #4a9090; } /* teal doux */
+.yearbar-seg-6 { background: #9f6b6b; } /* rose poudré */
+.yearbar-seg-7 { background: #6b8457; } /* vert sauge */
+.yearbar-seg-8 { background: #7a6a5a; } /* brun naturel */
+.yearbar-seg-9 { background: #607080; } /* gris bleuté */
 
 /* ============================================================
    KPI CARDS ANIMÉES (dashboard)
@@ -1500,3 +1503,16 @@ button.dp-trigger.input-date:focus::after {
     letter-spacing: .01em;
 }
 .perm-static .perm-code { display: block; font-size: .72rem; color: var(--bc-muted); font-family: monospace; }
+
+/* Badge compteur de permissions */
+.perm-count-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .18rem .55rem;
+    border-radius: 20px;
+    font-size: .72rem;
+    font-weight: 600;
+    background: rgba(var(--bc-primary-rgb), .12);
+    color: var(--bc-primary);
+    letter-spacing: .02em;
+}

@@ -1457,6 +1457,27 @@ html, body { background: var(--bc-body); }
 .perm-static .ps-dot { color: var(--cat); font-size: 1.1rem; flex-shrink: 0; }
 .perm-static .perm-label { display: block; font-weight: 600; color: var(--bc-text); font-size: .9rem; }
 
+/* ── Fix espace blanc sous footer (AdminLTE double-scroll) ──────────── */
+html, body {
+    height: 100%;
+    overflow: hidden;
+}
+.app-wrapper {
+    height: 100vh !important;
+    min-height: unset !important;
+    overflow: hidden;
+}
+.layout-fixed .app-main {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-height: 0 !important;
+}
+.app-footer {
+    position: relative !important;
+    z-index: 1 !important;
+    flex-shrink: 0;
+}
+
 /* ── Datepicker (date de naissance) ─────────────────────────────────── */
 .dp { position: relative; }
 
